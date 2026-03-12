@@ -3,14 +3,23 @@ import PortfolioPanel from './components/PortfolioPanel'
 import TickerPanel from './components/TickerPanel'
 import OrderPanel from './components/OrderPanel'
 import OrdersLogPanel from './components/OrdersLogPanel'
-import OracleCopilot from './components/features/OracleCopilot'
+
 import RiskRadarPanel from './components/features/RiskRadarPanel'
 import BacktestArenaPanel from './components/features/BacktestArenaPanel'
+
+// New Features
+import OnChainGalaxyMap from './components/features/OnChainGalaxyMap'
+import HolographicAICore from './components/features/HolographicAICore'
+import CandleCityscape from './components/features/CandleCityscape'
+import BotSwarmRadar from './components/features/BotSwarmRadar'
+import DefiWormholeExplorer from './components/features/DefiWormholeExplorer'
+
 import { getAuthToken, setAuthToken } from './auth'
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(!!getAuthToken());
   const [password, setPassword] = useState('');
+  const [activeTab, setActiveTab] = useState('DASHBOARD');
 
   useEffect(() => {
     const handleAuthError = () => setIsAuthenticated(false);
@@ -48,6 +57,43 @@ export default function App() {
     );
   }
 
+  const renderContent = () => {
+      if (activeTab === 'DASHBOARD') {
+          return (
+              <div className="main-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
+                  {/* Left Column */}
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <PortfolioPanel />
+                      <TickerPanel />
+                      <BacktestArenaPanel />
+                  </div>
+
+                  {/* Right Column */}
+                  <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <RiskRadarPanel />
+                      <OrderPanel />
+                      <OrdersLogPanel />
+                  </aside>
+              </div>
+          )
+      } else if (activeTab === 'COMMAND_CENTER') {
+           return (
+              <div className="main-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
+                  <CandleCityscape />
+                  <DefiWormholeExplorer />
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <HolographicAICore />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <BotSwarmRadar />
+                      <OnChainGalaxyMap />
+                  </div>
+              </div>
+          )
+      }
+  }
+
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#020205' }}>
       {/* Background grid effect */}
@@ -59,25 +105,33 @@ export default function App() {
         pointerEvents: 'none'
       }}></div>
 
-      <div className="main-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
-
-        {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <PortfolioPanel />
-          <TickerPanel />
-          <BacktestArenaPanel />
-        </div>
-
-        {/* Right Column */}
-        <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <RiskRadarPanel />
-          <OrderPanel />
-          <OrdersLogPanel />
-        </aside>
+      {/* Navigation Layer */}
+      <div style={{ position: 'relative', zIndex: 2, display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px 0', borderBottom: '1px solid rgba(0,255,255,0.1)', background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(5px)' }}>
+          <button
+            className="btn-outline"
+            style={{
+                borderColor: activeTab === 'DASHBOARD' ? '#00ffff' : 'rgba(255,255,255,0.2)',
+                color: activeTab === 'DASHBOARD' ? '#00ffff' : '#fff',
+                boxShadow: activeTab === 'DASHBOARD' ? '0 0 10px rgba(0,255,255,0.3)' : 'none'
+            }}
+            onClick={() => setActiveTab('DASHBOARD')}
+          >
+              CORE DASHBOARD
+          </button>
+          <button
+            className="btn-outline"
+            style={{
+                borderColor: activeTab === 'COMMAND_CENTER' ? '#ff00ff' : 'rgba(255,255,255,0.2)',
+                color: activeTab === 'COMMAND_CENTER' ? '#ff00ff' : '#fff',
+                boxShadow: activeTab === 'COMMAND_CENTER' ? '0 0 10px rgba(255,0,255,0.3)' : 'none'
+            }}
+            onClick={() => setActiveTab('COMMAND_CENTER')}
+          >
+              AI COMMAND CENTER
+          </button>
       </div>
 
-      {/* Feature 3: The Oracle Co-Pilot */}
-      <OracleCopilot />
+      {renderContent()}
 
     </div>
   )
