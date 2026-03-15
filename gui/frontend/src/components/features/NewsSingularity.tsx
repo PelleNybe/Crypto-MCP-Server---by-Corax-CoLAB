@@ -1,173 +1,151 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html } from '@react-three/drei';
-import * as THREE from 'three';
-import { Globe } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Text, Html } from '@react-three/drei';
+import * as THREE from 'three';
+import ForceGraph3D from 'react-force-graph-3d';
 
-const Singularity = () => {
-  const meshRef = useRef<THREE.Mesh>(null);
-  const materialRef = useRef<THREE.ShaderMaterial>(null);
+const SentimentParticle = ({ position, sentiment }: { position: THREE.Vector3, sentiment: 'bullish' | 'bearish' | 'neutral' }) => {
+    const meshRef = useRef<THREE.Mesh>(null);
+    const color = sentiment === 'bullish' ? '#10b981' : sentiment === 'bearish' ? '#ef4444' : '#6366f1';
 
-  useFrame((state) => {
-    if (materialRef.current) {
-      materialRef.current.uniforms.time.value = state.clock.elapsedTime;
-    }
-    if (meshRef.current) {
-      meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
-    }
-  });
+    useFrame((state) => {
+        if (meshRef.current) {
+            meshRef.current.position.y += Math.sin(state.clock.elapsedTime + position.x) * 0.01;
+            meshRef.current.rotation.x += 0.01;
+            meshRef.current.rotation.y += 0.01;
+        }
+    });
 
-  const vertexShader = `
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `;
-
-  const fragmentShader = `
-    uniform float time;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vec3 color = vec3(0.1, 0.4, 0.8);
-
-      float intensity = pow(0.6 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
-      vec3 glow = color * intensity * 2.5;
-
-      float noise = fract(sin(dot(vUv * time, vec2(12.9898, 78.233))) * 43758.5453);
-      vec3 noiseColor = vec3(0.0, 0.5, 1.0) * noise * 0.2;
-
-      gl_FragColor = vec4(glow + noiseColor, 0.8);
-    }
-  `;
-
-  return (
-    <mesh ref={meshRef}>
-      <sphereGeometry args={[2, 64, 64]} />
-      <shaderMaterial
-        ref={materialRef}
-        vertexShader={vertexShader}
-        fragmentShader={fragmentShader}
-        uniforms={{ time: { value: 0 } }}
-        transparent
-        blending={THREE.AdditiveBlending}
-        depthWrite={false}
-      />
-    </mesh>
-  );
-};
-
-const NewsNode = ({ position, text, sentiment }: { position: THREE.Vector3, text: string, sentiment: 'positive' | 'negative' | 'neutral' }) => {
-  const meshRef = useRef<THREE.Mesh>(null);
-
-  useFrame((state) => {
-    if (meshRef.current) {
-      const dir = new THREE.Vector3().copy(position).normalize().multiplyScalar(-0.02);
-      meshRef.current.position.add(dir);
-
-      if (meshRef.current.position.length() < 2.5) {
-        meshRef.current.position.copy(position);
-      }
-    }
-  });
-
-  const color = sentiment === 'positive' ? '#10b981' : sentiment === 'negative' ? '#ef4444' : '#9ca3af';
-
-  return (
-    <mesh ref={meshRef} position={position}>
-      <sphereGeometry args={[0.1, 8, 8]} />
-      <meshBasicMaterial color={color} />
-      <Html position={[0.2, 0, 0]} center zIndexRange={[100, 0]}>
-        <div style={{
-          background: 'rgba(0, 0, 0, 0.6)',
-          border: `1px solid ${color}`,
-          padding: '2px 6px',
-          borderRadius: '2px',
-          color: color,
-          fontFamily: 'monospace',
-          fontSize: '10px',
-          whiteSpace: 'nowrap',
-          boxShadow: `0 0 5px ${color}`,
-          opacity: 0.8
-        }}>
-          {text.substring(0, 20)}...
-        </div>
-      </Html>
-    </mesh>
-  );
+    return (
+        <mesh ref={meshRef} position={position}>
+            <octahedronGeometry args={[0.2, 0]} />
+            <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} wireframe />
+        </mesh>
+    );
 };
 
 export default function NewsSingularity() {
-  const [news, setNews] = useState<any[]>([]);
+    const [news, setNews] = useState<any[]>([]);
+    const [graphData, setGraphData] = useState<{nodes: any[], links: any[]}>({ nodes: [], links: [] });
+    const graphRef = useRef<any>(null);
 
-  useEffect(() => {
-    const fetchTrending = async () => {
-      try {
-        const trendingData = await callMcpEndpoint('MCP_COINGECKO', 'trending');
-        if (trendingData && trendingData.coins) {
-            const newNodes = trendingData.coins.slice(0, 7).map((coinItem: any) => {
-                const coin = coinItem.item;
-                const priceChange = coin.data?.price_change_percentage_24h?.usd;
+    useEffect(() => {
+        let active = true;
 
-                let sentiment = 'neutral';
-                if (priceChange > 5) sentiment = 'positive';
-                else if (priceChange < -5) sentiment = 'negative';
+        const fetchMarketDataAndCreateNews = async () => {
+            try {
+                // Since there is no dedicated News MCP yet, we use CoinGecko trending as a proxy for "News" / "Hype"
+                const trendingData = await callMcpEndpoint('MCP_COINGECKO', 'trending', {});
 
-                return {
-                    id: coin.id + Math.random(),
-                    text: `Trending: ${coin.symbol.toUpperCase()} (${priceChange ? priceChange.toFixed(2) + '%' : 'N/A'})`,
-                    sentiment: sentiment,
-                    position: new THREE.Vector3(
-                        (Math.random() - 0.5) * 15,
-                        (Math.random() - 0.5) * 15,
-                        (Math.random() - 0.5) * 15
-                    ).normalize().multiplyScalar(10)
-                };
-            });
-            setNews(newNodes);
-        }
-      } catch (err) {
-        console.error("Failed to fetch trending coins for News Singularity", err);
-      }
-    };
+                if (!active) return;
 
-    fetchTrending();
-    const interval = setInterval(fetchTrending, 60000); // Update every minute
-    return () => clearInterval(interval);
-  }, []);
+                if (trendingData && trendingData.coins) {
+                    // Create nodes
+                    const newNodes = trendingData.coins.map((coinWrapper: any, index: number) => {
+                        const coin = coinWrapper.item;
 
-  return (
-    <div className="card interactive-element" style={{ height: '350px', position: 'relative', overflow: 'hidden', padding: 0 }}>
-      <div style={{ position: 'absolute', top: 15, left: 15, zIndex: 10, display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Globe size={20} className="text-blue" />
-        <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '1px' }}>Trending Singularity</h3>
-      </div>
+                        // Mock sentiment based on rank change/price change if available, else random for visual demo
+                        // In a real scenario, this would come from a sentiment analysis MCP
+                        const priceChange = coin.data?.price_change_percentage_24h?.usd;
+                        let sentiment = 'neutral';
+                        if (priceChange > 5) sentiment = 'bullish';
+                        else if (priceChange < -5) sentiment = 'bearish';
+                        else sentiment = priceChange > 0 ? 'bullish' : 'bearish';
 
-      <Canvas camera={{ position: [0, 0, 15], fov: 45 }}>
-        <color attach="background" args={['#020205']} />
+                        return {
+                            id: `${coin.id}-${index}`, // Fixed random ID
+                            text: `Trending: ${coin.symbol.toUpperCase()} (${priceChange ? priceChange.toFixed(2) + '%' : 'N/A'})`,
+                            sentiment: sentiment,
+                            val: 1.5,
+                            color: sentiment === 'bullish' ? '#10b981' : sentiment === 'bearish' ? '#ef4444' : '#6366f1'
+                        };
+                    });
 
-        <Singularity />
+                    // Create some arbitrary links between top trending coins to form a cluster
+                    const newLinks = [];
+                    for (let i = 0; i < newNodes.length; i++) {
+                        for (let j = i + 1; j < newNodes.length; j++) {
+                            // Link nodes if they share sentiment or just randomly to create web
+                            if (newNodes[i].sentiment === newNodes[j].sentiment || i % 3 === j % 3) {
+                                newLinks.push({
+                                    source: newNodes[i].id,
+                                    target: newNodes[j].id
+                                });
+                            }
+                        }
+                    }
 
-        {news.map(n => (
-          <NewsNode key={n.id} position={n.position} text={n.text} sentiment={n.sentiment as any} />
-        ))}
+                    setGraphData({ nodes: newNodes, links: newLinks });
+                    setNews(newNodes);
+                }
+            } catch (err) {
+                console.error("NewsSingularity fetch error", err);
+            }
+        };
 
-        {/* Orbit paths */}
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <ringGeometry args={[9.9, 10, 64]} />
-          <meshBasicMaterial color="#334155" transparent opacity={0.3} side={THREE.DoubleSide} />
-        </mesh>
-        <mesh rotation={[Math.PI / 2, 0, Math.PI / 4]}>
-          <ringGeometry args={[7.9, 8, 64]} />
-          <meshBasicMaterial color="#334155" transparent opacity={0.3} side={THREE.DoubleSide} />
-        </mesh>
+        fetchMarketDataAndCreateNews();
+        const interval = setInterval(fetchMarketDataAndCreateNews, 60000); // refresh every minute
 
-        <OrbitControls enablePan={false} autoRotate autoRotateSpeed={0.5} minDistance={5} maxDistance={20} />
-      </Canvas>
-    </div>
-  );
+        return () => {
+            active = false;
+            clearInterval(interval);
+        };
+    }, []);
+
+    return (
+        <div className="card interactive-element" style={{ gridColumn: 'span 1', height: '400px', display: 'flex', flexDirection: 'column', padding: 0, overflow: 'hidden', position: 'relative' }}>
+            <div style={{ padding: '15px', borderBottom: '1px solid rgba(255,255,255,0.05)', background: 'rgba(0,0,0,0.5)', zIndex: 10 }}>
+                <h3 style={{ margin: 0, color: '#a855f7', textTransform: 'uppercase', letterSpacing: '1px', textShadow: '0 0 10px rgba(168, 85, 247, 0.5)' }}>
+                    News Singularity Web
+                </h3>
+            </div>
+
+            <div style={{ flex: 1, position: 'relative' }}>
+                {graphData.nodes.length > 0 ? (
+                    <ForceGraph3D
+                        ref={graphRef}
+                        graphData={graphData}
+                        nodeAutoColorBy="sentiment"
+                        nodeColor={node => node.color}
+                        nodeLabel="text"
+                        linkWidth={0.5}
+                        linkOpacity={0.2}
+                        linkColor={() => '#334155'}
+                        backgroundColor="#050505"
+                        width={600} // Approximate width, ideally would be responsive
+                        height={340}
+                        showNavInfo={false}
+                        nodeResolution={16}
+                        nodeRelSize={4}
+                    />
+                ) : (
+                    <div style={{ padding: '20px', color: '#64748b', textAlign: 'center' }}>
+                        Establishing uplink to global sentiment nodes...
+                    </div>
+                )}
+            </div>
+
+            {/* Overlay ticker of the top news item */}
+            {news.length > 0 && (
+                 <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'rgba(0,0,0,0.8)',
+                    padding: '10px',
+                    borderTop: `1px solid ${news[0].color}`,
+                    color: news[0].color,
+                    fontFamily: 'monospace',
+                    fontSize: '12px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                 }}>
+                     LATEST ANOMALY: {news[0].text}
+                 </div>
+            )}
+        </div>
+    );
 }

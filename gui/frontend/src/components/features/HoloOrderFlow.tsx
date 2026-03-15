@@ -5,7 +5,7 @@ import { OrbitControls, Line, Box, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
 const Wall = ({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
-  const height = (volume / maxVolume) * 5;
+  const height = maxVolume > 0 ? (volume / maxVolume) * 5 : 0;
   const color = type === 'bid' ? '#10b981' : '#ef4444'; // Green for bids, Red for asks
   const positionX = type === 'bid' ? -index * 0.3 - 0.5 : index * 0.3 + 0.5;
 
@@ -38,31 +38,49 @@ const Wall = ({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', 
 };
 
 export default function HoloOrderFlow({ price, symbol }: { price: number, symbol: string }) {
-  // Simulate order book data based on current price
-  const simulatedOrderBook = useMemo(() => {
-    if (!price) return { bids: [], asks: [], maxVolume: 1 };
+  const [bids, setBids] = useState<{price: number, volume: number}[]>([]);
+  const [asks, setAsks] = useState<{price: number, volume: number}[]>([]);
+  const [maxVolume, setMaxVolume] = useState<number>(1);
 
-    const bids = [];
-    const asks = [];
-    let maxVolume = 0;
+  useEffect(() => {
+    let active = true;
 
-    // Generate 30 levels of depth
-    for (let i = 0; i < 30; i++) {
-      const bidPrice = price * (1 - (i * 0.001) - 0.001);
-      const askPrice = price * (1 + (i * 0.001) + 0.001);
+    const fetchOrderBook = async () => {
+      try {
+        const orderBook = await callMcpEndpoint('MCP_CCXT', 'fetch_order_book', {
+          exchange: 'binance',
+          symbol: symbol || 'BTC/USDT',
+          limit: 30
+        });
 
-      // Add some noise to make it look realistic
-      const bidVol = Math.random() * 10 + (Math.random() > 0.8 ? Math.random() * 50 : 0);
-      const askVol = Math.random() * 10 + (Math.random() > 0.8 ? Math.random() * 50 : 0);
+        if (!active) return;
 
-      maxVolume = Math.max(maxVolume, bidVol, askVol);
+        if (orderBook && orderBook.bids && orderBook.asks) {
+          const parsedBids = orderBook.bids.slice(0, 30).map((b: any[]) => ({ price: b[0], volume: b[1] }));
+          const parsedAsks = orderBook.asks.slice(0, 30).map((a: any[]) => ({ price: a[0], volume: a[1] }));
 
-      bids.push({ price: bidPrice, volume: bidVol });
-      asks.push({ price: askPrice, volume: askVol });
-    }
+          let localMax = 0;
+          parsedBids.forEach((b: any) => localMax = Math.max(localMax, b.volume));
+          parsedAsks.forEach((a: any) => localMax = Math.max(localMax, a.volume));
 
-    return { bids, asks, maxVolume };
-  }, [price]);
+          setBids(parsedBids);
+          setAsks(parsedAsks);
+          setMaxVolume(localMax > 0 ? localMax : 1);
+        }
+      } catch (err) {
+        console.error("Failed to fetch order book for HoloOrderFlow", err);
+      }
+    };
+
+    fetchOrderBook();
+    const interval = setInterval(fetchOrderBook, 5000); // refresh every 5s
+
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, [symbol]);
+
 
   return (
     <div style={{ width: '100%', height: '300px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
