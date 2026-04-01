@@ -94,7 +94,7 @@ export default function OrdersLogPanel() {
               </td>
               <td style={{ padding: '10px' }}>
                 {o.status === 'pending' && (
-                  <button onClick={() => approveOrder(o.id)} className="btn-primary" style={{ padding: '4px 8px', fontSize: '10px' }}>
+                  <button onClick={() => approveOrder(o.id)} aria-label={`Approve order ${o.id || idx}`} className="btn-primary" style={{ padding: '4px 8px', fontSize: '10px' }}>
                     APPROVE
                   </button>
                 )}
