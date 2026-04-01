@@ -78,26 +78,31 @@ async def fetch_exchange_balance(exch_low: str):
     ex = cls(opts)
     details = []
 
+    async def _get_asset_price(coin, amount):
+        # Note: Coingecko API used here is synchronous, but could be run in an executor or kept as is
+        # since it is cached and quick for the most part.
+        price = _get_price_coingecko(coin)
+        if price is None:
+            price = await _get_price_ccxt(ex, coin)
+
+        return {
+            "exchange": exch_low,
+            "asset": coin,
+            "amount": amount,
+            "price_usd": price,
+            "value_usd": amount * (price or 0.0)
+        }
+
     try:
         bal = await ex.fetch_balance()
+        tasks = []
         for coin, amount in bal.get("total", {}).items():
             if not amount or amount == 0:
                 continue
+            tasks.append(_get_asset_price(coin, amount))
 
-            # Note: Coingecko API used here is synchronous, but could be run in an executor or kept as is
-            # since it is cached and quick for the most part.
-            price = _get_price_coingecko(coin)
-            if price is None:
-                price = await _get_price_ccxt(ex, coin)
-
-            value = amount * (price or 0.0)
-            details.append({
-                "exchange": exch_low,
-                "asset": coin,
-                "amount": amount,
-                "price_usd": price,
-                "value_usd": value
-            })
+        if tasks:
+            details = await asyncio.gather(*tasks)
     except Exception as e:
         logger.warning("fetch_balance failed for %s: %s", exch_low, e)
     finally:
