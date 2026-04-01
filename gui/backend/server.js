@@ -163,7 +163,10 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
 // GET /api/portfolio
 app.get('/api/portfolio', async (req, res) => {
-  const exchanges = (req.query.exchanges || 'binance').split(',').map(s => s.trim());
+  let exchangesParam = req.query.exchanges || 'binance';
+  if (Array.isArray(exchangesParam)) exchangesParam = exchangesParam.join(',');
+  else if (typeof exchangesParam !== 'string') exchangesParam = String(exchangesParam);
+  const exchanges = exchangesParam.split(',').map(s => s.trim());
   try {
     const result = await callMCP(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', exchanges);
     res.json({ ok: true, data: result });
