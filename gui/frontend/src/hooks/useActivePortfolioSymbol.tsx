@@ -1,9 +1,24 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect, createContext, useContext } from 'react';
 import { callMcpEndpoint } from '../api_mcp';
 
-export function useActivePortfolioSymbol(defaultSymbol = 'BTC/USDT', defaultExchange = 'binance') {
+interface ActivePortfolioSymbolContextType {
+    targetSymbol: string;
+    targetExchange: string;
+    loading: boolean;
+    error: string | null;
+}
+
+const ActivePortfolioSymbolContext = createContext<ActivePortfolioSymbolContextType>({
+    targetSymbol: 'BTC/USDT',
+    targetExchange: 'binance',
+    loading: true,
+    error: null
+});
+
+export const ActivePortfolioSymbolProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const defaultExchange = 'binance';
     const [error, setError] = useState<string | null>(null);
-    const [targetSymbol, setTargetSymbol] = useState(defaultSymbol);
+    const [targetSymbol, setTargetSymbol] = useState('BTC/USDT');
     const [targetExchange, setTargetExchange] = useState(defaultExchange);
     const [loading, setLoading] = useState(true);
 
@@ -39,5 +54,13 @@ export function useActivePortfolioSymbol(defaultSymbol = 'BTC/USDT', defaultExch
         };
     }, [defaultExchange]);
 
-    return { targetSymbol, targetExchange, loading, error };
+    return (
+        <ActivePortfolioSymbolContext.Provider value={{ targetSymbol, targetExchange, loading, error }}>
+            {children}
+        </ActivePortfolioSymbolContext.Provider>
+    );
+};
+
+export function useActivePortfolioSymbol(defaultSymbol = 'BTC/USDT', defaultExchange = 'binance') {
+    return useContext(ActivePortfolioSymbolContext);
 }
