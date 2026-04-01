@@ -18,13 +18,12 @@ const crypto = require('crypto');
 
 let DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD;
 if (!DASHBOARD_PASSWORD) {
-  DASHBOARD_PASSWORD = crypto.randomBytes(16).toString('hex');
-  console.warn('\n=============================================================');
-  console.warn('⚠️  SECURITY WARNING: DASHBOARD_PASSWORD not set in environment.');
-  console.warn('⚠️  A temporary random password has been generated for this session:');
-  console.warn('⚠️  --> ' + DASHBOARD_PASSWORD + ' <--');
-  console.warn('⚠️  Please set DASHBOARD_PASSWORD in gui/backend/.env for a permanent password.');
-  console.warn('=============================================================\n');
+  console.error('\n=============================================================');
+  console.error('❌ FATAL SECURITY ERROR: DASHBOARD_PASSWORD not set in environment.');
+  console.error('❌ The server will not start without a defined password.');
+  console.error('❌ Please set DASHBOARD_PASSWORD in gui/backend/.env for a permanent password.');
+  console.error('=============================================================\n');
+  process.exit(1);
 }
 const app = express();
 
