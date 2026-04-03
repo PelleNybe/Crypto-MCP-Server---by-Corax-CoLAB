@@ -189,6 +189,7 @@ export default function OrbitalPortfolio() {
 
       {selectedAsset && (
         <button
+           aria-label="Unlock HUD"
            onClick={() => setSelectedAsset(null)}
            style={{ position: 'absolute', top: 15, right: 15, zIndex: 10, background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444', border: '1px solid #ef4444', padding: '5px 10px', borderRadius: '4px', cursor: 'pointer' }}
         >
