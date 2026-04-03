@@ -9,3 +9,7 @@
 ## 2024-03-27 - Custom Hook Redundant API Calls
 **Learning:** Custom React hooks that initiate API calls or set intervals (like `setInterval` for polling) will execute independently for *each* component that uses them. If 10 components use the same hook, 10 identical network requests and intervals are created simultaneously, causing severe frontend lag and backend/API rate-limit pressure.
 **Action:** When a hook provides globally shared or synchronized data (e.g., active portfolio symbol, global market status), move the fetching logic and state into a React Context Provider wrapping the app. Update the custom hook to simply `return useContext(...)` to ensure the work is only done once and shared across all consumers.
+
+## 2024-05-15 - React Three Fiber Memoization
+**Learning:** React Three Fiber components inside list maps (like `<Star>` in `<GalaxyView>`) re-render entire Three.js layouts when parent state changes. Even if internal Three.js hooks limit calculation overhead, the React reconciliation diffing is slow for a large number of Canvas objects.
+**Action:** Always wrap `<Canvas>` list item components in `React.memo` and provide stable event handlers via `useCallback` to prevent unnecessary massive Three.js sub-tree updates.

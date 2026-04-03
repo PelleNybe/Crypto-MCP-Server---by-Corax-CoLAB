@@ -1,10 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
-const Star = ({ coin, onSelect, selected }: { coin: any, onSelect: any, selected: boolean }) => {
+// ⚡ Bolt: Wrapped Star component in React.memo to prevent 48 out of 50 Three.js
+// instances from recalculating layout and re-rendering when a single star is selected.
+const Star = React.memo(({ coin, onSelect, selected }: { coin: any, onSelect: any, selected: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const orbitRef = useRef<THREE.Group>(null);
 
@@ -43,11 +45,15 @@ const Star = ({ coin, onSelect, selected }: { coin: any, onSelect: any, selected
         </mesh>
     </group>
   );
-};
+});
 
 export default function GalaxyView() {
   const [coins, setCoins] = useState<any[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
+
+  const handleSelect = useCallback((coin: any) => {
+    setSelectedCoin(coin);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -86,7 +92,7 @@ export default function GalaxyView() {
 
               {/* Central Black Hole (Bitcoin) - Wait, we map all coins so BTC will naturally be big */}
               {coins.map(coin => (
-                  <Star key={coin.id} coin={coin} onSelect={setSelectedCoin} selected={selectedCoin?.id === coin.id} />
+                  <Star key={coin.id} coin={coin} onSelect={handleSelect} selected={selectedCoin?.id === coin.id} />
               ))}
 
               <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={true} autoRotateSpeed={0.2} />
