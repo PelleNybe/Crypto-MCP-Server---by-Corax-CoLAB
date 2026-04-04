@@ -81,3 +81,14 @@ def test_req_headers_without_api_key():
             assert "Authorization" not in kwargs["headers"]
         finally:
             octobot_mcp.OCTOBOT_API_KEY = original_api_key
+
+def test_req_request_exception():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_request.side_effect = Exception("Connection Timeout")
+
+        result = octobot_mcp._req("api/test")
+
+        assert result["status_code"] == 500
+        assert "text" in result
+        assert result["text"] == "Connection Timeout"
+        assert "json" not in result
