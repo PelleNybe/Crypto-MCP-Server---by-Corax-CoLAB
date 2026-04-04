@@ -34,6 +34,7 @@ sys.modules["mcp.server.fastmcp"] = fastmcp_module
 sys.modules["dotenv"] = MagicMock()
 sys.modules["requests"] = MagicMock()
 
+import pytest
 import notifier_mcp
 
 def test_ping():
