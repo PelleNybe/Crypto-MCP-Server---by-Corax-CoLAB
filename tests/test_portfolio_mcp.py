@@ -22,11 +22,11 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
         # Reset cache and mocks
         portfolio_mcp._CACHE = {"prices": {}, "timestamp": 0, "mapping": None, "mapping_timestamp": 0}
 
-    @patch("portfolio_mcp._get_price_coingecko")
+    @patch("portfolio_mcp._get_prices_coingecko")
     @patch("portfolio_mcp._get_price_ccxt")
     async def test_fetch_exchange_balance_concurrent(self, mock_ccxt, mock_cg):
         # Setup
-        mock_cg.return_value = None
+        mock_cg.return_value = {}
 
         async def mock_ccxt_call(ex, symbol):
             await asyncio.sleep(0.01)

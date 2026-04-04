@@ -25,7 +25,8 @@ _CACHE = {"prices": {}, "timestamp": 0, "mapping": None, "mapping_timestamp": 0}
 CACHE_TTL = int(os.getenv("PORTFOLIO_CACHE_TTL", "30"))
 MAPPING_TTL = int(os.getenv("PORTFOLIO_MAPPING_TTL", "3600"))
 
-def _get_price_coingecko(symbol: str):
+
+def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     now = time.time()
     if now - _CACHE["timestamp"] > CACHE_TTL:
         _CACHE["prices"] = {}
@@ -39,22 +40,36 @@ def _get_price_coingecko(symbol: str):
         except Exception as e:
             logger.debug("CoinGecko mapping lookup failed: %s", e)
             if _CACHE["mapping"] is None:
-                return None
+                return {}
 
-    key = symbol.upper()
-    if key in _CACHE["prices"]:
-        return _CACHE["prices"][key]
-    try:
-        coin_id = _CACHE["mapping"].get(key)
-        if coin_id:
-            rp = cg.get_price(ids=coin_id, vs_currencies="usd")
-            price = rp.get(coin_id, {}).get("usd")
-            if price:
-                _CACHE["prices"][key] = price
-                return price
-    except Exception as e:
-        logger.debug("CoinGecko price lookup failed: %s", e)
-    return None
+    missing_keys = []
+    missing_ids = []
+
+    for symbol in symbols:
+        key = symbol.upper()
+        if key not in _CACHE["prices"]:
+            coin_id = _CACHE.get("mapping", {}).get(key)
+            if coin_id:
+                missing_keys.append(key)
+                missing_ids.append(coin_id)
+
+    if missing_ids:
+        try:
+            ids_str = ",".join(missing_ids)
+            rp = cg.get_price(ids=ids_str, vs_currencies="usd")
+            for key, coin_id in zip(missing_keys, missing_ids):
+                price = rp.get(coin_id, {}).get("usd")
+                if price:
+                    _CACHE["prices"][key] = price
+        except Exception as e:
+            logger.debug("CoinGecko batch price lookup failed: %s", e)
+
+    result = {}
+    for symbol in symbols:
+        key = symbol.upper()
+        if key in _CACHE["prices"]:
+            result[key] = _CACHE["prices"][key]
+    return result
 
 async def _get_price_ccxt(exchange, symbol):
     pair = f"{symbol}/USDT"
@@ -78,31 +93,37 @@ async def fetch_exchange_balance(exch_low: str):
     ex = cls(opts)
     details = []
 
-    async def _get_asset_price(coin, amount):
-        # Note: Coingecko API used here is synchronous, but could be run in an executor or kept as is
-        # since it is cached and quick for the most part.
-        price = _get_price_coingecko(coin)
-        if price is None:
-            price = await _get_price_ccxt(ex, coin)
-
-        return {
-            "exchange": exch_low,
-            "asset": coin,
-            "amount": amount,
-            "price_usd": price,
-            "value_usd": amount * (price or 0.0)
-        }
-
     try:
         bal = await ex.fetch_balance()
+
+        # Collect non-zero balances
+        balances = {coin: amount for coin, amount in bal.get("total", {}).items() if amount and amount > 0}
+        coins = list(balances.keys())
+
+        # Batch fetch prices from Coingecko
+        cg_prices = _get_prices_coingecko(coins) if coins else {}
+
+        # For missing prices, prepare CCXT fallback tasks
+        async def _get_asset_price_ccxt_fallback(coin, amount):
+            price = cg_prices.get(coin.upper())
+            if price is None:
+                price = await _get_price_ccxt(ex, coin)
+
+            return {
+                "exchange": exch_low,
+                "asset": coin,
+                "amount": amount,
+                "price_usd": price,
+                "value_usd": amount * (price or 0.0)
+            }
+
         tasks = []
-        for coin, amount in bal.get("total", {}).items():
-            if not amount or amount == 0:
-                continue
-            tasks.append(_get_asset_price(coin, amount))
+        for coin, amount in balances.items():
+            tasks.append(_get_asset_price_ccxt_fallback(coin, amount))
 
         if tasks:
             details = await asyncio.gather(*tasks)
+
     except Exception as e:
         logger.warning("fetch_balance failed for %s: %s", exch_low, e)
     finally:
