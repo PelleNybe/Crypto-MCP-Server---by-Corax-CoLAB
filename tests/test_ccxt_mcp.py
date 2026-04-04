@@ -1,3 +1,23 @@
+import sys
+from unittest.mock import MagicMock
+
+# Mock dependencies thoroughly
+mock_mcp = MagicMock()
+mock_fastmcp = MagicMock()
+mock_fastmcp.tool.return_value = lambda f: f
+mock_mcp.server.fastmcp.FastMCP.return_value = mock_fastmcp
+
+sys.modules["mcp"] = mock_mcp
+sys.modules["mcp.server.fastmcp"] = MagicMock()
+sys.modules["mcp.server.fastmcp"].FastMCP = MagicMock(return_value=mock_fastmcp)
+sys.modules["requests"] = MagicMock()
+sys.modules["ccxt"] = MagicMock()
+sys.modules["web3"] = MagicMock()
+sys.modules["web3.middleware"] = MagicMock()
+sys.modules["web3.gas_strategies.time_based"] = MagicMock()
+sys.modules["dotenv"] = MagicMock()
+sys.modules["eth_account"] = MagicMock()
+
 from unittest.mock import patch, MagicMock
 from ccxt_mcp import get_ticker
 

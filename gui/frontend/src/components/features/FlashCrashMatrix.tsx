@@ -1,6 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, Text } from '@react-three/drei';
+import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+
+const MatrixBar = React.memo(({ position, height, color, label }: { position: [number, number, number], height: number, color: string, label: string }) => {
+    return (
+        <group position={position}>
+            <mesh position={[0, height / 2, 0]}>
+                <boxGeometry args={[0.8, height, 0.8]} />
+                <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} transparent opacity={0.8} />
+            </mesh>
+            <Text position={[0, -0.5, 0]} fontSize={0.3} color="#cbd5e1" anchorX="center" anchorY="middle" rotation={[-Math.PI / 2, 0, 0]}>
+                {label}
+            </Text>
+        </group>
+    );
+});
 
 export default function FlashCrashMatrix() {
   const [matrixData, setMatrixData] = useState<any[]>([]);
@@ -26,6 +43,8 @@ export default function FlashCrashMatrix() {
             const range = midPrice * 0.05;
             const bucketSize = range / (numBuckets / 2);
 
+            let maxVol = 0;
+
             for (let i = 0; i < numBuckets; i++) {
                 const priceTarget = midPrice - range + (i * bucketSize);
 
@@ -40,14 +59,22 @@ export default function FlashCrashMatrix() {
                     if (Math.abs(a[0] - priceTarget) <= bucketSize / 2) askVol += a[1];
                 });
 
+                const totalVol = bidVol + askVol;
+                if (totalVol > maxVol) maxVol = totalVol;
+
                 buckets.push({
                     price: priceTarget,
                     bidVol,
                     askVol,
                     imbalance: bidVol - askVol,
-                    totalVol: bidVol + askVol
+                    totalVol
                 });
             }
+
+            // Normalize heights
+            buckets.forEach(b => {
+                b.normalizedHeight = maxVol > 0 ? (b.totalVol / maxVol) * 5 : 0;
+            });
 
             setMatrixData(buckets);
         } catch (err) {
@@ -67,35 +94,39 @@ export default function FlashCrashMatrix() {
               Flash-Crash Matrix
           </h3>
           <div style={{ fontSize: '10px', color: '#ef4444', background: 'rgba(239, 68, 68, 0.1)', padding: '2px 6px', borderRadius: '4px', border: '1px solid #ef4444' }}>
-              ORDERBOOK IMBALANCE
+              3D ORDERBOOK
           </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', height: '100%', overflowY: 'auto' }}>
-          {matrixData.map((bucket, i) => {
-              const total = bucket.totalVol || 1;
-              const bidPct = (bucket.bidVol / total) * 100;
-              const askPct = (bucket.askVol / total) * 100;
-              const intensity = Math.min(1, Math.abs(bucket.imbalance) / (total + 1));
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020205', borderRadius: '8px', overflow: 'hidden' }}>
+          <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} intensity={1} />
+              <gridHelper args={[12, 12, '#334155', '#1e293b']} position={[0, -0.01, 0]} />
 
-              const isDanger = bucket.imbalance < 0 && intensity > 0.5;
-              const isPump = bucket.imbalance > 0 && intensity > 0.5;
+              <group position={[-4.5, 0, 0]}>
+                  {matrixData.map((bucket, i) => {
+                      const color = bucket.imbalance > 0 ? '#10b981' : '#ef4444'; // Green if more bids, Red if more asks
+                      const height = Math.max(0.1, bucket.normalizedHeight);
 
-              return (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', padding: '5px', background: 'rgba(0,0,0,0.5)', borderRadius: '4px', borderLeft: isDanger ? '2px solid #ef4444' : isPump ? '2px solid #10b981' : '2px solid #334155' }}>
-                      <div style={{ width: '80px', color: '#cbd5e1', fontSize: '12px', fontFamily: 'monospace' }}>
-                          ${bucket.price.toFixed(2)}
-                      </div>
-                      <div style={{ flex: 1, display: 'flex', height: '10px', background: '#1e293b', borderRadius: '5px', overflow: 'hidden' }}>
-                          <div style={{ width: `${bidPct}%`, background: '#10b981', opacity: 0.8 }}></div>
-                          <div style={{ width: `${askPct}%`, background: '#ef4444', opacity: 0.8 }}></div>
-                      </div>
-                      <div style={{ width: '60px', textAlign: 'right', color: isDanger ? '#ef4444' : isPump ? '#10b981' : '#94a3b8', fontSize: '12px', fontFamily: 'monospace' }}>
-                          {intensity > 0.5 ? 'CRITICAL' : 'STABLE'}
-                      </div>
-                  </div>
-              );
-          })}
+                      return (
+                          <MatrixBar
+                              key={i}
+                              position={[i, 0, 0]}
+                              height={height}
+                              color={color}
+                              label={`$${bucket.price.toFixed(0)}`}
+                          />
+                      );
+                  })}
+              </group>
+
+              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={0.5} />
+          </Canvas>
+
+          <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
+              ANALYZING LIQUIDITY: {activeSymbolHook}
+          </div>
       </div>
     </div>
   );

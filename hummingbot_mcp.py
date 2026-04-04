@@ -11,7 +11,7 @@ from typing import Any, Dict, Optional
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 
-load_dotenv(dotenv_path="/home/pelle/cryptomcpserver/.env")
+load_dotenv(dotenv_path=".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("hummingbot_mcp")
 
