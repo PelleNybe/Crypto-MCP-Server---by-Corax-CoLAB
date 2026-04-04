@@ -25,11 +25,15 @@ def _req(path: str, method: str = "get", json: Optional[dict]=None) -> Dict[str,
     headers = {}
     if OCTOBOT_API_KEY:
         headers["Authorization"] = f"Bearer {OCTOBOT_API_KEY}"
-    r = requests.request(method, url, json=json, headers=headers, timeout=15)
     try:
+        r = requests.request(method, url, json=json, headers=headers, timeout=15)
         return {"status_code": r.status_code, "json": r.json()}
-    except Exception:
-        return {"status_code": r.status_code, "text": r.text}
+    except Exception as e:
+        # Fallback if request fails entirely, or if r.json() fails and r isn't defined yet
+        if 'r' in locals() and hasattr(r, 'status_code'):
+            return {"status_code": r.status_code, "text": getattr(r, 'text', str(e))}
+        return {"status_code": 500, "text": str(e)}
+
 
 @mcp.tool()
 def ping() -> str:
