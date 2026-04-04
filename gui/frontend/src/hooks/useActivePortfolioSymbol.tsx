@@ -1,4 +1,4 @@
-import React, { useState, useEffect, createContext, useContext } from 'react';
+import React, { useState, useEffect, createContext, useContext, useMemo } from 'react';
 import { callMcpEndpoint } from '../api_mcp';
 
 interface ActivePortfolioSymbolContextType {
@@ -24,43 +24,52 @@ export const ActivePortfolioSymbolProvider: React.FC<{ children: React.ReactNode
 
     useEffect(() => {
         let active = true;
+        let timeoutId: NodeJS.Timeout;
+
         const fetchPortfolioPair = async () => {
-            setLoading(true);
             try {
                 const portfolio = await callMcpEndpoint('MCP_PORTFOLIO', 'portfolio_value', { exchanges: [defaultExchange] });
                 if (!active) return;
 
                 if (portfolio && portfolio.portfolio) {
                     const coins = Object.keys(portfolio.portfolio);
-                    if (coins.length > 0) {
+                    if (coins.length > 0 && coins[0].toUpperCase() !== 'USDT') {
                         setTargetSymbol(`${coins[0].toUpperCase()}/USDT`);
                         setTargetExchange(defaultExchange);
                     }
                 }
+                setError(null);
             } catch (err: any) {
-                console.warn("Could not fetch portfolio for dynamic pair, using default", err);
-                setError(err.message || 'Failed to fetch portfolio symbol');
+                if (active) {
+                    console.warn("Could not fetch portfolio for dynamic pair, using default", err);
+                    setError(err.message || 'Failed to fetch portfolio symbol');
+                }
             } finally {
-                if (active) setLoading(false);
+                if (active) {
+                    setLoading(false);
+                    // Use recursive timeout instead of setInterval to prevent overlapping requests
+                    timeoutId = setTimeout(fetchPortfolioPair, 60000);
+                }
             }
         };
 
         fetchPortfolioPair();
-        const interval = setInterval(fetchPortfolioPair, 60000); // Check every minute to keep updated with Top 1
 
         return () => {
             active = false;
-            clearInterval(interval);
+            clearTimeout(timeoutId);
         };
     }, [defaultExchange]);
 
+    const value = useMemo(() => ({ targetSymbol, targetExchange, loading, error }), [targetSymbol, targetExchange, loading, error]);
+
     return (
-        <ActivePortfolioSymbolContext.Provider value={{ targetSymbol, targetExchange, loading, error }}>
+        <ActivePortfolioSymbolContext.Provider value={value}>
             {children}
         </ActivePortfolioSymbolContext.Provider>
     );
 };
 
-export function useActivePortfolioSymbol(defaultSymbol = 'BTC/USDT', defaultExchange = 'binance') {
+export function useActivePortfolioSymbol() {
     return useContext(ActivePortfolioSymbolContext);
 }

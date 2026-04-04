@@ -13,7 +13,7 @@ from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
 
 
-load_dotenv(dotenv_path="/home/pelle/cryptomcpserver/.env")
+load_dotenv(dotenv_path=".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("onchain_mcp")
 

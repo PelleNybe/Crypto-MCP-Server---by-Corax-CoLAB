@@ -7,8 +7,8 @@ Type=simple
 User=pelle
 WorkingDirectory=/home/pelle/cryptomcpserver
 Environment=PYTHONUNBUFFERED=1
-EnvironmentFile=/home/pelle/cryptomcpserver/.env
-ExecStart=/home/pelle/cryptomcpserver/venv/bin/python /home/pelle/cryptomcpserver/freqtrade_mcp.py
+EnvironmentFile=.env
+ExecStart=.env/bin/python /home/pelle/cryptomcpserver/freqtrade_mcp.py
 Restart=on-failure
 RestartSec=5
 

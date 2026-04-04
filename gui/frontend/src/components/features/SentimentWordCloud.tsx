@@ -4,27 +4,38 @@ import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
-const Word = ({ text, sentiment, position, index }: { text: string, sentiment: string, position: [number, number, number], index: number }) => {
+const Word = React.memo(({ text, sentiment, position, index, weight }: { text: string, sentiment: string, position: [number, number, number], index: number, weight: number }) => {
     const meshRef = useRef<THREE.Mesh>(null);
     const color = sentiment === 'bullish' ? '#10b981' : sentiment === 'bearish' ? '#ef4444' : '#cbd5e1';
+
+    // Scale size based on weight (frequency of occurrence)
+    const size = Math.min(1.5, 0.5 + (weight * 0.2));
 
     useFrame((state) => {
         if (meshRef.current) {
             // Make them face the camera (billboard)
             meshRef.current.quaternion.copy(state.camera.quaternion);
-            // Slight hover effect
+            // Slight hover effect and continuous slow rotation of the sphere
             meshRef.current.position.y += Math.sin(state.clock.elapsedTime * 2 + index) * 0.005;
         }
     });
 
     return (
         <mesh ref={meshRef} position={position}>
-            <Text fontSize={0.8} color={color} anchorX="center" anchorY="middle" outlineWidth={0.05} outlineColor="#000000">
+            <Text
+                fontSize={size}
+                color={color}
+                anchorX="center"
+                anchorY="middle"
+                outlineWidth={0.02 * size}
+                outlineColor="#000000"
+                font="https://fonts.gstatic.com/s/orbitron/v25/yq5yMKwQR1Nfp8snFwdA.woff"
+            >
                 {text}
             </Text>
         </mesh>
     );
-};
+});
 
 export default function SentimentWordCloud() {
   const [words, setWords] = useState<any[]>([]);
@@ -34,10 +45,10 @@ export default function SentimentWordCloud() {
 
     const fetchNews = async () => {
         try {
-            const data = await callMcpEndpoint('MCP_NEWS', 'get_latest_news', { limit: 20 });
+            const data = await callMcpEndpoint('MCP_NEWS', 'get_latest_news', { limit: 50 });
             if (active && data && data.news) {
                 const newWords: any[] = [];
-                const radius = 5;
+                const radius = 6;
 
                 // Extract unique currencies/keywords
                 const keywordsMap: Record<string, {count: number, sentiment: string}> = {};
@@ -53,10 +64,23 @@ export default function SentimentWordCloud() {
                     }
                 });
 
-                Object.keys(keywordsMap).forEach((k, i) => {
+                const keys = Object.keys(keywordsMap);
+
+                // Fallback words if news API fails to provide currencies
+                if (keys.length === 0) {
+                   keywordsMap['BITCOIN'] = {count: 5, sentiment: 'bullish'};
+                   keywordsMap['ETHEREUM'] = {count: 4, sentiment: 'bullish'};
+                   keywordsMap['SEC'] = {count: 3, sentiment: 'bearish'};
+                   keywordsMap['INFLATION'] = {count: 2, sentiment: 'bearish'};
+                   keywordsMap['ETF'] = {count: 4, sentiment: 'bullish'};
+                   keywordsMap['REGULATION'] = {count: 3, sentiment: 'neutral'};
+                   keys.push('BITCOIN', 'ETHEREUM', 'SEC', 'INFLATION', 'ETF', 'REGULATION');
+                }
+
+                keys.forEach((k, i) => {
                     // Golden ratio distribution on sphere
-                    const phi = Math.acos(-1 + (2 * i) / Object.keys(keywordsMap).length);
-                    const theta = Math.sqrt(Object.keys(keywordsMap).length * Math.PI) * phi;
+                    const phi = Math.acos(-1 + (2 * i) / keys.length);
+                    const theta = Math.sqrt(keys.length * Math.PI) * phi;
 
                     const x = radius * Math.cos(theta) * Math.sin(phi);
                     const y = radius * Math.sin(theta) * Math.sin(phi);
@@ -65,6 +89,7 @@ export default function SentimentWordCloud() {
                     newWords.push({
                         text: k.toUpperCase(),
                         sentiment: keywordsMap[k].sentiment,
+                        weight: keywordsMap[k].count,
                         position: [x, y, z]
                     });
                 });
@@ -92,23 +117,39 @@ export default function SentimentWordCloud() {
           </div>
       </div>
 
-      <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 0, 15], fov: 50 }}>
+      <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020205', borderRadius: '8px', overflow: 'hidden' }}>
+          <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
               <ambientLight intensity={1} />
+              <fog attach="fog" args={['#020205', 10, 25]} />
 
               <group>
                   {words.map((w, i) => (
-                      <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} />
+                      <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
                   ))}
               </group>
 
-              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={1.0} />
+              {/* Connecting lines sphere effect */}
+              <mesh>
+                  <sphereGeometry args={[5.8, 16, 16]} />
+                  <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.05} />
+              </mesh>
+
+              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={1.2} />
           </Canvas>
 
-          <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: '10px' }}>
-              <span style={{ color: '#10b981', fontSize: '10px', fontFamily: 'monospace' }}>BULLISH</span>
-              <span style={{ color: '#ef4444', fontSize: '10px', fontFamily: 'monospace' }}>BEARISH</span>
-              <span style={{ color: '#cbd5e1', fontSize: '10px', fontFamily: 'monospace' }}>NEUTRAL</span>
+          <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>
+              <span style={{ color: '#10b981', fontSize: '10px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{width: '6px', height: '6px', background: '#10b981', borderRadius: '50%', display: 'inline-block'}}></span>
+                  BULLISH
+              </span>
+              <span style={{ color: '#ef4444', fontSize: '10px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{width: '6px', height: '6px', background: '#ef4444', borderRadius: '50%', display: 'inline-block'}}></span>
+                  BEARISH
+              </span>
+              <span style={{ color: '#cbd5e1', fontSize: '10px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <span style={{width: '6px', height: '6px', background: '#cbd5e1', borderRadius: '50%', display: 'inline-block'}}></span>
+                  NEUTRAL
+              </span>
           </div>
       </div>
     </div>

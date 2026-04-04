@@ -318,7 +318,24 @@ app.get('/api/orders_old', (req, res) => {
 /* Socket.io + periodic polling */
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: '*' }
+  cors: { origin: "*" }
+});
+
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  if (!token) {
+    return next(new Error("Authentication error"));
+  }
+  try {
+    const tokenHash = crypto.createHash("sha256").update(token).digest();
+    const passHash = crypto.createHash("sha256").update(DASHBOARD_PASSWORD).digest();
+    if (!crypto.timingSafeEqual(tokenHash, passHash)) {
+      return next(new Error("Authentication error"));
+    }
+    next();
+  } catch (e) {
+    next(new Error("Authentication error"));
+  }
 });
 
 // Helper to call and emit
