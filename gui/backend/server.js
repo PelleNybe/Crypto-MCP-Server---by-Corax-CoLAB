@@ -222,15 +222,15 @@ app.post('/api/order/dry_run', async (req, res) => {
   }
   const allowedSides = ['buy', 'sell'];
   const allowedTypes = ['market', 'limit'];
-  if (!allowedSides.includes(side.toLowerCase())) {
-      return res.status(400).json({ ok:false, error: 'Invalid order side (must be buy or sell)' });
+  if (!side || typeof side !== 'string' || !allowedSides.includes(side.toLowerCase())) {
+    return res.status(400).json({ ok:false, error: 'Invalid order side (must be buy or sell)' });
   }
-  if (!allowedTypes.includes(type.toLowerCase())) {
-      return res.status(400).json({ ok:false, error: 'Invalid order type (must be market or limit)' });
+  if (!type || typeof type !== 'string' || !allowedTypes.includes(type.toLowerCase())) {
+    return res.status(400).json({ ok:false, error: 'Invalid order type (must be market or limit)' });
   }
   const symbolRegex = /^[A-Z0-9-]+\/[A-Z0-9-]+$/i;
-  if (!symbolRegex.test(symbol)) {
-      return res.status(400).json({ ok:false, error: 'Invalid symbol format (expected e.g. BTC/USDT)' });
+  if (!symbolRegex || typeof symbol !== 'string' || !symbolRegex.test(symbol)) {
+    return res.status(400).json({ ok:false, error: 'Invalid symbol format (expected e.g. BTC/USDT)' });
   }
   try {
     const ticker = await callMCP(mcpUrls.MCP_CCXT, 'get_ticker', { exchange, symbol });
@@ -268,6 +268,18 @@ app.post('/api/order/execute', async (req, res) => {
   const numericPrice = price !== undefined && price !== null ? Number(price) : null;
   if (numericPrice !== null && (isNaN(numericPrice) || numericPrice <= 0)) {
     return res.status(400).json({ ok:false, error: 'Price must be a positive number' });
+  }
+  const allowedSides = ['buy', 'sell'];
+  const allowedTypes = ['market', 'limit'];
+  if (!side || typeof side !== 'string' || !allowedSides.includes(side.toLowerCase())) {
+    return res.status(400).json({ ok:false, error: 'Invalid order side (must be buy or sell)' });
+  }
+  if (!type || typeof type !== 'string' || !allowedTypes.includes(type.toLowerCase())) {
+    return res.status(400).json({ ok:false, error: 'Invalid order type (must be market or limit)' });
+  }
+  const symbolRegex = /^[A-Z0-9-]+\/[A-Z0-9-]+$/i;
+  if (!symbolRegex || typeof symbol !== 'string' || !symbolRegex.test(symbol)) {
+    return res.status(400).json({ ok:false, error: 'Invalid symbol format (expected e.g. BTC/USDT)' });
   }
   try {
     if (!execute) {
@@ -410,15 +422,15 @@ app.post('/api/order/pending', (req, res) => {
   }
   const allowedSides = ['buy', 'sell'];
   const allowedTypes = ['market', 'limit'];
-  if (!allowedSides.includes(side.toLowerCase())) {
-      return res.status(400).json({ ok: false, error: 'Invalid order side (must be buy or sell)' });
+  if (!side || typeof side !== 'string' || !allowedSides.includes(side.toLowerCase())) {
+    return res.status(400).json({ ok: false, error: 'Invalid order side (must be buy or sell)' });
   }
-  if (!allowedTypes.includes(type.toLowerCase())) {
-      return res.status(400).json({ ok: false, error: 'Invalid order type (must be market or limit)' });
+  if (!type || typeof type !== 'string' || !allowedTypes.includes(type.toLowerCase())) {
+    return res.status(400).json({ ok: false, error: 'Invalid order type (must be market or limit)' });
   }
   const symbolRegex = /^[A-Z0-9-]+\/[A-Z0-9-]+$/i;
-  if (!symbolRegex.test(symbol)) {
-      return res.status(400).json({ ok: false, error: 'Invalid symbol format (expected e.g. BTC/USDT)' });
+  if (!symbolRegex || typeof symbol !== 'string' || !symbolRegex.test(symbol)) {
+    return res.status(400).json({ ok: false, error: 'Invalid symbol format (expected e.g. BTC/USDT)' });
   }
 
   try {
