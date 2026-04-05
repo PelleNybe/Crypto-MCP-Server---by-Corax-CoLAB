@@ -55,5 +55,15 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
             if r["asset"] == "ETH":
                 self.assertEqual(r["value_usd"], 200.0)
 
+    async def test_fetch_exchange_balance_invalid_exchange(self):
+        # Setup
+        portfolio_mcp.ccxt_async.exchanges = ["binance"]
+
+        # Action
+        results = await portfolio_mcp.fetch_exchange_balance("non_existent_exchange")
+
+        # Assertions
+        self.assertEqual(results, [])
+
 if __name__ == "__main__":
     unittest.main()
