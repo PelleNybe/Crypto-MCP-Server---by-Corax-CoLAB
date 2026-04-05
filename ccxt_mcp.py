@@ -7,6 +7,8 @@ Run via systemd or: python3 ccxt_mcp.py
 """
 import os
 import logging
+import time
+from functools import wraps
 from typing import Optional, List, Any
 import ccxt
 import requests
@@ -31,6 +33,24 @@ if not ALLOWED_PAIRS:
 # Endpoint to dashboard for HITL (Human In The Loop) approval
 DASHBOARD_API_URL = os.getenv("DASHBOARD_API_URL", "http://backend:4000")
 
+def ttl_cache(seconds: int):
+    """Simple TTL cache decorator."""
+    def decorator(func):
+        cache = {}
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            key = (args, tuple(sorted(kwargs.items())))
+            now = time.time()
+            if key in cache:
+                result, expiry = cache[key]
+                if now < expiry:
+                    return result
+            result = func(*args, **kwargs)
+            cache[key] = (result, now + seconds)
+            return result
+        return wrapper
+    return decorator
+
 def _make_exchange(exchange_id: str) -> ccxt.Exchange:
     exchange_id = exchange_id.lower()
     if exchange_id not in ccxt.exchanges:
@@ -48,6 +68,7 @@ def ping() -> str:
     return "ccxt_mcp alive — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
 
 @mcp.tool()
+@ttl_cache(seconds=30)
 def get_ticker(exchange: str, symbol: str) -> dict:
     ex = _make_exchange(exchange)
     ticker = ex.fetch_ticker(symbol)
