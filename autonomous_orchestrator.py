@@ -60,6 +60,7 @@ async def gather_market_data(target_ticker: str, config: dict):
         "price": None
     }
 
+
     # Try Aarna
     if "aarna-atars" in config.get("mcpServers", {}):
         logger.info("Connecting to aarna-atars to fetch technical signals...")
@@ -67,11 +68,30 @@ async def gather_market_data(target_ticker: str, config: dict):
             async with await connect_mcp(config["mcpServers"]["aarna-atars"]) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
-                    # Placeholder call for actual tool name. Adapt based on the real aarna-atars MCP tools.
-                    # Since we don't have the exact schema, we simulate the interaction if tools aren't listed
+                    tools_response = await session.list_tools()
+                    tools = tools_response.tools
 
-                    # Example logic:
-                    market_data["technical_signals"] = "bullish" # Simulated response
+                    target_tool = None
+                    schema = None
+                    for t in tools:
+                        if any(kw in t.name.lower() or kw in (t.description or "").lower() for kw in ["signal", "macd", "technical"]):
+                            target_tool = t.name
+                            schema = t.inputSchema
+                            break
+
+                    if target_tool:
+                        arg_name = "ticker"
+                        if schema and "properties" in schema:
+                            if "symbol" in schema["properties"]:
+                                arg_name = "symbol"
+                            elif "coin" in schema["properties"]:
+                                arg_name = "coin"
+
+                        logger.info(f"Calling {target_tool} with {arg_name}={target_ticker}")
+                        res = await session.call_tool(target_tool, arguments={arg_name: target_ticker})
+                        market_data["technical_signals"] = res.content[0].text if res.content else None
+                    else:
+                        logger.warning(f"No technical signal tool found on aarna-atars. Available tools: {[t.name for t in tools]}")
         except Exception as e:
             logger.error(f"Failed to gather data from aarna-atars: {e}")
 
@@ -82,11 +102,32 @@ async def gather_market_data(target_ticker: str, config: dict):
             async with await connect_mcp(config["mcpServers"]["lunarcrush"]) as (read, write):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
-                    # Placeholder call
-                    market_data["sentiment"] = "positive" # Simulated response
+                    tools_response = await session.list_tools()
+                    tools = tools_response.tools
+
+                    target_tool = None
+                    schema = None
+                    for t in tools:
+                        if any(kw in t.name.lower() or kw in (t.description or "").lower() for kw in ["sentiment", "social"]):
+                            target_tool = t.name
+                            schema = t.inputSchema
+                            break
+
+                    if target_tool:
+                        arg_name = "ticker"
+                        if schema and "properties" in schema:
+                            if "symbol" in schema["properties"]:
+                                arg_name = "symbol"
+                            elif "coin" in schema["properties"]:
+                                arg_name = "coin"
+
+                        logger.info(f"Calling {target_tool} with {arg_name}={target_ticker}")
+                        res = await session.call_tool(target_tool, arguments={arg_name: target_ticker})
+                        market_data["sentiment"] = res.content[0].text if res.content else None
+                    else:
+                        logger.warning(f"No sentiment tool found on lunarcrush. Available tools: {[t.name for t in tools]}")
         except Exception as e:
             logger.error(f"Failed to gather data from lunarcrush: {e}")
-
     logger.info(f"Data gathered: {market_data}")
     return market_data
 
@@ -181,25 +222,46 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
                 await session.initialize()
 
                 # Fetch available tools
-                tools = await session.list_tools()
+                tools_response = await session.list_tools()
+                tool_names = [t.name for t in tools_response.tools]
 
-                tool_names = [t.name for t in tools.tools]
-
-                if "execute" not in tool_names:
-                    logger.error("The 'execute' tool is not available on corax-crypto.")
+                if "create_order" not in tool_names or "get_ticker" not in tool_names:
+                    logger.error("Required tools ('create_order', 'get_ticker') are not available on corax-crypto.")
                     return False
 
-                # Call execute tool
-                # Default execution args (e.g., small test amount for agent loop)
+                exchange_name = "binance"
+                symbol = f"{target_ticker}/USDT"
+
+                # Get current price to calculate amount dynamically
+                logger.info(f"Fetching ticker for {symbol} on {exchange_name}...")
+                ticker_result = await session.call_tool("get_ticker", arguments={"exchange": exchange_name, "symbol": symbol})
+
+                try:
+                    ticker_data = json.loads(ticker_result.content[0].text)
+                    current_price = ticker_data.get("last")
+                except Exception as e:
+                    logger.error(f"Failed to parse ticker data: {e}. Raw: {ticker_result.content[0].text if ticker_result.content else None}")
+                    return False
+
+                if not current_price or current_price <= 0:
+                    logger.error(f"Invalid current price for {symbol}: {current_price}")
+                    return False
+
+                # Calculate trade amount for a fixed risk amount (e.g. 20 USD)
+                trade_usd = 20.0
+                amount = trade_usd / current_price
+
+                # Call create_order tool
                 tool_args = {
-                    "symbol": f"{target_ticker}/USDT",  # Assumption based on target_ticker
+                    "exchange": exchange_name,
+                    "symbol": symbol,
                     "type": "market",
                     "side": action.lower(),
-                    "amount": 10.0 # Small test amount
+                    "amount": round(amount, 6)
                 }
 
-                logger.info(f"Calling corax-crypto execute tool with: {tool_args}")
-                result = await session.call_tool("execute", arguments=tool_args)
+                logger.info(f"Calling corax-crypto create_order tool with: {tool_args}")
+                result = await session.call_tool("create_order", arguments=tool_args)
 
                 logger.info(f"Trade Execution Result: {result.content[0].text if result.content else 'Success'}")
                 return True
