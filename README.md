@@ -122,6 +122,33 @@ We provide a `multi_mcp_config.example.json` file that shows you how to connect 
 
 This setup is completely hardware- and OS-agnostic. Use `start_server.sh` or Docker to run the local Corax Server seamlessly on any environment!
 
+
+## 🤖 Autonomous Orchestrator Mode (Agentic Loop)
+
+We are introducing **Track 2: Agentic Orchestration**, evolving the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework.
+
+The `autonomous_orchestrator.py` script acts as an MCP Client, automatically connecting to the MCPs defined in your `multi_mcp_config.example.json`.
+
+It runs a continuous **Observe-Analyze-Act** (OODA) loop:
+1. **Observe (`gather_market_data`):** Queries Aarna ATARS for technical signals and LunarCrush for sentiment.
+2. **Analyze (`analyze_with_llm`):** Evaluates signals using an LLM (e.g., Gemini or Claude) to return a structured decision (BUY, SELL, HOLD).
+3. **Act (`execute_trade`):** If a trade is decided, it calls the local Corax MCP to execute the trade.
+
+### How to use the Autonomous Orchestrator
+1. Ensure your API keys are set correctly in `.env` and your multi-MCP configuration.
+2. You can test the orchestrator locally:
+   ```bash
+   python3 autonomous_orchestrator.py
+   ```
+3. **Run 24/7 as a background service:**
+   We provide a systemd service template `systemd/corax_orchestrator.service`.
+   Copy it to your systemd folder, enable it, and start it to let your AI daemon trade fully autonomously:
+   ```bash
+   sudo cp systemd/corax_orchestrator.service /etc/systemd/system/
+   sudo systemctl daemon-reload
+   sudo systemctl enable --now corax_orchestrator.service
+   ```
+
 ## 🗺️ System Overview & Architecture
 
 The image series below illustrates the key stages of the Crypto MCP Server, bridging AI (Claude Desktop), local tools, and blockchain technology.
