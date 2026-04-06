@@ -1,0 +1,40 @@
+{
+  "mcpServers": {
+    "corax-crypto": {
+      "command": "python3",
+      "args": [
+        "<PATH_TO_YOUR_CLONED_REPO>/ccxt_mcp.py"
+      ],
+      "env": {
+        "BINANCE_API_KEY": "YOUR_BINANCE_API_KEY",
+        "BINANCE_API_SECRET": "YOUR_BINANCE_API_SECRET",
+        "ALLOWED_PAIRS": "BTC/USDT,SOL/USDT",
+        "MAX_TRADE_USD": "100.0"
+      }
+    },
+    "aarna-atars": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@aarna-ai/atars-fts-mcp"
+      ]
+    },
+    "blockscout": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@blockscout/mcp-server"
+      ]
+    },
+    "lunarcrush": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@lunarcrush/mcp-server"
+      ],
+      "env": {
+        "LUNARCRUSH_API_KEY": "YOUR_LUNARCRUSH_API_KEY"
+      }
+    }
+  }
+}

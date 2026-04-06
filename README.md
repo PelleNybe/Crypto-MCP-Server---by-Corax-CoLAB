@@ -3,7 +3,8 @@
     <img width="800" alt="Frontend Dashboard" src="./gui/frontend/public/images/dashboard.png" style="border-radius: 12px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(16, 185, 129, 0.4);" />
   </a>
 
-  <h1>🌌 Crypto MCP Server <br> <span style="font-size: 0.6em; color: #10b981;">by Corax CoLAB & PelleNybe 🚀🪙</span></h1>
+  <h1>🌌 Crypto Multi-MCP Hub <br> <span style="font-size: 0.6em; color: #10b981;">by Corax CoLAB & PelleNybe 🚀🪙</span></h1>
+  <h2>Hedge Fund AI Orchestrator</h2>
 
   <p>
     <a href="https://github.com/PelleNybe"><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=22&pause=1000&color=10B981&center=true&vCenter=true&width=800&lines=Welcome+to+Crypto+MCP+Server;The+Future+of+Edge+AI+%26+Blockchain;AI-driven+command+center;100%25+Real+Data+Integration;Built+with+React,+Three.js+%26+Python" alt="Typing SVG" /></a>
@@ -18,7 +19,7 @@
     <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License"/>
   </p>
 
-  <p><em>The ultimate AI-driven command center for your local crypto operations, featuring a dark, cyberpunk/command-center aesthetic.</em></p>
+  <p><em>The ultimate AI-driven command center and Multi-MCP Hub for your local crypto operations, featuring a dark, cyberpunk/command-center aesthetic. Built for everyone, from homebrew Raspberry Pi setups to cloud servers.</em></p>
 </div>
 
 ---
@@ -96,6 +97,30 @@ The Crypto MCP Server has been heavily upgraded to ensure **every single concept
 *   **Global Weather System:** An interactive background system that reacts to the current market sentiment (Bull, Bear, Neutral), altering the entire visual environment.
 
 ---
+
+
+## 🚀 The Multi-MCP Ecosystem
+
+This repository has evolved into a **Multi-MCP Hub** - a Hedge Fund AI Orchestrator. The vision is that anyone downloading this repo can easily configure their AI agent to use our server for execution/raw data, combined with external public MCPs for analysis.
+
+Synergy examples:
+*   **Aarna ATARS:** High-frequency sentiment signals and specialized DeFi analytics.
+*   **Blockscout:** Contract safety, verified smart contract readouts.
+*   **LunarCrush:** Social sentiment and trending metrics.
+*   **Corax Crypto MCP (This repo):** Trade execution, real-time monitoring, and local AI reasoning.
+
+### How to use the Multi-MCP Configuration
+
+We provide a `multi_mcp_config.example.json` file that shows you how to connect your AI client (like Claude Desktop or Cursor) to multiple servers simultaneously.
+
+1.  Open your AI client's MCP configuration file.
+    *   **Claude Desktop:** `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
+    *   **Cursor:** Add servers in Cursor Settings > Features > MCP.
+2.  Copy the structure from `multi_mcp_config.example.json`.
+3.  Fill in any required API keys (like `LUNARCRUSH_API_KEY`).
+4.  Restart your AI client.
+
+This setup is completely hardware- and OS-agnostic. Use `start_server.sh` or Docker to run the local Corax Server seamlessly on any environment!
 
 ## 🗺️ System Overview & Architecture
 

@@ -4,11 +4,11 @@ After=network.target
 
 [Service]
 Type=simple
-User=pelle
-WorkingDirectory=/home/pelle/cryptomcpserver
+# User=pelle (Run as current user or specific user)
+WorkingDirectory=%h/cryptomcpserver
 Environment=PYTHONUNBUFFERED=1
-EnvironmentFile=.env
-ExecStart=.env/bin/python /home/pelle/cryptomcpserver/notifier_mcp.py
+EnvironmentFile=%h/cryptomcpserver/.env
+ExecStart=.env/bin/python %h/cryptomcpserver/notifier_mcp.py
 Restart=on-failure
 RestartSec=5
 
