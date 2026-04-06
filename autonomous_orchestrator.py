@@ -131,17 +131,43 @@ async def gather_market_data(target_ticker: str, config: dict):
     logger.info(f"Data gathered: {market_data}")
     return market_data
 
-async def analyze_with_llm(market_data: dict):
+def calculate_consensus(votes):
     """
-    Evaluates the signals and returns a JSON decision: BUY, SELL, or HOLD.
+    Evaluates the results from all active providers.
+    Implements Majority Rule. If tie or no consensus, default is HOLD.
     """
-    provider = os.getenv("ACTIVE_LLM_PROVIDER", "gemini").lower()
-    logger.info(f"Analyzing data with LLM ({provider})...")
+    decisions = [v.get("decision", "HOLD").upper() for v in votes]
+    vote_counts = {"BUY": decisions.count("BUY"), "SELL": decisions.count("SELL"), "HOLD": decisions.count("HOLD")}
+    total_votes = len(votes)
 
-    system_prompt = "You are Corax CoLAB's autonomous hedge fund manager. Analyze this data and return a JSON decision: BUY, SELL, or HOLD."
+    final_decision = "HOLD"
+    if total_votes > 0:
+        for action, count in vote_counts.items():
+            if count > total_votes / 2:
+                final_decision = action
+                break
+
+    return {
+        "decision": final_decision,
+        "vote_counts": vote_counts,
+        "total_votes": total_votes,
+        "director_votes": votes
+    }
+
+async def call_provider(provider: str, market_data: dict):
+    provider = provider.strip().lower()
+
+    personas = {
+        "gemini": "Technical Analyst",
+        "openai": "Macro Strategist",
+        "anthropic": "Risk Manager"
+    }
+
+    persona = personas.get(provider, "General Analyst")
+    system_prompt = f"You are Corax CoLAB's autonomous hedge fund manager acting as the {persona}. Analyze this data and return a JSON decision: BUY, SELL, or HOLD."
     user_prompt = f"Data to analyze: {json.dumps(market_data)}\nRespond strictly with JSON in this format: {{\"decision\": \"BUY|SELL|HOLD\", \"reasoning\": \"your reasoning here\"}}"
 
-    decision_json = {"decision": "HOLD", "reasoning": "Fallback decision due to failure."}
+    decision_json = {"decision": "HOLD", "reasoning": f"Fallback decision due to failure for {provider}.", "provider": provider}
 
     try:
         if provider == "openai":
@@ -157,6 +183,7 @@ async def analyze_with_llm(market_data: dict):
                 response_format={"type": "json_object"}
             )
             decision_json = json.loads(response.choices[0].message.content)
+            decision_json["provider"] = provider
 
         elif provider == "anthropic":
             if not anthropic:
@@ -170,16 +197,14 @@ async def analyze_with_llm(market_data: dict):
                     {"role": "user", "content": user_prompt}
                 ]
             )
-            # Try to parse the text block as JSON
             content = response.content[0].text
             decision_json = json.loads(content)
+            decision_json["provider"] = provider
 
         elif provider == "gemini":
             if not genai:
                 raise ImportError("Google GenAI SDK not installed.")
             client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
-            # In async contexts, use aio or run in executor depending on SDK support.
-            # We'll use synchronous call wrapped in to_thread since GenAI SDK async support varies
             def _call_gemini():
                 return client.models.generate_content(
                     model='gemini-2.5-pro',
@@ -191,15 +216,41 @@ async def analyze_with_llm(market_data: dict):
                 )
             response = await asyncio.to_thread(_call_gemini)
             decision_json = json.loads(response.text)
+            decision_json["provider"] = provider
 
         else:
             logger.error(f"Unknown LLM provider: {provider}")
 
     except Exception as e:
-        logger.error(f"LLM Analysis failed: {e}")
+        logger.error(f"LLM Analysis failed for {provider}: {e}")
 
-    logger.info(f"LLM Analysis Complete. Decision: {decision_json.get('decision')}")
+    logger.info(f"{provider} Analysis Complete. Decision: {decision_json.get('decision')}")
     return decision_json
+
+async def consult_board_of_directors(market_data: dict):
+    """
+    Evaluates the signals using multiple LLM providers and returns a consensus decision.
+    """
+    providers_str = os.getenv("ACTIVE_LLM_PROVIDERS", os.getenv("ACTIVE_LLM_PROVIDER", "gemini"))
+    providers = [p.strip() for p in providers_str.split(",") if p.strip()]
+
+    logger.info(f"Consulting Board of Directors ({', '.join(providers)})...")
+
+    tasks = [call_provider(p, market_data) for p in providers]
+    results = await asyncio.gather(*tasks)
+
+    consensus_result = calculate_consensus(results)
+
+    final_decision = consensus_result["decision"]
+    votes_for_decision = consensus_result["vote_counts"].get(final_decision, 0)
+    total_votes = consensus_result["total_votes"]
+
+    if votes_for_decision > total_votes / 2:
+        logger.info(f"Consensus reached: {final_decision} ({votes_for_decision}/{total_votes} votes)")
+    else:
+        logger.info(f"No consensus: HOLD ({consensus_result['vote_counts'].get('HOLD', 0)}/{total_votes} votes)")
+
+    return consensus_result
 
 async def execute_trade(decision: dict, target_ticker: str, config: dict):
     """
@@ -300,7 +351,7 @@ async def agent_loop(config: dict):
             market_data = await gather_market_data(target_ticker, config)
 
             # 2. Analyze (LLM Reasoning)
-            analysis = await analyze_with_llm(market_data)
+            analysis = await consult_board_of_directors(market_data)
 
             # 3. Act (Execute Trade)
             await execute_trade(analysis, target_ticker, config)
