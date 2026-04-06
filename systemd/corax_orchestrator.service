@@ -1,16 +1,15 @@
 [Unit]
-Description=Autonomous Orchestrator - Crypto MCP Server (Corax CoLAB)
+Description=Corax Autonomous Orchestrator Service
 After=network.target
 
 [Service]
 Type=simple
-# User=pelle (Run as current user or specific user)
-WorkingDirectory=%h/cryptomcpserver
-Environment=PYTHONUNBUFFERED=1
-EnvironmentFile=%h/cryptomcpserver/.env
-ExecStart=.env/bin/python %h/cryptomcpserver/autonomous_orchestrator.py
+User=%i
+WorkingDirectory=%h/Crypto-MCP-Server---by-Corax-CoLAB
+EnvironmentFile=%h/Crypto-MCP-Server---by-Corax-CoLAB/.env
+ExecStart=/usr/bin/python3 autonomous_orchestrator.py
 Restart=on-failure
-RestartSec=5
+RestartSec=5s
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target
