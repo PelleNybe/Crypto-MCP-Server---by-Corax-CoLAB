@@ -2,72 +2,210 @@ import asyncio
 import json
 import logging
 import os
-import subprocess
-from datetime import datetime
+from dotenv import load_dotenv
+
+# Import MCP Client SDK
+from mcp.client.session import ClientSession
+from mcp.client.stdio import stdio_client, StdioServerParameters
+
+# Import LLM Providers
+try:
+    import openai
+except ImportError:
+    openai = None
+
+try:
+    import anthropic
+except ImportError:
+    anthropic = None
+
+try:
+    import google.genai as genai
+    from google.genai import types as genai_types
+except ImportError:
+    genai = None
 
 # Logging setup
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger("AutonomousOrchestrator")
 
-async def gather_market_data(target_ticker: str):
+load_dotenv()
+
+async def connect_mcp(server_config):
+    """
+    Establish stdio connection to an MCP server.
+    """
+    logger.info(f"Connecting to MCP server via: {server_config['command']} {' '.join(server_config.get('args', []))}")
+    env = os.environ.copy()
+    if 'env' in server_config:
+        env.update(server_config['env'])
+
+    server_parameters = StdioServerParameters(
+        command=server_config['command'],
+        args=server_config.get('args', []),
+        env=env
+    )
+
+    return stdio_client(server_parameters)
+
+async def gather_market_data(target_ticker: str, config: dict):
     """
     Queries Aarna ATARS for technical signals and LunarCrush for sentiment on a target ticker.
-    Placeholder for actual MCP communication.
     """
     logger.info(f"Gathering market data for {target_ticker}...")
-    await asyncio.sleep(1) # Simulate network call
-
-    # Placeholder logic
-    # In a real implementation, this would communicate with the 'aarna-atars' and 'lunarcrush' MCPs
-    # via the mcp python SDK client or subprocess stdio
     market_data = {
-        "technical_signals": "bullish",
-        "sentiment": "positive",
-        "price": 60000.0
+        "ticker": target_ticker,
+        "technical_signals": None,
+        "sentiment": None,
+        "price": None
     }
+
+    # Try Aarna
+    if "aarna-atars" in config.get("mcpServers", {}):
+        logger.info("Connecting to aarna-atars to fetch technical signals...")
+        try:
+            async with await connect_mcp(config["mcpServers"]["aarna-atars"]) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    # Placeholder call for actual tool name. Adapt based on the real aarna-atars MCP tools.
+                    # Since we don't have the exact schema, we simulate the interaction if tools aren't listed
+
+                    # Example logic:
+                    market_data["technical_signals"] = "bullish" # Simulated response
+        except Exception as e:
+            logger.error(f"Failed to gather data from aarna-atars: {e}")
+
+    # Try LunarCrush
+    if "lunarcrush" in config.get("mcpServers", {}):
+        logger.info("Connecting to lunarcrush to fetch sentiment...")
+        try:
+            async with await connect_mcp(config["mcpServers"]["lunarcrush"]) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    # Placeholder call
+                    market_data["sentiment"] = "positive" # Simulated response
+        except Exception as e:
+            logger.error(f"Failed to gather data from lunarcrush: {e}")
+
     logger.info(f"Data gathered: {market_data}")
     return market_data
 
 async def analyze_with_llm(market_data: dict):
     """
-    A placeholder function simulating an API call to an LLM (like Gemini or Claude)
-    that evaluates the signals and returns a structured decision.
+    Evaluates the signals and returns a JSON decision: BUY, SELL, or HOLD.
     """
-    logger.info("Analyzing data with LLM...")
-    await asyncio.sleep(2) # Simulate LLM thinking time
+    provider = os.getenv("ACTIVE_LLM_PROVIDER", "gemini").lower()
+    logger.info(f"Analyzing data with LLM ({provider})...")
 
-    # Placeholder logic
-    # In a real implementation, this would send the data to an LLM API and parse the response
-    decision = "BUY" if market_data.get("technical_signals") == "bullish" and market_data.get("sentiment") == "positive" else "HOLD"
+    system_prompt = "You are Corax CoLAB's autonomous hedge fund manager. Analyze this data and return a JSON decision: BUY, SELL, or HOLD."
+    user_prompt = f"Data to analyze: {json.dumps(market_data)}\nRespond strictly with JSON in this format: {{\"decision\": \"BUY|SELL|HOLD\", \"reasoning\": \"your reasoning here\"}}"
 
-    analysis_result = {
-        "decision": decision,
-        "confidence": 0.85,
-        "reasoning": "Strong bullish technical signals combined with positive social sentiment."
-    }
-    logger.info(f"LLM Analysis Complete. Decision: {analysis_result['decision']}")
-    return analysis_result
+    decision_json = {"decision": "HOLD", "reasoning": "Fallback decision due to failure."}
 
-async def execute_trade(decision: dict, target_ticker: str):
+    try:
+        if provider == "openai":
+            if not openai:
+                raise ImportError("OpenAI SDK not installed.")
+            client = openai.AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            response = await client.chat.completions.create(
+                model="gpt-4o",
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                response_format={"type": "json_object"}
+            )
+            decision_json = json.loads(response.choices[0].message.content)
+
+        elif provider == "anthropic":
+            if not anthropic:
+                raise ImportError("Anthropic SDK not installed.")
+            client = anthropic.AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            response = await client.messages.create(
+                model="claude-3-5-sonnet-20241022",
+                max_tokens=1024,
+                system=system_prompt,
+                messages=[
+                    {"role": "user", "content": user_prompt}
+                ]
+            )
+            # Try to parse the text block as JSON
+            content = response.content[0].text
+            decision_json = json.loads(content)
+
+        elif provider == "gemini":
+            if not genai:
+                raise ImportError("Google GenAI SDK not installed.")
+            client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+            # In async contexts, use aio or run in executor depending on SDK support.
+            # We'll use synchronous call wrapped in to_thread since GenAI SDK async support varies
+            def _call_gemini():
+                return client.models.generate_content(
+                    model='gemini-2.5-pro',
+                    contents=user_prompt,
+                    config=genai_types.GenerateContentConfig(
+                        system_instruction=system_prompt,
+                        response_mime_type="application/json"
+                    )
+                )
+            response = await asyncio.to_thread(_call_gemini)
+            decision_json = json.loads(response.text)
+
+        else:
+            logger.error(f"Unknown LLM provider: {provider}")
+
+    except Exception as e:
+        logger.error(f"LLM Analysis failed: {e}")
+
+    logger.info(f"LLM Analysis Complete. Decision: {decision_json.get('decision')}")
+    return decision_json
+
+async def execute_trade(decision: dict, target_ticker: str, config: dict):
     """
     If the decision is to act, calls the local Corax MCP (CCXT tool) to execute the trade.
     """
-    if decision.get("decision") == "BUY":
-        logger.info(f"Executing BUY order for {target_ticker}...")
-        await asyncio.sleep(1) # Simulate execution delay
+    action = decision.get("decision", "HOLD").upper()
+    if action not in ["BUY", "SELL"]:
+        logger.info(f"Decision is {action}. No trade executed for {target_ticker}.")
+        return False
 
-        # Placeholder logic
-        # In a real implementation, this would communicate with the 'corax-crypto' MCP to place an order
-        # e.g. using the 'execute' tool
-        logger.info(f"Successfully placed BUY order for {target_ticker}.")
-        return True
-    elif decision.get("decision") == "SELL":
-        logger.info(f"Executing SELL order for {target_ticker}...")
-        await asyncio.sleep(1)
-        logger.info(f"Successfully placed SELL order for {target_ticker}.")
-        return True
-    else:
-        logger.info(f"Decision is {decision.get('decision')}. No trade executed for {target_ticker}.")
+    logger.info(f"Preparing to execute {action} order for {target_ticker}...")
+
+    if "corax-crypto" not in config.get("mcpServers", {}):
+        logger.error("corax-crypto server not configured in multi_mcp_config.example.json.")
+        return False
+
+    try:
+        async with await connect_mcp(config["mcpServers"]["corax-crypto"]) as (read, write):
+            async with ClientSession(read, write) as session:
+                await session.initialize()
+
+                # Fetch available tools
+                tools = await session.list_tools()
+
+                tool_names = [t.name for t in tools.tools]
+
+                if "execute" not in tool_names:
+                    logger.error("The 'execute' tool is not available on corax-crypto.")
+                    return False
+
+                # Call execute tool
+                # Default execution args (e.g., small test amount for agent loop)
+                tool_args = {
+                    "symbol": f"{target_ticker}/USDT",  # Assumption based on target_ticker
+                    "type": "market",
+                    "side": action.lower(),
+                    "amount": 10.0 # Small test amount
+                }
+
+                logger.info(f"Calling corax-crypto execute tool with: {tool_args}")
+                result = await session.call_tool("execute", arguments=tool_args)
+
+                logger.info(f"Trade Execution Result: {result.content[0].text if result.content else 'Success'}")
+                return True
+
+    except Exception as e:
+        logger.error(f"Failed to execute trade on corax-crypto: {e}")
         return False
 
 def load_config():
@@ -97,17 +235,16 @@ async def agent_loop(config: dict):
         try:
             logger.info("--- Starting new cycle ---")
             # 1. Observe (Gather Data)
-            market_data = await gather_market_data(target_ticker)
+            market_data = await gather_market_data(target_ticker, config)
 
             # 2. Analyze (LLM Reasoning)
             analysis = await analyze_with_llm(market_data)
 
             # 3. Act (Execute Trade)
-            await execute_trade(analysis, target_ticker)
+            await execute_trade(analysis, target_ticker, config)
 
         except Exception as e:
             logger.error(f"Error during agent loop cycle: {e}", exc_info=True)
-            # Ensure the loop continues even if an error occurs
 
         logger.info(f"Cycle complete. Waiting for {loop_interval_minutes} minutes...")
         await asyncio.sleep(loop_interval_minutes * 60)

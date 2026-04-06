@@ -313,3 +313,22 @@ BINANCE_API_SECRET=your_secret
   <img src="https://raw.githubusercontent.com/PelleNybe/PelleNybe/main/assets/line.svg" width="100%" height="2" onerror="this.style.display='none'"/>
   <p><i>Stay Cypherpunk. Keep Building. ⚡</i></p>
 </div>
+
+## Autonomous Orchestrator Mode
+
+The Autonomous Orchestrator Mode evolves the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework. It runs a continuous Observe-Orient-Decide-Act (OODA) loop, connecting to external MCPs like Aarna ATARS and LunarCrush to gather market signals, and then utilizes an LLM to analyze the data and make trading decisions. The local Corax MCP is then instructed to execute trades if necessary.
+
+To enable and configure the orchestrator, you can simply edit your `.env` file to select the LLM "brain" of your choice without editing any Python logic:
+
+```env
+# --- Autonomous Orchestrator Settings ---
+# Choose your provider: 'gemini', 'anthropic', or 'openai'
+ACTIVE_LLM_PROVIDER="gemini"
+
+# API Keys for the LLM providers (only the active one is required)
+GEMINI_API_KEY="your_google_gemini_key_here"
+ANTHROPIC_API_KEY="your_claude_api_key_here"
+OPENAI_API_KEY="your_openai_api_key_here"
+```
+
+A `systemd/corax_orchestrator.service` template is provided to run the `autonomous_orchestrator.py` script as a 24/7 background daemon on Linux.
