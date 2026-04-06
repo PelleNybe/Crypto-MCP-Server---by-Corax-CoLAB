@@ -331,4 +331,15 @@ ANTHROPIC_API_KEY="your_claude_api_key_here"
 OPENAI_API_KEY="your_openai_api_key_here"
 ```
 
+### Proof of Brain / Trading Diary
+
+To provide full transparency, the Autonomous Orchestrator includes a "Proof of Brain" module. After every complete OODA cycle (Observe, Analyze, Act), a comprehensive Markdown report is generated in the `trading_diary/` directory.
+
+These reports document every decision made by the AI Board of Directors, answering *why* a specific action was taken. They include:
+*   The raw market data the orchestrator gathered from its MCPs.
+*   The individual votes and reasoning from the Technical Analyst (Gemini), Macro Strategist (OpenAI), and Risk Manager (Anthropic).
+*   The final consensus reached and execution parameters.
+
+Reports are saved even if the board's decision is "HOLD", ensuring a fully auditable track record of the agent's logic.
+
 A `systemd/corax_orchestrator.service` template is provided to run the `autonomous_orchestrator.py` script as a 24/7 background daemon on Linux.
