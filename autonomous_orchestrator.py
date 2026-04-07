@@ -29,27 +29,31 @@ except ImportError:
     genai = None
 
 # Logging setup
-logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s"
+)
 logger = logging.getLogger("AutonomousOrchestrator")
 
 load_dotenv()
+
 
 async def connect_mcp(server_config):
     """
     Establish stdio connection to an MCP server.
     """
-    logger.info(f"Connecting to MCP server via: {server_config['command']} {' '.join(server_config.get('args', []))}")
+    logger.info(
+        f"Connecting to MCP server via: {server_config['command']} {' '.join(server_config.get('args', []))}"
+    )
     env = os.environ.copy()
-    if 'env' in server_config:
-        env.update(server_config['env'])
+    if "env" in server_config:
+        env.update(server_config["env"])
 
     server_parameters = StdioServerParameters(
-        command=server_config['command'],
-        args=server_config.get('args', []),
-        env=env
+        command=server_config["command"], args=server_config.get("args", []), env=env
     )
 
     return stdio_client(server_parameters)
+
 
 async def gather_market_data(target_ticker: str, config: dict):
     """
@@ -60,15 +64,17 @@ async def gather_market_data(target_ticker: str, config: dict):
         "ticker": target_ticker,
         "technical_signals": None,
         "sentiment": None,
-        "price": None
+        "price": None,
     }
-
 
     # Try Aarna
     if "aarna-atars" in config.get("mcpServers", {}):
         logger.info("Connecting to aarna-atars to fetch technical signals...")
         try:
-            async with await connect_mcp(config["mcpServers"]["aarna-atars"]) as (read, write):
+            async with await connect_mcp(config["mcpServers"]["aarna-atars"]) as (
+                read,
+                write,
+            ):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     tools_response = await session.list_tools()
@@ -77,7 +83,10 @@ async def gather_market_data(target_ticker: str, config: dict):
                     target_tool = None
                     schema = None
                     for t in tools:
-                        if any(kw in t.name.lower() or kw in (t.description or "").lower() for kw in ["signal", "macd", "technical"]):
+                        if any(
+                            kw in t.name.lower() or kw in (t.description or "").lower()
+                            for kw in ["signal", "macd", "technical"]
+                        ):
                             target_tool = t.name
                             schema = t.inputSchema
                             break
@@ -90,11 +99,19 @@ async def gather_market_data(target_ticker: str, config: dict):
                             elif "coin" in schema["properties"]:
                                 arg_name = "coin"
 
-                        logger.info(f"Calling {target_tool} with {arg_name}={target_ticker}")
-                        res = await session.call_tool(target_tool, arguments={arg_name: target_ticker})
-                        market_data["technical_signals"] = res.content[0].text if res.content else None
+                        logger.info(
+                            f"Calling {target_tool} with {arg_name}={target_ticker}"
+                        )
+                        res = await session.call_tool(
+                            target_tool, arguments={arg_name: target_ticker}
+                        )
+                        market_data["technical_signals"] = (
+                            res.content[0].text if res.content else None
+                        )
                     else:
-                        logger.warning(f"No technical signal tool found on aarna-atars. Available tools: {[t.name for t in tools]}")
+                        logger.warning(
+                            f"No technical signal tool found on aarna-atars. Available tools: {[t.name for t in tools]}"
+                        )
         except Exception as e:
             logger.error(f"Failed to gather data from aarna-atars: {e}")
 
@@ -102,7 +119,10 @@ async def gather_market_data(target_ticker: str, config: dict):
     if "lunarcrush" in config.get("mcpServers", {}):
         logger.info("Connecting to lunarcrush to fetch sentiment...")
         try:
-            async with await connect_mcp(config["mcpServers"]["lunarcrush"]) as (read, write):
+            async with await connect_mcp(config["mcpServers"]["lunarcrush"]) as (
+                read,
+                write,
+            ):
                 async with ClientSession(read, write) as session:
                     await session.initialize()
                     tools_response = await session.list_tools()
@@ -111,7 +131,10 @@ async def gather_market_data(target_ticker: str, config: dict):
                     target_tool = None
                     schema = None
                     for t in tools:
-                        if any(kw in t.name.lower() or kw in (t.description or "").lower() for kw in ["sentiment", "social"]):
+                        if any(
+                            kw in t.name.lower() or kw in (t.description or "").lower()
+                            for kw in ["sentiment", "social"]
+                        ):
                             target_tool = t.name
                             schema = t.inputSchema
                             break
@@ -124,15 +147,24 @@ async def gather_market_data(target_ticker: str, config: dict):
                             elif "coin" in schema["properties"]:
                                 arg_name = "coin"
 
-                        logger.info(f"Calling {target_tool} with {arg_name}={target_ticker}")
-                        res = await session.call_tool(target_tool, arguments={arg_name: target_ticker})
-                        market_data["sentiment"] = res.content[0].text if res.content else None
+                        logger.info(
+                            f"Calling {target_tool} with {arg_name}={target_ticker}"
+                        )
+                        res = await session.call_tool(
+                            target_tool, arguments={arg_name: target_ticker}
+                        )
+                        market_data["sentiment"] = (
+                            res.content[0].text if res.content else None
+                        )
                     else:
-                        logger.warning(f"No sentiment tool found on lunarcrush. Available tools: {[t.name for t in tools]}")
+                        logger.warning(
+                            f"No sentiment tool found on lunarcrush. Available tools: {[t.name for t in tools]}"
+                        )
         except Exception as e:
             logger.error(f"Failed to gather data from lunarcrush: {e}")
     logger.info(f"Data gathered: {market_data}")
     return market_data
+
 
 def calculate_consensus(votes):
     """
@@ -140,7 +172,11 @@ def calculate_consensus(votes):
     Implements Majority Rule. If tie or no consensus, default is HOLD.
     """
     decisions = [v.get("decision", "HOLD").upper() for v in votes]
-    vote_counts = {"BUY": decisions.count("BUY"), "SELL": decisions.count("SELL"), "HOLD": decisions.count("HOLD")}
+    vote_counts = {
+        "BUY": decisions.count("BUY"),
+        "SELL": decisions.count("SELL"),
+        "HOLD": decisions.count("HOLD"),
+    }
     total_votes = len(votes)
 
     final_decision = "HOLD"
@@ -154,8 +190,9 @@ def calculate_consensus(votes):
         "decision": final_decision,
         "vote_counts": vote_counts,
         "total_votes": total_votes,
-        "director_votes": votes
+        "director_votes": votes,
     }
+
 
 async def call_provider(provider: str, market_data: dict):
     provider = provider.strip().lower()
@@ -163,14 +200,18 @@ async def call_provider(provider: str, market_data: dict):
     personas = {
         "gemini": "Technical Analyst",
         "openai": "Macro Strategist",
-        "anthropic": "Risk Manager"
+        "anthropic": "Risk Manager",
     }
 
     persona = personas.get(provider, "General Analyst")
     system_prompt = f"You are Corax CoLAB's autonomous hedge fund manager acting as the {persona}. Analyze this data and return a JSON decision: BUY, SELL, or HOLD."
-    user_prompt = f"Data to analyze: {json.dumps(market_data)}\nRespond strictly with JSON in this format: {{\"decision\": \"BUY|SELL|HOLD\", \"reasoning\": \"your reasoning here\"}}"
+    user_prompt = f'Data to analyze: {json.dumps(market_data)}\nRespond strictly with JSON in this format: {{"decision": "BUY|SELL|HOLD", "reasoning": "your reasoning here"}}'
 
-    decision_json = {"decision": "HOLD", "reasoning": f"Fallback decision due to failure for {provider}.", "provider": provider}
+    decision_json = {
+        "decision": "HOLD",
+        "reasoning": f"Fallback decision due to failure for {provider}.",
+        "provider": provider,
+    }
 
     try:
         if provider == "openai":
@@ -181,9 +222,9 @@ async def call_provider(provider: str, market_data: dict):
                 model="gpt-4o",
                 messages=[
                     {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
+                    {"role": "user", "content": user_prompt},
                 ],
-                response_format={"type": "json_object"}
+                response_format={"type": "json_object"},
             )
             decision_json = json.loads(response.choices[0].message.content)
             decision_json["provider"] = provider
@@ -196,9 +237,7 @@ async def call_provider(provider: str, market_data: dict):
                 model="claude-3-5-sonnet-20241022",
                 max_tokens=1024,
                 system=system_prompt,
-                messages=[
-                    {"role": "user", "content": user_prompt}
-                ]
+                messages=[{"role": "user", "content": user_prompt}],
             )
             content = response.content[0].text
             decision_json = json.loads(content)
@@ -208,15 +247,17 @@ async def call_provider(provider: str, market_data: dict):
             if not genai:
                 raise ImportError("Google GenAI SDK not installed.")
             client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
             def _call_gemini():
                 return client.models.generate_content(
-                    model='gemini-2.5-pro',
+                    model="gemini-2.5-pro",
                     contents=user_prompt,
                     config=genai_types.GenerateContentConfig(
                         system_instruction=system_prompt,
-                        response_mime_type="application/json"
-                    )
+                        response_mime_type="application/json",
+                    ),
                 )
+
             response = await asyncio.to_thread(_call_gemini)
             decision_json = json.loads(response.text)
             decision_json["provider"] = provider
@@ -227,14 +268,19 @@ async def call_provider(provider: str, market_data: dict):
     except Exception as e:
         logger.error(f"LLM Analysis failed for {provider}: {e}")
 
-    logger.info(f"{provider} Analysis Complete. Decision: {decision_json.get('decision')}")
+    logger.info(
+        f"{provider} Analysis Complete. Decision: {decision_json.get('decision')}"
+    )
     return decision_json
+
 
 async def consult_board_of_directors(market_data: dict):
     """
     Evaluates the signals using multiple LLM providers and returns a consensus decision.
     """
-    providers_str = os.getenv("ACTIVE_LLM_PROVIDERS", os.getenv("ACTIVE_LLM_PROVIDER", "gemini"))
+    providers_str = os.getenv(
+        "ACTIVE_LLM_PROVIDERS", os.getenv("ACTIVE_LLM_PROVIDER", "gemini")
+    )
     providers = [p.strip() for p in providers_str.split(",") if p.strip()]
 
     logger.info(f"Consulting Board of Directors ({', '.join(providers)})...")
@@ -249,11 +295,16 @@ async def consult_board_of_directors(market_data: dict):
     total_votes = consensus_result["total_votes"]
 
     if votes_for_decision > total_votes / 2:
-        logger.info(f"Consensus reached: {final_decision} ({votes_for_decision}/{total_votes} votes)")
+        logger.info(
+            f"Consensus reached: {final_decision} ({votes_for_decision}/{total_votes} votes)"
+        )
     else:
-        logger.info(f"No consensus: HOLD ({consensus_result['vote_counts'].get('HOLD', 0)}/{total_votes} votes)")
+        logger.info(
+            f"No consensus: HOLD ({consensus_result['vote_counts'].get('HOLD', 0)}/{total_votes} votes)"
+        )
 
     return consensus_result
+
 
 async def execute_trade(decision: dict, target_ticker: str, config: dict):
     """
@@ -267,11 +318,16 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
     logger.info(f"Preparing to execute {action} order for {target_ticker}...")
 
     if "corax-crypto" not in config.get("mcpServers", {}):
-        logger.error("corax-crypto server not configured in multi_mcp_config.example.json.")
+        logger.error(
+            "corax-crypto server not configured in multi_mcp_config.example.json."
+        )
         return False
 
     try:
-        async with await connect_mcp(config["mcpServers"]["corax-crypto"]) as (read, write):
+        async with await connect_mcp(config["mcpServers"]["corax-crypto"]) as (
+            read,
+            write,
+        ):
             async with ClientSession(read, write) as session:
                 await session.initialize()
 
@@ -280,7 +336,9 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
                 tool_names = [t.name for t in tools_response.tools]
 
                 if "create_order" not in tool_names or "get_ticker" not in tool_names:
-                    logger.error("Required tools ('create_order', 'get_ticker') are not available on corax-crypto.")
+                    logger.error(
+                        "Required tools ('create_order', 'get_ticker') are not available on corax-crypto."
+                    )
                     return False
 
                 exchange_name = "binance"
@@ -288,13 +346,18 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
 
                 # Get current price to calculate amount dynamically
                 logger.info(f"Fetching ticker for {symbol} on {exchange_name}...")
-                ticker_result = await session.call_tool("get_ticker", arguments={"exchange": exchange_name, "symbol": symbol})
+                ticker_result = await session.call_tool(
+                    "get_ticker",
+                    arguments={"exchange": exchange_name, "symbol": symbol},
+                )
 
                 try:
                     ticker_data = json.loads(ticker_result.content[0].text)
                     current_price = ticker_data.get("last")
                 except Exception as e:
-                    logger.error(f"Failed to parse ticker data: {e}. Raw: {ticker_result.content[0].text if ticker_result.content else None}")
+                    logger.error(
+                        f"Failed to parse ticker data: {e}. Raw: {ticker_result.content[0].text if ticker_result.content else None}"
+                    )
                     return False
 
                 if not current_price or current_price <= 0:
@@ -311,13 +374,15 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
                     "symbol": symbol,
                     "type": "market",
                     "side": action.lower(),
-                    "amount": round(amount, 6)
+                    "amount": round(amount, 6),
                 }
 
                 logger.info(f"Calling corax-crypto create_order tool with: {tool_args}")
                 result = await session.call_tool("create_order", arguments=tool_args)
 
-                logger.info(f"Trade Execution Result: {result.content[0].text if result.content else 'Success'}")
+                logger.info(
+                    f"Trade Execution Result: {result.content[0].text if result.content else 'Success'}"
+                )
                 return True
 
     except Exception as e:
@@ -325,27 +390,29 @@ async def execute_trade(decision: dict, target_ticker: str, config: dict):
         return False
 
 
-def generate_trading_report(market_data: dict, board_results: dict, trade_executed: bool, target_ticker: str):
+def generate_trading_report(
+    market_data: dict, board_results: dict, trade_executed: bool, target_ticker: str
+):
     """
     Generates a human-readable Proof of Brain markdown report for the cycle.
     """
     os.makedirs("trading_diary", exist_ok=True)
 
     timestamp = datetime.now()
-    timestamp_str = timestamp.strftime('%Y%m%d_%H%M%S')
+    timestamp_str = timestamp.strftime("%Y%m%d_%H%M%S")
     decision = board_results.get("decision", "HOLD")
 
     filename = f"trading_diary/{timestamp_str}_{target_ticker}_{decision}.md"
 
-    md_content = f"# Proof of Brain: Trading Diary\n\n"
+    md_content = "# Proof of Brain: Trading Diary\n\n"
     md_content += f"**Timestamp:** {timestamp.strftime('%Y-%m-%d %H:%M:%S')}\n"
     md_content += f"**Target Ticker:** {target_ticker}\n"
     md_content += f"**Final Consensus Decision:** {decision}\n\n"
 
-    md_content += f"## 1. Raw Market Context\n\n"
+    md_content += "## 1. Raw Market Context\n\n"
     md_content += f"```json\n{json.dumps(market_data, indent=2)}\n```\n\n"
 
-    md_content += f"## 2. Board's Deliberation\n\n"
+    md_content += "## 2. Board's Deliberation\n\n"
     for vote in board_results.get("director_votes", []):
         provider = vote.get("provider", "Unknown")
         v_decision = vote.get("decision", "HOLD")
@@ -354,13 +421,15 @@ def generate_trading_report(market_data: dict, board_results: dict, trade_execut
         md_content += f"- **Vote:** {v_decision}\n"
         md_content += f"- **Reasoning:** {reasoning}\n\n"
 
-    md_content += f"## 3. Consensus Analysis\n\n"
+    md_content += "## 3. Consensus Analysis\n\n"
     md_content += f"- **Total Votes:** {board_results.get('total_votes', 0)}\n"
-    md_content += f"- **Vote Distribution:** {json.dumps(board_results.get('vote_counts', {}))}\n"
+    md_content += (
+        f"- **Vote Distribution:** {json.dumps(board_results.get('vote_counts', {}))}\n"
+    )
     md_content += f"- **Trade Executed:** {'Yes' if trade_executed else 'No'}\n\n"
 
     if trade_executed:
-        md_content += f"## 4. Execution Data\n\n"
+        md_content += "## 4. Execution Data\n\n"
         md_content += f"A {decision} trade was dispatched to the CCXT orchestrator.\n"
 
     try:
@@ -371,14 +440,16 @@ def generate_trading_report(market_data: dict, board_results: dict, trade_execut
         logger.error(f"Failed to write trading report: {e}")
 
 
-
 # Global state for Telegram commands
 orchestrator_state = {
     "target_ticker": "BTC",
     "last_decision": "None",
-    "active_providers": os.getenv("ACTIVE_LLM_PROVIDERS", os.getenv("ACTIVE_LLM_PROVIDER", "gemini")),
-    "config": {}
+    "active_providers": os.getenv(
+        "ACTIVE_LLM_PROVIDERS", os.getenv("ACTIVE_LLM_PROVIDER", "gemini")
+    ),
+    "config": {},
 }
+
 
 async def get_status():
     providers = orchestrator_state["active_providers"]
@@ -386,12 +457,14 @@ async def get_status():
     last = orchestrator_state["last_decision"]
     return f"🟢 Orchestrator Status\nProviders: {providers}\nTarget Ticker: {ticker}\nLast Decision: {last}"
 
+
 async def get_latest_report():
     files = glob.glob("trading_diary/*.md")
     if not files:
         return None
     latest_file = max(files, key=os.path.getctime)
     return latest_file
+
 
 async def trigger_analyze():
     ticker = orchestrator_state["target_ticker"]
@@ -404,6 +477,7 @@ async def trigger_analyze():
         return f"Decision: {decision}\nSee the latest /report for details."
     except Exception as e:
         return f"Error during analysis: {e}"
+
 
 def load_config():
     config_path = "multi_mcp_config.example.json"
@@ -419,6 +493,7 @@ def load_config():
         logger.error(f"Error parsing configuration file {config_path}: {e}")
         return {}
 
+
 async def agent_loop(config: dict, telegram_mgr: TelegramManager):
     """
     The main autonomous loop: Observe, Analyze, Act.
@@ -426,7 +501,9 @@ async def agent_loop(config: dict, telegram_mgr: TelegramManager):
     target_ticker = "BTC"
     loop_interval_minutes = 15
 
-    logger.info(f"Starting Autonomous Agent Loop. Target: {target_ticker}, Interval: {loop_interval_minutes} minutes.")
+    logger.info(
+        f"Starting Autonomous Agent Loop. Target: {target_ticker}, Interval: {loop_interval_minutes} minutes."
+    )
 
     while True:
         try:
@@ -441,7 +518,9 @@ async def agent_loop(config: dict, telegram_mgr: TelegramManager):
             trade_executed = await execute_trade(analysis, target_ticker, config)
 
             # 4. Proof of Brain (Record keeping)
-            generate_trading_report(market_data, analysis, trade_executed, target_ticker)
+            generate_trading_report(
+                market_data, analysis, trade_executed, target_ticker
+            )
 
             # Update state
             orchestrator_state["last_decision"] = analysis.get("decision", "HOLD")
@@ -449,22 +528,37 @@ async def agent_loop(config: dict, telegram_mgr: TelegramManager):
             # Send Telegram Alert
             if telegram_mgr:
                 decision = analysis.get("decision", "HOLD")
-                votes = ", ".join([f"{v.get('provider')}: {v.get('decision')}" for v in analysis.get("director_votes", [])])
+                votes = ", ".join(
+                    [
+                        f"{v.get('provider')}: {v.get('decision')}"
+                        for v in analysis.get("director_votes", [])
+                    ]
+                )
                 msg = f"🔔 Cycle Complete for {target_ticker}\nConsensus: {decision}\nVotes: {votes}"
                 await telegram_mgr.send_telegram_alert(msg)
 
         except Exception as e:
-            logger.error(f"Error during agent loop cycle: {e}", exc_info=True)
+            logger.error(f"Critical error during agent loop cycle: {e}", exc_info=True)
+            if telegram_mgr:
+                try:
+                    await telegram_mgr.send_telegram_alert(
+                        f"⚠️ Critical Error in Agent Loop: {e}"
+                    )
+                except Exception as tg_e:
+                    logger.error(f"Failed to send Telegram error alert: {tg_e}")
 
         logger.info(f"Cycle complete. Waiting for {loop_interval_minutes} minutes...")
         await asyncio.sleep(loop_interval_minutes * 60)
+
 
 async def main():
     logger.info("Initializing Autonomous Orchestrator...")
     config = load_config()
 
     if not config:
-        logger.warning("Starting with empty or missing configuration. Check multi_mcp_config.example.json.")
+        logger.warning(
+            "Starting with empty or missing configuration. Check multi_mcp_config.example.json."
+        )
 
     orchestrator_state["config"] = config
 
@@ -472,6 +566,7 @@ async def main():
     asyncio.create_task(telegram_mgr.start())
 
     await agent_loop(config, telegram_mgr)
+
 
 if __name__ == "__main__":
     try:
