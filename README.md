@@ -360,4 +360,17 @@ The Autonomous Orchestrator includes a built-in Telegram integration allowing yo
 *   `/report` - Directly sends you the latest "Proof of Brain" markdown report as a document.
 *   `/analyze` - Manually triggers the agent to run an OODA cycle instantly without executing a trade.
 
+### Agentic Backtesting
+
+To safely test the AI prompts and model configurations against past market behavior, we provide an Agentic Backtesting Engine. This allows you to simulate the "Board of Directors" consensus logic without risking real funds.
+
+The backtest uses the `ccxt` library to fetch actual historical OHLCV data and simulates the market environment the orchestrator would have seen at that time.
+
+**To run a backtest:**
+```bash
+python3 backtest_orchestrator.py
+```
+
+After the simulation finishes, a detailed markdown report summarizing the starting period, ending period, total simulated actions (BUYS, SELLS, HOLDS), and the AI's reasoning will be generated in the `trading_diary/` directory (e.g., `YYYYMMDD_HHMMSS_[TICKER]_BACKTEST.md`).
+
 A `systemd/corax_orchestrator.service` template is provided to run the `autonomous_orchestrator.py` script as a 24/7 background daemon on Linux.
