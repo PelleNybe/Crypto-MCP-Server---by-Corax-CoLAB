@@ -1,14 +1,18 @@
 import os
-import glob
 import logging
 from telegram import Update
 from telegram.ext import ApplicationBuilder, CommandHandler, ContextTypes
 
 logger = logging.getLogger("TelegramManager")
 
+
 class TelegramManager:
-    def __init__(self, get_status_callback, get_latest_report_callback, trigger_analyze_callback):
-        self.enabled = os.getenv("TELEGRAM_NOTIFICATIONS_ENABLED", "false").lower() == "true"
+    def __init__(
+        self, get_status_callback, get_latest_report_callback, trigger_analyze_callback
+    ):
+        self.enabled = (
+            os.getenv("TELEGRAM_NOTIFICATIONS_ENABLED", "false").lower() == "true"
+        )
         self.bot_token = os.getenv("TELEGRAM_BOT_TOKEN")
         self.chat_id = os.getenv("TELEGRAM_CHAT_ID")
 
@@ -61,11 +65,15 @@ class TelegramManager:
         if report_path and os.path.exists(report_path):
             try:
                 with open(report_path, "rb") as f:
-                    await update.message.reply_document(document=f, filename=os.path.basename(report_path))
+                    await update.message.reply_document(
+                        document=f, filename=os.path.basename(report_path)
+                    )
             except Exception as e:
                 await update.message.reply_text(f"Error reading report: {e}")
         else:
-            await update.message.reply_text("No reports found in the trading_diary folder.")
+            await update.message.reply_text(
+                "No reports found in the trading_diary folder."
+            )
 
     async def handle_analyze(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("Initiating manual OODA cycle. Please wait...")

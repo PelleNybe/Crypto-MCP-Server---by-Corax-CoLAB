@@ -215,7 +215,13 @@ sudo journalctl -u crypto-mcp-gui.service -f
 
 If you prefer to do everything yourself:
 
-1. **Install system deps:**
+1. **Install system deps & Python Requirements:**
+   ```bash
+   sudo apt update
+   sudo apt install -y curl build-essential ca-certificates git python3-pip
+   pip3 install -r requirements.txt
+   ```
+
    ```bash
    sudo apt update
    sudo apt install -y curl build-essential ca-certificates git
@@ -314,9 +320,9 @@ BINANCE_API_SECRET=your_secret
   <p><i>Stay Cypherpunk. Keep Building. ⚡</i></p>
 </div>
 
-## Autonomous Orchestrator Mode
+## 🤖 Autonomous Orchestrator Mode
 
-The Autonomous Orchestrator Mode evolves the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework. It runs a continuous Observe-Orient-Decide-Act (OODA) loop, connecting to external MCPs like Aarna ATARS and LunarCrush to gather market signals, and then utilizes an LLM to analyze the data and make trading decisions. The local Corax MCP is then instructed to execute trades if necessary.
+The Autonomous Orchestrator Mode evolves the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework. It features a "Board of Directors" consensus logic, Telegram Command Center, and an Agentic Backtesting Engine. It runs a continuous Observe-Orient-Decide-Act (OODA) loop, connecting to external MCPs like Aarna ATARS and LunarCrush to gather market signals, and then utilizes an LLM to analyze the data and make trading decisions. The local Corax MCP is then instructed to execute trades if necessary.
 
 To enable and configure the orchestrator, you can simply edit your `.env` file to select the LLM "brain" of your choice without editing any Python logic:
 
