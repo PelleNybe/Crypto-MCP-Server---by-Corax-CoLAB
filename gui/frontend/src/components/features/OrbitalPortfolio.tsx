@@ -5,7 +5,9 @@ import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
 // Feature 4: Orbital Portfolio Control Deck
-const Planet = ({ asset, onSelect, selected }: { asset: any, onSelect: any, selected: boolean }) => {
+// ⚡ Bolt: Wrapped Planet component in React.memo to prevent expensive Three.js
+// sub-tree re-renders when parent state (like totalValue or other selections) changes.
+const Planet = React.memo(({ asset, onSelect, selected }: { asset: any, onSelect: any, selected: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const orbitRef = useRef<THREE.Group>(null);
 
@@ -77,7 +79,7 @@ const Planet = ({ asset, onSelect, selected }: { asset: any, onSelect: any, sele
       </mesh>
     </group>
   );
-};
+});
 
 
 const Starfield = () => {
@@ -115,6 +117,11 @@ export default function OrbitalPortfolio() {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);
   const [assets, setAssets] = useState<any[]>([]);
   const [totalValue, setTotalValue] = useState<number>(0);
+
+  // ⚡ Bolt: Memoize the onSelect event handler to prevent breaking Planet's React.memo
+  const handleSelectAsset = React.useCallback((a: any) => {
+      setSelectedAsset(a.id);
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -221,7 +228,7 @@ export default function OrbitalPortfolio() {
           <Planet
              key={asset.id}
              asset={asset}
-             onSelect={(a: any) => setSelectedAsset(a.id)}
+             onSelect={handleSelectAsset}
              selected={selectedAsset === asset.id}
           />
         ))}
