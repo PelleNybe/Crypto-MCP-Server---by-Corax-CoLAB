@@ -209,8 +209,8 @@ app.get('/api/ticker', async (req, res) => {
 // POST /api/order/dry_run
 app.post('/api/order/dry_run', async (req, res) => {
   const { exchange, symbol, side, type, amount, price, params } = req.body || {};
-  if (!exchange || !symbol || !side || !type || !amount) {
-    return res.status(400).json({ ok:false, error: 'Missing required fields' });
+  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
+    return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -245,7 +245,9 @@ app.post('/api/order/dry_run', async (req, res) => {
     };
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview));
+    stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview), (err) => {
+      if (err) console.error('DB error:', err);
+    });
     stmt.finalize();
 
     res.json({ ok:true, data: preview });
@@ -258,8 +260,8 @@ app.post('/api/order/dry_run', async (req, res) => {
 // POST /api/order/execute
 app.post('/api/order/execute', async (req, res) => {
   const { exchange, symbol, side, type, amount, price, execute, params } = req.body || {};
-  if (!exchange || !symbol || !side || !type || !amount) {
-    return res.status(400).json({ ok:false, error: 'Missing required fields' });
+  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
+    return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -302,8 +304,10 @@ app.post('/api/order/execute', async (req, res) => {
 
     const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'create_order', orderArgs);
 
-    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp));
+    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), (err) => {
+      if (err) console.error('DB error:', err);
+    });
     stmt.finalize();
 
     io.emit('order_placed', { exchange, symbol, side, amount, price, response: orderResp });
@@ -311,8 +315,10 @@ app.post('/api/order/execute', async (req, res) => {
     res.json({ ok:true, data: orderResp });
   } catch (err) {
     console.error('execute order error', err.message || err);
-    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err));
+    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err), (dbErr) => {
+      if (dbErr) console.error('DB error:', dbErr);
+    });
     stmt.finalize();
 
     res.status(500).json({ ok:false, error: String(err.message || err) });
@@ -409,8 +415,8 @@ process.on('unhandledRejection', (reason) => {
 // Called by ccxt_mcp when AI tries to create an order
 app.post('/api/order/pending', (req, res) => {
   const { exchange, symbol, side, type, amount, price, params, estimated_usd } = req.body || {};
-  if (!exchange || !symbol || !side || !type || !amount) {
-    return res.status(400).json({ ok: false, error: 'Missing required fields' });
+  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
+    return res.status(400).json({ ok: false, error: 'Missing or invalid required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
