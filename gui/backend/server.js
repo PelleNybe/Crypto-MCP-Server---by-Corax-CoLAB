@@ -27,7 +27,28 @@ if (!DASHBOARD_PASSWORD) {
 }
 const app = express();
 
-app.use(cors());
+// Security: Restrict CORS to allowed origins
+const allowedOrigins = process.env.ALLOWED_ORIGINS
+  ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
+  : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4000', 'http://127.0.0.1:4000', 'http://localhost'];
+
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, or same-origin)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin) || allowedOrigins.includes('*')) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked request from origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+};
+
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
 // Basic auth middleware for all /api routes
@@ -336,7 +357,11 @@ app.get('/api/orders_old', (req, res) => {
 /* Socket.io + periodic polling */
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" }
+  cors: {
+    origin: allowedOrigins.includes('*') ? '*' : allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true
+  }
 });
 
 io.use((socket, next) => {
