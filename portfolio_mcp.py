@@ -101,7 +101,7 @@ async def fetch_exchange_balance(exch_low: str):
         coins = list(balances.keys())
 
         # Batch fetch prices from Coingecko
-        cg_prices = _get_prices_coingecko(coins) if coins else {}
+        cg_prices = await asyncio.to_thread(_get_prices_coingecko, coins) if coins else {}
 
         # For missing prices, prepare CCXT fallback tasks
         async def _get_asset_price_ccxt_fallback(coin, amount):
