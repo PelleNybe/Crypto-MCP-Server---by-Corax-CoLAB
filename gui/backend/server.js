@@ -142,8 +142,12 @@ db.serialize(() => {
     response TEXT
   )`, (err) => {
     if (err) console.error('Error creating orders table:', err);
-    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)');
-    db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)', (err) => {
+      if (err) console.error('Error creating idx_orders_created_at:', err);
+    });
+    db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)', (err) => {
+      if (err) console.error('Error creating idx_orders_status:', err);
+    });
   });
 });
 
@@ -515,14 +519,18 @@ app.post('/api/order/approve', async (req, res) => {
 
       const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'execute_approved_order', orderArgs);
 
-      db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId]);
+      db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId], (err) => {
+        if (err) console.error('DB UPDATE error (placed):', err);
+      });
 
       io.emit('order_placed', { id: orderId, ...orderArgs, response: orderResp });
 
       res.json({ ok: true, data: orderResp });
     } catch (apiErr) {
       console.error('Execute error', apiErr);
-      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId]);
+      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId], (err) => {
+        if (err) console.error('DB UPDATE error (error status):', err);
+      });
       res.status(500).json({ ok: false, error: String(apiErr.message || apiErr) });
     }
   });
