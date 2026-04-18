@@ -19,7 +19,39 @@ sys.modules["dotenv"] = MagicMock()
 sys.modules["eth_account"] = MagicMock()
 
 from unittest.mock import patch, MagicMock
-from ccxt_mcp import get_ticker
+from ccxt_mcp import get_ticker, fetch_ohlcv
+
+@patch('ccxt_mcp._make_exchange')
+def test_fetch_ohlcv_success(mock_make_exchange):
+    mock_exchange = MagicMock()
+    expected_ohlcv = [[1612137600000, 30000.0, 31000.0, 29000.0, 30500.0, 100.0]]
+    mock_exchange.fetch_ohlcv.return_value = expected_ohlcv
+    mock_make_exchange.return_value = mock_exchange
+
+    res = fetch_ohlcv("binance", "BTC/USDT")
+    assert res == expected_ohlcv
+    mock_exchange.fetch_ohlcv.assert_called_once()
+
+@patch('ccxt_mcp._make_exchange')
+def test_fetch_ohlcv_empty(mock_make_exchange):
+    mock_exchange = MagicMock()
+    mock_exchange.fetch_ohlcv.return_value = []
+    mock_make_exchange.return_value = mock_exchange
+
+    res = fetch_ohlcv("binance", "BTC/USDT")
+    assert res == []
+    mock_exchange.fetch_ohlcv.assert_called_once()
+
+@patch('ccxt_mcp._make_exchange')
+def test_fetch_ohlcv_error(mock_make_exchange):
+    import pytest
+    mock_exchange = MagicMock()
+    mock_exchange.fetch_ohlcv.side_effect = Exception("API Error")
+    mock_make_exchange.return_value = mock_exchange
+
+    with pytest.raises(Exception, match="API Error"):
+        fetch_ohlcv("binance", "BTC/USDT")
+    mock_exchange.fetch_ohlcv.assert_called_once()
 
 @patch('ccxt_mcp._make_exchange')
 def test_get_ticker(mock_make_exchange):
