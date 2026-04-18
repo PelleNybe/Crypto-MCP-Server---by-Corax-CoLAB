@@ -67,16 +67,31 @@ Crypto MCP Server provides an **advanced, fully integrated ecosystem** for crypt
 🔹 **Systemd Integration:** Runs seamlessly as a background service starting at boot.
 🔹 **Claude Desktop Ready:** Designed specifically to integrate with Claude Desktop Local MCP Servers. 🤖
 
-### 🚀 NEW: World-Class 3D Features & Modules
-We have recently supercharged the dashboard with **next-level** interactive components:
-*   **Arbitrage Wormhole:** Visualize cross-exchange arbitrage opportunities in real-time.
-*   **Algo Grid Architect:** Design and deploy automated grid trading strategies.
-*   **Oracle Copilot:** AI-driven insights and market sentiment analysis.
-*   **Quantum Risk Map:** Advanced topography of your portfolio's risk exposure.
-*   **Whale Constellations & Sonar Sweep:** Track large on-chain movements and whale activity.
-*   **Global Weather System:** Dynamic environment reflecting current market sentiment (Bull, Bear, Neutral).
-*   **News Singularity:** Aggregated crypto news streams directly into your command center.
-*   **And much more!** (Predictive Ghosting, Backtest Arena, Risk Radar, Volatility Matrix).
+
+
+## ✨ 10 Technical and Visual Upgrades
+1. **Async Portfolio MCP**: The `portfolio_mcp.py` now fetches concurrent exchange balances using `ccxt.async_support` for incredibly fast dashboard load times.
+2. **Robust Proxy Timeouts**: The Node backend implements robust `AbortSignal` logic for MCP communication, preventing hanging connections.
+3. **SQLite Indices**: The backend automatically initializes proper database indices on `orders.db` for `created_at` and `status` to dramatically speed up log querying.
+4. **WebSocket Resilience**: The React frontend implements a centralized, self-healing `Socket.io` client ensuring the dashboard never goes stale if the backend restarts.
+5. **Strict Input Validation**: Backend order execution endpoints rigorously validate symbol format, trade side, and order type before dispatching to the MCP.
+6. **Cyberpunk Loaders**: Components like `PortfolioPanel` and `TickerPanel` feature animated, stylized loading states during data decryption.
+7. **Neon Toasts**: A custom notification system provides sleek, auto-dismissing visual feedback for system events and order executions.
+8. **Enhanced Orders Table**: The `OrdersLogPanel` is upgraded with pagination, neon-color-coded status badges, and interactive hover effects.
+9. **Glitch Effects**: Critical data changes trigger subtle CSS glitch animations, enhancing the cyberpunk aesthetic.
+10. **Dynamic Theme Colors**: The entire dashboard reacts to global market sentiment, shifting its neon glowing borders based on whether the market is bullish or bearish.
+
+## 🌌 100% Real Data Integration & Visualizer Dynamics (Upgraded v3.0)
+
+The Crypto MCP Server has been heavily upgraded to ensure **every single conceptual placeholder has been actively replaced with real data mechanisms**. The entire system operates without a single mockup across visualizers. All 3D graphs reflect live local data.
+
+*   🎯 **Dark Pool Sonar:** Real-time 3D sonar pings for large volume "whale" trades on central exchanges. Connected to `MCP_CCXT` to monitor `fetch_trades` data and renders physics-based 3D ripples with `@react-three/fiber`.
+*   🔥 **Flash-Crash Prediction Matrix:** Visualizes the ratio of bids to asks as a dynamic glowing heatmap grid, tracking potential liquidity drains using `MCP_CCXT` `fetch_order_book`.
+*   🚀 **Galaxy View (Gravity Well):** Maps the top 50 cryptocurrencies in a 3D galaxy using `MCP_COINGECKO`. Star size = Market Cap, orbit speed = Volume, color = 24h change.
+*   🧠 **AI Sentiment Word-Cloud Sphere:** Fetches recent crypto news via `MCP_NEWS` and extracts trending keywords and sentiment to form a 3D interactive floating word sphere.
+*   ⚡ **Gas & Network Congestion Hologram:** Visualizes current Ethereum network congestion as a glowing, pulsating reactor core using `MCP_ONCHAIN` `gas_price`. Faster pulsing/red colors indicate high congestion.
+*   **Arbitrage Wormhole:** Live Cross-DEX arbitrage detection using multi-exchange CCXT MCP polling.
+
 
 ---
 
