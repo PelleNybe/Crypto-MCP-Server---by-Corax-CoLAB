@@ -16,3 +16,9 @@
 ## 2024-04-17 - Prevent API Piling
 **Learning:** High-frequency polling using `setInterval` can cause API requests to pile up and cause a DoS condition on the backend if responses are delayed.
 **Action:** Use a recursive `setTimeout` within a `finally` block inside an async polling function to ensure the next request is only scheduled after the previous one completes.
+## 2025-04-24 - Optimize Dictionary Lookups
+**Learning:** Repeated dictionary key lookups and string method calls inside tight loops are significantly slower than dictionary comprehensions.
+**Action:** Use dictionary comprehensions, local variable aliasing, and the walrus operator () for inline assignments when processing dictionary lookups within loops.
+## 2025-04-24 - Optimize Dictionary Lookups
+**Learning:** Repeated dictionary key lookups and string method calls inside tight loops are significantly slower than dictionary comprehensions.
+**Action:** Use dictionary comprehensions, local variable aliasing, and the walrus operator (`:=`) for inline assignments when processing dictionary lookups within loops.

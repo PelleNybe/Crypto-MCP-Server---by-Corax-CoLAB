@@ -4,6 +4,7 @@ portfolio_mcp.py
 Aggregates balances (CEX via CCXT + on-chain) and prices (CoinGecko primary, CCXT fallback).
 For Crypto MCP Server – Produced by Corax CoLAB - The Future of Edge AI & Blockchain
 """
+
 import os
 import logging
 from typing import Dict, Any, List
@@ -18,7 +19,9 @@ load_dotenv(dotenv_path=".env")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("portfolio_mcp")
 
-mcp = FastMCP(name="portfolio", stateless_http=True, json_response=True, host="0.0.0.0", port=7004)
+mcp = FastMCP(
+    name="portfolio", stateless_http=True, json_response=True, host="0.0.0.0", port=7004
+)
 cg = CoinGeckoAPI()
 
 _CACHE = {"prices": {}, "timestamp": 0, "mapping": None, "mapping_timestamp": 0}
@@ -64,12 +67,9 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
         except Exception as e:
             logger.debug("CoinGecko batch price lookup failed: %s", e)
 
-    result = {}
-    for symbol in symbols:
-        key = symbol.upper()
-        if key in _CACHE["prices"]:
-            result[key] = _CACHE["prices"][key]
-    return result
+    prices = _CACHE["prices"]
+    return {k: prices[k] for symbol in symbols if (k := symbol.upper()) in prices}
+
 
 async def _get_price_ccxt(exchange, symbol):
     pair = f"{symbol}/USDT"
@@ -78,6 +78,7 @@ async def _get_price_ccxt(exchange, symbol):
         return t.get("last")
     except Exception:
         return None
+
 
 async def fetch_exchange_balance(exch_low: str):
     if exch_low not in ccxt_async.exchanges:
@@ -97,11 +98,17 @@ async def fetch_exchange_balance(exch_low: str):
         bal = await ex.fetch_balance()
 
         # Collect non-zero balances
-        balances = {coin: amount for coin, amount in bal.get("total", {}).items() if amount and amount > 0}
+        balances = {
+            coin: amount
+            for coin, amount in bal.get("total", {}).items()
+            if amount and amount > 0
+        }
         coins = list(balances.keys())
 
         # Batch fetch prices from Coingecko
-        cg_prices = await asyncio.to_thread(_get_prices_coingecko, coins) if coins else {}
+        cg_prices = (
+            await asyncio.to_thread(_get_prices_coingecko, coins) if coins else {}
+        )
 
         # For missing prices, prepare CCXT fallback tasks
         async def _get_asset_price_ccxt_fallback(coin, amount):
@@ -114,7 +121,7 @@ async def fetch_exchange_balance(exch_low: str):
                 "asset": coin,
                 "amount": amount,
                 "price_usd": price,
-                "value_usd": amount * (price or 0.0)
+                "value_usd": amount * (price or 0.0),
             }
 
         tasks = []
@@ -130,6 +137,7 @@ async def fetch_exchange_balance(exch_low: str):
         await ex.close()
 
     return details
+
 
 @mcp.tool()
 async def portfolio_value(exchanges: List[str]) -> Dict[str, Any]:
@@ -152,9 +160,12 @@ async def portfolio_value(exchanges: List[str]) -> Dict[str, Any]:
         "total_usd": total_usd,
         "details": details,
         "cache_ttl": CACHE_TTL,
-        "cached_at": _CACHE["timestamp"]
+        "cached_at": _CACHE["timestamp"],
     }
 
+
 if __name__ == "__main__":
-    print("Starting portfolio_mcp on http://127.0.0.1:7004/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)")
+    print(
+        "Starting portfolio_mcp on http://127.0.0.1:7004/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
+    )
     mcp.run("streamable-http")
