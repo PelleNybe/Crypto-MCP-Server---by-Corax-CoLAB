@@ -6,3 +6,7 @@
 **Action:** When implementing or updating buttons without text labels (like icons) or buttons whose states change functionally, make sure to include `aria-label` or `aria-pressed` to clarify the state.
 - React components without proper explicit text-labels on standard form inputs are less accessible for screen reader users and users requiring clear context. Including `title` and `placeholder` attributes on `<input>` and `<select>` elements provides this context when structural label tags aren't present.
 - Disabled interactive elements like buttons should communicate their state visually. Updating global styles with a `:disabled` pseudo-class that drops opacity and alters the cursor to `not-allowed` informs users immediately when actions like form submission are suspended or unavailable.
+
+## 2026-04-24 - Accessible Notification Toasts
+**Learning:** Custom notification systems (like NeonToasts) often fail to announce critical information to screen reader users if they lack proper ARIA live regions, leaving disabled users unaware of asynchronous actions like order placements.
+**Action:** When creating or fixing custom toast notification systems, ensure the container uses `aria-live="polite"` and `aria-atomic="true"`, and individual toasts use `role="alert"` to guarantee dynamic updates are announced.
