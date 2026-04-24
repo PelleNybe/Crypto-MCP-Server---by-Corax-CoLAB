@@ -28,17 +28,21 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   return (
     <ToastContext.Provider value={{ addToast }}>
       {children}
-      <div style={{
-        position: 'fixed',
-        bottom: '20px',
-        right: '20px',
-        zIndex: 9999,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '10px'
-      }}>
+      <div
+        aria-live="polite"
+        aria-atomic="true"
+        style={{
+          position: 'fixed',
+          bottom: '20px',
+          right: '20px',
+          zIndex: 9999,
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '10px'
+        }}
+      >
         {toasts.map(toast => (
-          <div key={toast.id} style={{
+          <div key={toast.id} role="alert" style={{
             background: 'rgba(2, 2, 5, 0.9)',
             border: `1px solid ${toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#60a5fa'}`,
             boxShadow: `0 0 15px ${toast.type === 'success' ? 'rgba(16,185,129,0.3)' : toast.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(96,165,250,0.3)'}`,

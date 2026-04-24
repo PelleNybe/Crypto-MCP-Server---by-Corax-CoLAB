@@ -13,6 +13,7 @@ export default function OrderPanel(){
   const [preview,setPreview]=useState<any>(null)
   const [result,setResult]=useState<any>(null)
   const [routingActive, setRoutingActive] = useState(false)
+  const { addToast } = useToast()
 
   async function previewOrder(){
     setRoutingActive(true)
@@ -27,7 +28,7 @@ export default function OrderPanel(){
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/execute', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange,symbol,side,type,amount,price,execute:true})})
     const j = await resp.json()
-    if (j.ok) { setResult(j.data); addToast('Order placed') } else alert(j.error, 'info')
+    if (j.ok) { setResult(j.data); addToast('Order placed') } else addToast(j.error, 'info')
     setTimeout(() => setRoutingActive(false), 2000)
   }
 
