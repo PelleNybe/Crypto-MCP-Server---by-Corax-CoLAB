@@ -92,3 +92,29 @@ def test_req_request_exception():
         assert "text" in result
         assert result["text"] == "Connection Timeout"
         assert "json" not in result
+
+def test_status_success():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"bot_status": "running"}
+        mock_request.return_value = mock_response
+
+        result = octobot_mcp.status()
+
+        assert result["status_code"] == 200
+        assert result["json"] == {"bot_status": "running"}
+        mock_request.assert_called_once()
+        args, kwargs = mock_request.call_args
+        assert args[1].endswith("api/bot/status")
+
+def test_status_error():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_request.side_effect = Exception("API connection failed")
+
+        result = octobot_mcp.status()
+
+        assert result["status_code"] == 500
+        assert "text" in result
+        assert result["text"] == "API connection failed"
+        assert "json" not in result
