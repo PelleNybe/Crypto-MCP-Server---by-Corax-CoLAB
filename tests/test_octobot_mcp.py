@@ -118,3 +118,70 @@ def test_status_error():
         assert "text" in result
         assert result["text"] == "API connection failed"
         assert "json" not in result
+
+def test_ping():
+    result = octobot_mcp.ping()
+    assert "octobot_mcp alive" in result
+    assert octobot_mcp.OCTOBOT_REST_URL in result
+
+def test_portfolio_success():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"portfolio": {}}
+        mock_request.return_value = mock_response
+
+        result = octobot_mcp.portfolio()
+
+        assert result["status_code"] == 200
+        assert result["json"] == {"portfolio": {}}
+        mock_request.assert_called_once()
+        args, kwargs = mock_request.call_args
+        assert args[1].endswith("api/portfolio/get_portfolio")
+
+def test_start_bot_success():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"started": True}
+        mock_request.return_value = mock_response
+
+        result = octobot_mcp.start_bot()
+
+        assert result["status_code"] == 200
+        assert result["json"] == {"started": True}
+        mock_request.assert_called_once()
+        args, kwargs = mock_request.call_args
+        assert args[0] == "post"
+        assert args[1].endswith("api/bot/start")
+
+def test_stop_bot_success():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"stopped": True}
+        mock_request.return_value = mock_response
+
+        result = octobot_mcp.stop_bot()
+
+        assert result["status_code"] == 200
+        assert result["json"] == {"stopped": True}
+        mock_request.assert_called_once()
+        args, kwargs = mock_request.call_args
+        assert args[0] == "post"
+        assert args[1].endswith("api/bot/stop")
+
+def test_history_success():
+    with patch("octobot_mcp.requests.request") as mock_request:
+        mock_response = MagicMock()
+        mock_response.status_code = 200
+        mock_response.json.return_value = {"history": []}
+        mock_request.return_value = mock_response
+
+        result = octobot_mcp.history()
+
+        assert result["status_code"] == 200
+        assert result["json"] == {"history": []}
+        mock_request.assert_called_once()
+        args, kwargs = mock_request.call_args
+        assert args[1].endswith("api/trading/history")
