@@ -22,3 +22,7 @@
 ## 2025-04-24 - Optimize Dictionary Lookups
 **Learning:** Repeated dictionary key lookups and string method calls inside tight loops are significantly slower than dictionary comprehensions.
 **Action:** Use dictionary comprehensions, local variable aliasing, and the walrus operator (`:=`) for inline assignments when processing dictionary lookups within loops.
+
+## 2025-05-15 - Asynchronous HTTP in FastMCP
+**Learning:** Using synchronous HTTP clients like `requests` in asynchronous FastMCP tools blocks the main event loop, severely degrading performance under concurrent load.
+**Action:** Always use asynchronous HTTP clients such as `httpx.AsyncClient` for network operations within FastMCP tools to maintain non-blocking execution and improve overall server throughput.
