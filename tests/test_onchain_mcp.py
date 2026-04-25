@@ -19,7 +19,7 @@ sys.modules["dotenv"] = MagicMock()
 sys.modules["eth_account"] = MagicMock()
 
 from unittest.mock import patch, MagicMock
-from onchain_mcp import eth_balance, gas_price
+from onchain_mcp import eth_balance, gas_price, erc20_balance
 
 @patch('onchain_mcp._get_web3')
 def test_eth_balance(mock_get_web3):
@@ -43,3 +43,40 @@ def test_gas_price(mock_get_web3):
     result = gas_price()
     assert result["gas_price_wei"] == "20000000000"
     assert result["gas_price_gwei"] == "20.0"
+
+@patch('onchain_mcp._get_web3')
+def test_erc20_balance(mock_get_web3):
+    mock_w3 = MagicMock()
+    mock_get_web3.return_value = mock_w3
+
+    mock_contract = MagicMock()
+    mock_w3.eth.contract.return_value = mock_contract
+
+    # Mock balance 100 with 6 decimals
+    mock_contract.functions.balanceOf().call.return_value = 100000000
+    mock_contract.functions.decimals().call.return_value = 6
+
+    result = erc20_balance("0xUser", "0xToken")
+
+    assert result["address"] == "0xUser"
+    assert result["contract"] == "0xToken"
+    assert result["balance_raw"] == "100000000"
+    assert result["balance"] == 100.0
+    assert result["decimals"] == 6
+
+@patch('onchain_mcp._get_web3')
+def test_erc20_balance_decimals_fallback(mock_get_web3):
+    mock_w3 = MagicMock()
+    mock_get_web3.return_value = mock_w3
+
+    mock_contract = MagicMock()
+    mock_w3.eth.contract.return_value = mock_contract
+
+    # Mock balance 1e18 -> 1.0 with 18 decimals fallback
+    mock_contract.functions.balanceOf().call.return_value = 1000000000000000000
+    mock_contract.functions.decimals().call.side_effect = Exception("No decimals function")
+
+    result = erc20_balance("0xUser", "0xToken")
+
+    assert result["balance"] == 1.0
+    assert result["decimals"] == 18
