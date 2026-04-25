@@ -29,9 +29,19 @@ def test_load_config_not_found():
         config = load_config()
         assert config == {}
 
-def test_load_config_invalid_json():
+def test_load_config_invalid_json(tmp_path):
     """Test behavior when configuration file contains invalid JSON."""
-    invalid_json = '{"mcpServers": {}' # Missing closing bracket
-    with patch("builtins.open", mock_open(read_data=invalid_json)):
-        config = load_config()
-        assert config == {}
+    invalid_json_file = tmp_path / "multi_mcp_config.example.json"
+    invalid_json_file.write_text('{"mcpServers": {}') # Missing closing bracket
+
+    import os
+    original_cwd = os.getcwd()
+    os.chdir(tmp_path)
+    try:
+        with patch("autonomous_orchestrator.logger.error") as mock_logger_error:
+            config = load_config()
+            assert config == {}
+            mock_logger_error.assert_called_once()
+            assert "Error parsing configuration file" in mock_logger_error.call_args[0][0]
+    finally:
+        os.chdir(original_cwd)
