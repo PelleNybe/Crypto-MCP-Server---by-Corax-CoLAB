@@ -23,8 +23,12 @@ def get_latest_news(limit: int = 10) -> dict:
     """
     try:
         # CryptoPanic public API for recent news
-        url = "https://cryptopanic.com/api/v1/posts/?auth_token=public&public=true"
-        response = requests.get(url, timeout=10)
+        url = "https://cryptopanic.com/api/v1/posts/"
+        params = {
+            "auth_token": "public",
+            "public": "true"
+        }
+        response = requests.get(url, params=params, timeout=10)
 
         if response.status_code == 200:
             data = response.json()
@@ -62,8 +66,13 @@ def search_news(query: str, limit: int = 10) -> dict:
     Searches for specific crypto news.
     """
     try:
-        url = f"https://cryptopanic.com/api/v1/posts/?auth_token=public&public=true&currencies={query}"
-        response = requests.get(url, timeout=10)
+        url = "https://cryptopanic.com/api/v1/posts/"
+        params = {
+            "auth_token": "public",
+            "public": "true",
+            "currencies": query
+        }
+        response = requests.get(url, params=params, timeout=10)
         if response.status_code == 200:
             return {"status": "success", "news": response.json().get('results', [])[:limit]}
         else:
