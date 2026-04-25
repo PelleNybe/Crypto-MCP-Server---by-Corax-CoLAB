@@ -5,9 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-// ⚡ Bolt: Wrapped Wall component in React.memo to prevent expensive Three.js
-// sub-tree re-renders for unchanged order book levels during high-frequency polling.
-const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
+const Wall = ({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
   const height = maxVolume > 0 ? (volume / maxVolume) * 5 : 0.1;
   const color = type === 'bid' ? '#10b981' : '#ef4444'; // Green for bids, Red for asks
   const positionX = type === 'bid' ? -index * 0.3 - 0.5 : index * 0.3 + 0.5;
@@ -38,7 +36,7 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
       )}
     </group>
   );
-});
+};
 
 export default function HoloTopographicOrderBook() {
   const [orderBook, setOrderBook] = useState({ bids: [], asks: [], maxVolume: 1 });
@@ -72,18 +70,12 @@ export default function HoloTopographicOrderBook() {
         setOrderBook({ bids, asks, maxVolume });
       } catch (err) {
         console.error("Failed to fetch order book data", err);
-      } finally {
-        // ⚡ Bolt: Replaced setInterval with recursive setTimeout to prevent API piling
-        // if the MCP backend is slow to respond.
-        if (active) {
-          timerId = setTimeout(fetchOrderBook, 10000);
-        }
       }
     };
 
-    let timerId: any;
     fetchOrderBook();
-    return () => { active = false; clearTimeout(timerId); };
+    const interval = setInterval(fetchOrderBook, 10000); // Poll every 10s
+    return () => { active = false; clearInterval(interval); };
   }, [activeSymbol]);
 
   return (

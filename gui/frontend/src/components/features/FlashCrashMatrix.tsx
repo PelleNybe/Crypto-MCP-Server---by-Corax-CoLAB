@@ -26,8 +26,6 @@ export default function FlashCrashMatrix() {
   useEffect(() => {
     let active = true;
 
-    let timeoutId: NodeJS.Timeout;
-
     const fetchOrderBook = async () => {
         try {
             const obData = await callMcpEndpoint('MCP_CCXT', 'fetch_order_book', { exchange: activeExchange, symbol: activeSymbolHook, limit: 100 });
@@ -80,18 +78,13 @@ export default function FlashCrashMatrix() {
 
             setMatrixData(buckets);
         } catch (err) {
-            if (active) {
-                console.error("Error fetching orderbook for Flash Crash Matrix:", err);
-            }
-        } finally {
-            if (active) {
-                timeoutId = setTimeout(fetchOrderBook, 2000); // Fast updates
-            }
+            console.error("Error fetching orderbook for Flash Crash Matrix:", err);
         }
     };
 
     fetchOrderBook();
-    return () => { active = false; clearTimeout(timeoutId); };
+    const interval = setInterval(fetchOrderBook, 2000); // Fast updates
+    return () => { active = false; clearInterval(interval); };
   }, [activeSymbolHook, activeExchange]);
 
   return (

@@ -42,7 +42,6 @@ export default function DarkPoolSonar() {
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
 
     const fetchTrades = async () => {
         try {
@@ -81,18 +80,13 @@ export default function DarkPoolSonar() {
                 }
             }
         } catch (err) {
-            if (active) {
-                console.error("Error fetching trades for Dark Pool Sonar:", err);
-            }
-        } finally {
-            if (active) {
-                timeoutId = setTimeout(fetchTrades, 4000);
-            }
+            console.error("Error fetching trades for Dark Pool Sonar:", err);
         }
     };
 
     fetchTrades();
-    return () => { active = false; clearTimeout(timeoutId); };
+    const interval = setInterval(fetchTrades, 4000);
+    return () => { active = false; clearInterval(interval); };
   }, [activeSymbolHook, activeExchange]);
 
   const removePing = React.useCallback((id: string) => {

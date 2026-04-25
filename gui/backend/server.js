@@ -142,12 +142,8 @@ db.serialize(() => {
     response TEXT
   )`, (err) => {
     if (err) console.error('Error creating orders table:', err);
-    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)', (err) => {
-      if (err) console.error('Error creating idx_orders_created_at:', err);
-    });
-    db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)', (err) => {
-      if (err) console.error('Error creating idx_orders_status:', err);
-    });
+    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)');
+    db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)');
   });
 });
 
@@ -234,8 +230,8 @@ app.get('/api/ticker', async (req, res) => {
 // POST /api/order/dry_run
 app.post('/api/order/dry_run', async (req, res) => {
   const { exchange, symbol, side, type, amount, price, params } = req.body || {};
-  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
-    return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
+  if (!exchange || !symbol || !side || !type || !amount) {
+    return res.status(400).json({ ok:false, error: 'Missing required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -270,9 +266,7 @@ app.post('/api/order/dry_run', async (req, res) => {
     };
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview), (err) => {
-      if (err) console.error('DB error:', err);
-    });
+    stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview));
     stmt.finalize();
 
     res.json({ ok:true, data: preview });
@@ -285,8 +279,8 @@ app.post('/api/order/dry_run', async (req, res) => {
 // POST /api/order/execute
 app.post('/api/order/execute', async (req, res) => {
   const { exchange, symbol, side, type, amount, price, execute, params } = req.body || {};
-  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
-    return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
+  if (!exchange || !symbol || !side || !type || !amount) {
+    return res.status(400).json({ ok:false, error: 'Missing required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -329,10 +323,8 @@ app.post('/api/order/execute', async (req, res) => {
 
     const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'create_order', orderArgs);
 
-    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), (err) => {
-      if (err) console.error('DB error:', err);
-    });
+    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?)');
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp));
     stmt.finalize();
 
     io.emit('order_placed', { exchange, symbol, side, amount, price, response: orderResp });
@@ -340,10 +332,8 @@ app.post('/api/order/execute', async (req, res) => {
     res.json({ ok:true, data: orderResp });
   } catch (err) {
     console.error('execute order error', err.message || err);
-    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err), (dbErr) => {
-      if (dbErr) console.error('DB error:', dbErr);
-    });
+    const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?)');
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err));
     stmt.finalize();
 
     res.status(500).json({ ok:false, error: String(err.message || err) });
@@ -444,8 +434,8 @@ process.on('unhandledRejection', (reason) => {
 // Called by ccxt_mcp when AI tries to create an order
 app.post('/api/order/pending', (req, res) => {
   const { exchange, symbol, side, type, amount, price, params, estimated_usd } = req.body || {};
-  if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
-    return res.status(400).json({ ok: false, error: 'Missing or invalid required fields' });
+  if (!exchange || !symbol || !side || !type || !amount) {
+    return res.status(400).json({ ok: false, error: 'Missing required fields' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -519,18 +509,14 @@ app.post('/api/order/approve', async (req, res) => {
 
       const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'execute_approved_order', orderArgs);
 
-      db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId], (err) => {
-        if (err) console.error('DB UPDATE error (placed):', err);
-      });
+      db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId]);
 
       io.emit('order_placed', { id: orderId, ...orderArgs, response: orderResp });
 
       res.json({ ok: true, data: orderResp });
     } catch (apiErr) {
       console.error('Execute error', apiErr);
-      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId], (err) => {
-        if (err) console.error('DB UPDATE error (error status):', err);
-      });
+      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId]);
       res.status(500).json({ ok: false, error: String(apiErr.message || apiErr) });
     }
   });

@@ -175,10 +175,10 @@ export default function AlgoGridArchitect() {
       </div>
 
       <div style={{ position: 'absolute', top: 15, right: 15, zIndex: 20, display: 'flex', gap: '10px' }}>
-        <button onClick={addNode} aria-label="Add Node" className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <button onClick={addNode} className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Plus size={12} /> ADD NODE
         </button>
-        <button onClick={saveStrategy} aria-label={loading ? "Saving Strategy..." : "Save and Deploy Strategy"} disabled={loading} className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', borderColor: '#10b981', color: '#10b981' }}>
+        <button onClick={saveStrategy} disabled={loading} className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', borderColor: '#10b981', color: '#10b981' }}>
             <Save size={12} /> {loading ? 'SAVING...' : 'SAVE & DEPLOY'}
         </button>
       </div>

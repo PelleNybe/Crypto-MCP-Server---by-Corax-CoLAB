@@ -44,7 +44,6 @@ export default function HoloOrderFlow({ price, symbol }: { price: number, symbol
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
 
     const fetchOrderBook = async () => {
       try {
@@ -69,21 +68,16 @@ export default function HoloOrderFlow({ price, symbol }: { price: number, symbol
           setMaxVolume(localMax > 0 ? localMax : 1);
         }
       } catch (err) {
-        if (active) {
-          console.error("Failed to fetch order book for HoloOrderFlow", err);
-        }
-      } finally {
-        if (active) {
-          timeoutId = setTimeout(fetchOrderBook, 5000); // refresh every 5s
-        }
+        console.error("Failed to fetch order book for HoloOrderFlow", err);
       }
     };
 
     fetchOrderBook();
+    const interval = setInterval(fetchOrderBook, 5000); // refresh every 5s
 
     return () => {
       active = false;
-      clearTimeout(timeoutId);
+      clearInterval(interval);
     };
   }, [symbol]);
 

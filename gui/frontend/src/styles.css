@@ -297,12 +297,6 @@ input:focus, select:focus {
   animation: ripple 0.6s ease-out;
 }
 
-button:disabled, .btn-primary:disabled, .btn-danger:disabled, .btn-outline:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  pointer-events: none;
-}
-
 .table tbody tr:hover {
   background-color: rgba(59, 130, 246, 0.1);
   transition: background-color 0.2s ease;

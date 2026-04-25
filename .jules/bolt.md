@@ -13,6 +13,3 @@
 ## 2024-05-15 - React Three Fiber Memoization
 **Learning:** React Three Fiber components inside list maps (like `<Star>` in `<GalaxyView>`) re-render entire Three.js layouts when parent state changes. Even if internal Three.js hooks limit calculation overhead, the React reconciliation diffing is slow for a large number of Canvas objects.
 **Action:** Always wrap `<Canvas>` list item components in `React.memo` and provide stable event handlers via `useCallback` to prevent unnecessary massive Three.js sub-tree updates.
-## 2024-04-17 - Prevent API Piling
-**Learning:** High-frequency polling using `setInterval` can cause API requests to pile up and cause a DoS condition on the backend if responses are delayed.
-**Action:** Use a recursive `setTimeout` within a `finally` block inside an async polling function to ensure the next request is only scheduled after the previous one completes.

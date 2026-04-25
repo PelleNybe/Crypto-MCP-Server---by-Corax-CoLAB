@@ -16,12 +16,7 @@
 4. **100% Implementation:** Everything must be 100% implemented with real, functional, production-ready code.
 5. **Recursive Scanning Required:** Whenever you search for files, functions, definitions, or implementations, you MUST scan recursively through all subdirectories in the repository to ensure absolutely nothing is missed.
 
-## 2024-04-10 - [Unhandled Exception DoS in Order Endpoints]
-**Vulnerability:** The order endpoints (`/api/order/execute`, `/api/order/dry_run`, `/api/order/pending`) did not validate that input fields such as `exchange` were strictly strings before calling string methods like `.toLowerCase()` on them.
-**Learning:** Sending JSON arrays or objects for these fields caused unhandled exceptions and potentially SQL injection-like errors (due to array serialization mismatch in SQLite parameterized queries) when passed down to `db.prepare()`.
-**Prevention:** Always explicitly check the type of incoming request body fields (e.g., `typeof field === 'string'`) in Node.js/Express, and ensure SQL parameter counts perfectly match the schema to avoid exposing database structure on errors.
-
-## 2026-04-18 - [Denial of Service] Unhandled Exception DoS in SQLite Queries
-**Vulnerability:** Several `db.run()` queries in the `node-sqlite3` driver were invoked without an error callback (e.g., during database initialization and order updates).
-**Learning:** In `node-sqlite3`, if a query fails and no callback is provided, an error event is emitted on the Database object. If no error handler is attached or the caller didn't provide a callback, this bubbles up to an uncaught exception, leading to a server crash (Denial of Service).
-**Prevention:** Always provide an error callback `(err) => { ... }` when executing queries using `db.run()`, `db.exec()`, or `stmt.run()` to catch and handle database exceptions locally and fail securely without terminating the process.
+## 2026-04-24 - [Information Disclosure / DoS] Overly Permissive CORS Configuration
+**Vulnerability:** The Express application (`gui/backend/server.js`) used a permissive CORS configuration `app.use(cors())` and `io({ cors: { origin: "*" } })`, allowing requests from any domain.
+**Learning:** Permissive CORS allows any site to make cross-origin requests and read responses, potentially leading to unauthorized access to user-specific data or performing actions on behalf of the user.
+**Prevention:** Always restrict CORS explicitly using `corsOptions` with an origin check, and ensure Socket.io instances follow the same restrictions.

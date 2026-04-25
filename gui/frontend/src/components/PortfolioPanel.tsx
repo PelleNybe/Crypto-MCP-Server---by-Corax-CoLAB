@@ -44,8 +44,6 @@ export default function PortfolioPanel() {
         <div style={{display:'flex', gap: '0.5rem'}}>
           <button
             onClick={() => setViewMode('3d')}
-            aria-label="View Asset Universe in 3D HUD"
-            aria-pressed={viewMode === '3d'}
             className="btn-outline"
             style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === '3d' ? 1 : 0.5}}
           >
@@ -53,8 +51,6 @@ export default function PortfolioPanel() {
           </button>
           <button
             onClick={() => setViewMode('list')}
-            aria-label="View Asset Universe as List"
-            aria-pressed={viewMode === 'list'}
             className="btn-outline"
             style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === 'list' ? 1 : 0.5}}
           >

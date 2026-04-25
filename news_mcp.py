@@ -31,23 +31,28 @@ def get_latest_news(limit: int = 10) -> dict:
             results = data.get('results', [])[:limit]
 
             # Format the output for the frontend
-            formatted_news = [
-                {
-                    'id': item.get('id', str(i)),
+            formatted_news = []
+            for item in results:
+                # Basic sentiment approximation based on votes (bullish vs bearish)
+                votes = item.get('votes', {})
+                bullish = votes.get('positive', 0) + votes.get('important', 0) + votes.get('liked', 0)
+                bearish = votes.get('negative', 0) + votes.get('disliked', 0) + votes.get('toxic', 0)
+
+                sentiment = 'neutral'
+                if bullish > bearish * 1.5:
+                    sentiment = 'bullish'
+                elif bearish > bullish * 1.5:
+                    sentiment = 'bearish'
+
+                formatted_news.append({
+                    'id': item.get('id', str(len(formatted_news))),
                     'title': item.get('title', ''),
                     'domain': item.get('domain', ''),
                     'url': item.get('url', ''),
                     'published_at': item.get('published_at', ''),
-                    'sentiment': (
-                        'bullish' if (bullish := (v := item.get('votes', {})).get('positive', 0) + v.get('important', 0) + v.get('liked', 0)) >
-                                     ((bearish := v.get('negative', 0) + v.get('disliked', 0) + v.get('toxic', 0)) * 1.5)
-                        else 'bearish' if bearish > (bullish * 1.5)
-                        else 'neutral'
-                    ),
+                    'sentiment': sentiment,
                     'currencies': [c.get('code') for c in item.get('currencies', [])] if item.get('currencies') else []
-                }
-                for i, item in enumerate(results)
-            ]
+                })
 
             return {"status": "success", "news": formatted_news}
         else:

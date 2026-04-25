@@ -191,7 +191,7 @@ export default function RiskRadarPanel() {
       </div>
 
       {defcon === 'RED' && (
-         <button className="btn-primary" aria-label="Emergency Hedge Exposure to USDC" style={{marginTop: '1rem', background: '#ef4444', borderColor: '#ef4444', boxShadow: '0 0 15px rgba(239, 68, 68, 0.5)'}}>
+         <button className="btn-primary" style={{marginTop: '1rem', background: '#ef4444', borderColor: '#ef4444', boxShadow: '0 0 15px rgba(239, 68, 68, 0.5)'}}>
            EMERGENCY: HEDGE EXPOSURE TO USDC
          </button>
       )}

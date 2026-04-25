@@ -140,8 +140,6 @@ export default function ArbitrageWormhole() {
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
-
     const fetchArbitrage = async () => {
       try {
         let pair = activeSymbol;
@@ -168,17 +166,12 @@ export default function ArbitrageWormhole() {
           }
         }
       } catch (err) {
-        if (active) {
-            console.error("Arbitrage fetch error", err);
-        }
-      } finally {
-        if (active) {
-            timeoutId = setTimeout(fetchArbitrage, 5000);
-        }
+        console.error("Arbitrage fetch error", err);
       }
     };
     fetchArbitrage();
-    return () => { active = false; clearTimeout(timeoutId); };
+    const interval = setInterval(fetchArbitrage, 5000);
+    return () => { active = false; clearInterval(interval); };
   }, [activeSymbol]);
 
 

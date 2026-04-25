@@ -8,7 +8,6 @@ Run via systemd or: python3 ccxt_mcp.py
 import os
 import logging
 import time
-import hmac
 from functools import wraps
 from typing import Optional, List, Any
 import ccxt
@@ -139,8 +138,7 @@ def execute_approved_order(exchange: str, symbol: str, side: str, type: str, amo
     """Internal tool called by the backend to actually execute the order after human approval."""
     params = params or {}
     db_pass = os.getenv("DASHBOARD_PASSWORD")
-    token = params.pop("approval_token", "") if params else ""
-    if db_pass and not hmac.compare_digest(str(token or "").encode("utf-8"), str(db_pass).encode("utf-8")):
+    if db_pass and params.pop("approval_token", None) != db_pass:
         return {"error": "Unauthorized: Dashboard approval required. Use create_order instead."}
     ex = _make_exchange(exchange)
     if type == "market":
