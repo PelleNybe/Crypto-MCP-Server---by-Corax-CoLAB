@@ -27,7 +27,7 @@ if (!DASHBOARD_PASSWORD) {
 }
 const app = express();
 
-// Security: Restrict CORS to allowed origins
+// Security: Restrict CORS to allowed origins to prevent unauthorized cross-origin requests
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',').map(o => o.trim())
   : ['http://localhost:5173', 'http://127.0.0.1:5173', 'http://localhost:4000', 'http://127.0.0.1:4000', 'http://localhost'];
@@ -48,6 +48,7 @@ const corsOptions = {
   credentials: true
 };
 
+// Explicitly pass corsOptions to the cors middleware
 app.use(cors(corsOptions));
 app.use(bodyParser.json());
 
