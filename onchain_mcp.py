@@ -8,12 +8,11 @@ Exposes: eth_balance, erc20_balance, tx_info, gas_price
 import os
 import logging
 from typing import Optional
-import requests
+import httpx
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
-
 
 load_dotenv(dotenv_path=".env")
 logging.basicConfig(level=logging.INFO)
@@ -127,35 +126,37 @@ if __name__ == "__main__":
 
 
 @mcp.tool()
-def get_dexscreener_trending() -> dict:
+async def get_dexscreener_trending() -> dict:
     """
     Fetches the latest trending tokens from DexScreener across all chains.
     This gives the AI insight into what is popular on-chain right now.
     """
     try:
         url = "https://api.dexscreener.com/token-profiles/latest/v1"
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            return {"status": "success", "data": response.json()}
-        else:
-            return {"error": f"DexScreener API error: {response.status_code}"}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=10)
+            if response.status_code == 200:
+                return {"status": "success", "data": response.json()}
+            else:
+                return {"error": f"DexScreener API error: {response.status_code}"}
     except Exception as e:
         logger.error(f"Error fetching DexScreener trending: {e}")
         return {"error": str(e)}
 
 
 @mcp.tool()
-def search_dexscreener_token(query: str) -> dict:
+async def search_dexscreener_token(query: str) -> dict:
     """
     Searches for a specific token or contract address on DexScreener.
     """
     try:
         url = f"https://api.dexscreener.com/latest/dex/search?q={query}"
-        response = requests.get(url, timeout=10)
-        if response.status_code == 200:
-            return {"status": "success", "data": response.json().get("pairs", [])}
-        else:
-            return {"error": f"DexScreener API error: {response.status_code}"}
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, timeout=10)
+            if response.status_code == 200:
+                return {"status": "success", "data": response.json().get("pairs", [])}
+            else:
+                return {"error": f"DexScreener API error: {response.status_code}"}
     except Exception as e:
         logger.error(f"Error searching DexScreener token: {e}")
         return {"error": str(e)}
