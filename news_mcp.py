@@ -32,7 +32,7 @@ async def get_latest_news(limit: int = 10) -> dict:
             "auth_token": "public",
             "public": "true"
         }
-        response = requests.get(url, params=params, timeout=10)
+        response = httpx.get(url, params=params, timeout=10)
 
         if response.status_code == 200:
             data = response.json()
@@ -92,7 +92,7 @@ async def search_news(query: str, limit: int = 10) -> dict:
             "public": "true",
             "currencies": query
         }
-        response = requests.get(url, params=params, timeout=10)
+        response = httpx.get(url, params=params, timeout=10)
         if response.status_code == 200:
             return {
                 "status": "success",

@@ -15,7 +15,7 @@ sys.modules["dotenv"] = MagicMock()
 
 from news_mcp import search_news
 
-@patch('news_mcp.requests.get')
+@patch('news_mcp.httpx.get')
 def test_search_news_parameter_encoding(mock_get):
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -24,7 +24,8 @@ def test_search_news_parameter_encoding(mock_get):
 
     # Malicious query attempting to inject additional parameters
     malicious_query = "BTC&public=false"
-    search_news(malicious_query)
+    import asyncio
+    asyncio.run(search_news(malicious_query))
 
     # Get the URL and params that were actually called
     args, kwargs = mock_get.call_args
