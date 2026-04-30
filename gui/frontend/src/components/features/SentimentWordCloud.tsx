@@ -66,16 +66,7 @@ export default function SentimentWordCloud() {
 
                 const keys = Object.keys(keywordsMap);
 
-                // Fallback words if news API fails to provide currencies
-                if (keys.length === 0) {
-                   keywordsMap['BITCOIN'] = {count: 5, sentiment: 'bullish'};
-                   keywordsMap['ETHEREUM'] = {count: 4, sentiment: 'bullish'};
-                   keywordsMap['SEC'] = {count: 3, sentiment: 'bearish'};
-                   keywordsMap['INFLATION'] = {count: 2, sentiment: 'bearish'};
-                   keywordsMap['ETF'] = {count: 4, sentiment: 'bullish'};
-                   keywordsMap['REGULATION'] = {count: 3, sentiment: 'neutral'};
-                   keys.push('BITCOIN', 'ETHEREUM', 'SEC', 'INFLATION', 'ETF', 'REGULATION');
-                }
+                // No fallback data
 
                 keys.forEach((k, i) => {
                     // Golden ratio distribution on sphere

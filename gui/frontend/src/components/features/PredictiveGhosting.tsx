@@ -67,22 +67,11 @@ export default function PredictiveGhosting() {
                     }
                 } else {
                     console.warn("Monte Carlo simulation failed or returned error", mcData);
-                    throw new Error("Fallback to defaults");
+                    throw new Error("Monte Carlo simulation failed");
                 }
             } catch (err) {
-                console.error("Error fetching Monte Carlo data, falling back", err);
-                // Fallback deterministic walk just in case
-                let simPrice = currentPrice;
-                for (let i = 1; i <= futureSteps; i++) {
-                    futureX.push(`T${i}`);
-                    const histIdx = Math.floor((i / futureSteps) * (y.length - 2));
-                    const priceDiff = (y[histIdx + 1] - y[histIdx]) / y[histIdx];
-                    simPrice += (priceDiff + (trendFactor * 0.2)) * (volatility * 0.5);
-                    futureY.push(simPrice);
-                    const spread = Math.sqrt(i) * volatility * 0.5;
-                    futureLower.push(simPrice - spread);
-                    futureUpper.push(simPrice + spread);
-                }
+                console.error("Error fetching Monte Carlo data", err);
+                // No fallback data allowed
             }
 
             setPlotData({ x, y, futureX, futureY, futureLower, futureUpper });

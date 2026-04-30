@@ -124,13 +124,10 @@ export default function GasHologram() {
             const data = await callMcpEndpoint('MCP_ONCHAIN', 'gas_price', {});
             if (active && data && data.gas_price_gwei) {
                 setGasPrice(parseFloat(data.gas_price_gwei));
-            } else if (active) {
-                // Fallback for demonstration if API fails to load data
-                setGasPrice(Math.floor(Math.random() * 40) + 10);
             }
         } catch (err) {
             console.error("Error fetching gas price:", err);
-            if (active) setGasPrice(25); // Fallback
+            // No fallback allowed
         }
     };
 
