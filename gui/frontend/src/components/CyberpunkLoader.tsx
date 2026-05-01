@@ -2,7 +2,12 @@ import React from 'react';
 import { Loader } from 'lucide-react';
 
 export const CyberpunkLoader = ({ message = "Decrypting Data Stream..." }) => (
-  <div style={{
+  <div
+    role="status"
+    aria-live="polite"
+    aria-busy="true"
+    aria-label="Loading"
+    style={{
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
