@@ -396,9 +396,20 @@ async function callAndEmit(mcpUrl, toolName, args, eventName) {
   }
 }
 
+// Recursive polling to prevent API piling
+function startPolling(mcpUrl, toolName, args, eventName, intervalMs) {
+  setTimeout(async () => {
+    try {
+      await callAndEmit(mcpUrl, toolName, args, eventName);
+    } finally {
+      startPolling(mcpUrl, toolName, args, eventName, intervalMs);
+    }
+  }, intervalMs);
+}
+
 // Polling intervals
-setInterval(() => callAndEmit(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio'), 30000);
-setInterval(() => callAndEmit(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker'), 5000);
+startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 30000);
+startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker', 5000);
 
 // GET /api/strategies
 app.get("/api/strategies", (req, res) => {
