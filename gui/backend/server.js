@@ -198,7 +198,7 @@ app.get('/api/portfolio', async (req, res) => {
     res.json({ ok: true, data: result });
   } catch (err) {
     console.error('portfolio error', err.message || err);
-    res.status(500).json({ ok: false, error: String(err.message || err) });
+    res.status(500).json({ ok: false, error: 'Portfolio operation failed' });
   }
 });
 
@@ -217,7 +217,7 @@ app.post('/api/mcp', async (req, res) => {
     res.json({ ok: true, data: result });
   } catch (err) {
     console.error('mcp error', err.message || err);
-    res.status(500).json({ ok: false, error: String(err.message || err) });
+    res.status(500).json({ ok: false, error: 'MCP operation failed' });
   }
 });
 
@@ -228,7 +228,7 @@ app.get('/api/ticker', async (req, res) => {
     res.json({ ok: true, data: result });
   } catch (err) {
     console.error('ticker error', err.message || err);
-    res.status(500).json({ ok: false, error: String(err.message || err) });
+    res.status(500).json({ ok: false, error: 'Ticker operation failed' });
   }
 });
 
@@ -279,7 +279,7 @@ app.post('/api/order/dry_run', async (req, res) => {
     res.json({ ok:true, data: preview });
   } catch (err) {
     console.error('dry_run error', err.message || err);
-    res.status(500).json({ ok:false, error: String(err.message || err) });
+    res.status(500).json({ ok:false, error: 'Dry run operation failed' });
   }
 });
 
@@ -347,14 +347,17 @@ app.post('/api/order/execute', async (req, res) => {
     });
     stmt.finalize();
 
-    res.status(500).json({ ok:false, error: String(err.message || err) });
+    res.status(500).json({ ok:false, error: 'Order execution failed' });
   }
 });
 
 // GET /api/orders
 app.get('/api/orders_old', (req, res) => {
   db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 200', [], (err, rows) => {
-    if (err) return res.status(500).json({ ok:false, error: err.message });
+    if (err) {
+      console.error('Database query failed:', err);
+      return res.status(500).json({ ok:false, error: 'Database query failed' });
+    }
     res.json({ ok:true, data: rows });
   });
 });
@@ -414,7 +417,10 @@ startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC
 // GET /api/strategies
 app.get("/api/strategies", (req, res) => {
   db.all("SELECT * FROM strategies ORDER BY created_at DESC", [], (err, rows) => {
-    if (err) return res.status(500).json({ ok: false, error: err.message });
+    if (err) {
+      console.error('Database query failed:', err);
+      return res.status(500).json({ ok: false, error: 'Database query failed' });
+    }
     res.json({ ok: true, data: rows });
   });
 });
@@ -427,7 +433,10 @@ app.post("/api/strategies", (req, res) => {
   }
   const stmt = db.prepare("INSERT INTO strategies (name, nodes, connections, active) VALUES (?, ?, ?, ?)");
   stmt.run(name, JSON.stringify(nodes), JSON.stringify(connections), active ? 1 : 0, function(err) {
-    if (err) return res.status(500).json({ ok: false, error: err.message });
+    if (err) {
+      console.error('Database insert failed:', err);
+      return res.status(500).json({ ok: false, error: 'Database insert failed' });
+    }
     res.json({ ok: true, id: this.lastID });
   });
   stmt.finalize();
@@ -491,8 +500,8 @@ app.post('/api/order/pending', (req, res) => {
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, price, 1, 'pending', JSON.stringify(preview), function(err) {
       if (err) {
-        console.error('Insert error', err);
-        return res.status(500).json({ ok: false, error: err.message });
+        console.error('Insert error:', err);
+        return res.status(500).json({ ok: false, error: 'Database insert failed' });
       }
       const orderId = this.lastID;
       io.emit('order_pending', { id: orderId, ...preview });
@@ -501,7 +510,7 @@ app.post('/api/order/pending', (req, res) => {
     stmt.finalize();
   } catch (err) {
     console.error('Pending order error', err.message || err);
-    res.status(500).json({ ok: false, error: String(err.message || err) });
+    res.status(500).json({ ok: false, error: 'Pending order operation failed' });
   }
 });
 
@@ -514,7 +523,10 @@ app.post('/api/order/approve', async (req, res) => {
   }
 
   db.get('SELECT * FROM orders WHERE id = ?', [orderId], async (err, order) => {
-    if (err) return res.status(500).json({ ok: false, error: err.message });
+    if (err) {
+      console.error('Database query failed:', err);
+      return res.status(500).json({ ok: false, error: 'Database query failed' });
+    }
     if (!order) return res.status(404).json({ ok: false, error: 'Order not found' });
     if (order.status !== 'pending') return res.status(400).json({ ok: false, error: 'Order is not pending' });
 
@@ -543,7 +555,7 @@ app.post('/api/order/approve', async (req, res) => {
       db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId], (err) => {
         if (err) console.error('DB UPDATE error (error status):', err);
       });
-      res.status(500).json({ ok: false, error: String(apiErr.message || apiErr) });
+      res.status(500).json({ ok: false, error: 'Order approval failed' });
     }
   });
 });
@@ -560,9 +572,15 @@ app.post('/api/order/reasoning', (req, res) => {
     explanation TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
-    if (err) return res.status(500).json({ ok: false, error: err.message });
+    if (err) {
+      console.error('Database table creation failed:', err);
+      return res.status(500).json({ ok: false, error: 'Database operation failed' });
+    }
     db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [trade_id, explanation], function(err2) {
-      if (err2) return res.status(500).json({ ok: false, error: err2.message });
+      if (err2) {
+        console.error('Database insert failed:', err2);
+        return res.status(500).json({ ok: false, error: 'Database insert failed' });
+      }
       res.json({ ok: true });
     });
   });
@@ -579,12 +597,18 @@ app.get('/api/orders', (req, res) => {
     // Graceful fallback if reasoning table doesn't exist yet
     if (err && err.message.includes('no such table: reasoning')) {
       db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 200', [], (err2, rows2) => {
-        if (err2) return res.status(500).json({ ok:false, error: err2.message });
+        if (err2) {
+          console.error('Database query failed:', err2);
+          return res.status(500).json({ ok:false, error: 'Database query failed' });
+        }
         return res.json({ ok:true, data: rows2 });
       });
       return;
     }
-    if (err) return res.status(500).json({ ok:false, error: err.message });
+    if (err) {
+      console.error('Database query failed:', err);
+      return res.status(500).json({ ok:false, error: 'Database query failed' });
+    }
     res.json({ ok:true, data: rows });
   });
 });
