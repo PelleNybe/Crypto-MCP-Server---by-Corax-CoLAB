@@ -22,7 +22,9 @@ export default function SystemOverview() {
       }
     };
 
-    const pingAll = () => {
+    let timeoutId: ReturnType<typeof setTimeout>;
+
+    const pingAll = async () => {
       setStatuses({
         MCP_CCXT: 'checking',
         MCP_PORTFOLIO: 'checking',
@@ -30,18 +32,25 @@ export default function SystemOverview() {
         MCP_LLM: 'checking'
       });
       // Try to call a benign method on each
-      checkStatus('MCP_CCXT', 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' });
-      checkStatus('MCP_PORTFOLIO', 'portfolio_value', { exchanges: ['binance'] });
-      checkStatus('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: 'BTC/USDT', timeframe: '1h' });
-      checkStatus('MCP_LLM', 'generate_text', { prompt: 'ping', max_tokens: 5 });
+      try {
+        await Promise.allSettled([
+          checkStatus('MCP_CCXT', 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }),
+          checkStatus('MCP_PORTFOLIO', 'portfolio_value', { exchanges: ['binance'] }),
+          checkStatus('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: 'BTC/USDT', timeframe: '1h' }),
+          checkStatus('MCP_LLM', 'generate_text', { prompt: 'ping', max_tokens: 5 })
+        ]);
+      } finally {
+        if (active) {
+          timeoutId = setTimeout(pingAll, 60000); // Check every minute
+        }
+      }
     };
 
     pingAll();
-    const interval = setInterval(pingAll, 60000); // Check every minute
 
     return () => {
       active = false;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, []);
 
