@@ -10,6 +10,18 @@ import logging
 from typing import Optional
 import httpx
 from mcp.server.fastmcp import FastMCP
+
+# Global async HTTP client for connection pooling
+_http_client: Optional[httpx.AsyncClient] = None
+
+
+def _get_http_client() -> httpx.AsyncClient:
+    global _http_client
+    if _http_client is None:
+        _http_client = httpx.AsyncClient()
+    return _http_client
+
+
 from dotenv import load_dotenv
 from web3 import Web3
 from web3.middleware import ExtraDataToPOAMiddleware
@@ -133,12 +145,12 @@ async def get_dexscreener_trending() -> dict:
     """
     try:
         url = "https://api.dexscreener.com/token-profiles/latest/v1"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10)
-            if response.status_code == 200:
-                return {"status": "success", "data": response.json()}
-            else:
-                return {"error": f"DexScreener API error: {response.status_code}"}
+        client = _get_http_client()
+        response = await client.get(url, timeout=10)
+        if response.status_code == 200:
+            return {"status": "success", "data": response.json()}
+        else:
+            return {"error": f"DexScreener API error: {response.status_code}"}
     except Exception as e:
         logger.error(f"Error fetching DexScreener trending: {e}")
         return {"error": str(e)}
@@ -151,12 +163,12 @@ async def search_dexscreener_token(query: str) -> dict:
     """
     try:
         url = f"https://api.dexscreener.com/latest/dex/search?q={query}"
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, timeout=10)
-            if response.status_code == 200:
-                return {"status": "success", "data": response.json().get("pairs", [])}
-            else:
-                return {"error": f"DexScreener API error: {response.status_code}"}
+        client = _get_http_client()
+        response = await client.get(url, timeout=10)
+        if response.status_code == 200:
+            return {"status": "success", "data": response.json().get("pairs", [])}
+        else:
+            return {"error": f"DexScreener API error: {response.status_code}"}
     except Exception as e:
         logger.error(f"Error searching DexScreener token: {e}")
         return {"error": str(e)}
