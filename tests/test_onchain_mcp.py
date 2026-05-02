@@ -97,10 +97,10 @@ from onchain_mcp import get_dexscreener_trending, search_dexscreener_token
 
 
 @pytest.mark.asyncio
-@patch("onchain_mcp.httpx.AsyncClient")
-async def test_get_dexscreener_trending(mock_async_client):
+@patch("onchain_mcp._get_http_client")
+async def test_get_dexscreener_trending(mock_get_client):
     mock_client = AsyncMock()
-    mock_async_client.return_value.__aenter__.return_value = mock_client
+    mock_get_client.return_value = mock_client
 
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -114,10 +114,10 @@ async def test_get_dexscreener_trending(mock_async_client):
 
 
 @pytest.mark.asyncio
-@patch("onchain_mcp.httpx.AsyncClient")
-async def test_search_dexscreener_token(mock_async_client):
+@patch("onchain_mcp._get_http_client")
+async def test_search_dexscreener_token(mock_get_client):
     mock_client = AsyncMock()
-    mock_async_client.return_value.__aenter__.return_value = mock_client
+    mock_get_client.return_value = mock_client
 
     mock_response = MagicMock()
     mock_response.status_code = 200
