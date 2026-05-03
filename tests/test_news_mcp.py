@@ -20,7 +20,6 @@ sys.modules["dotenv"] = MagicMock()
 sys.modules["eth_account"] = MagicMock()
 
 from unittest.mock import patch
-import pytest
 
 # We need to delete news_mcp from sys.modules to ensure it reloads with our mocks
 if "news_mcp" in sys.modules:
