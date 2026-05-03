@@ -116,7 +116,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
   }
 });
 
-// Create orders table (safe)
+// Create tables (safe)
 db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS strategies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -126,7 +126,10 @@ db.serialize(() => {
     active INTEGER DEFAULT 0,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`, (err) => {
-    if (err) console.error('Error creating strategies table:', err);
+    if (err) {
+      console.error('Error creating strategies table:', err);
+      process.exit(1);
+    }
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS orders (
@@ -142,13 +145,34 @@ db.serialize(() => {
     status TEXT,
     response TEXT
   )`, (err) => {
-    if (err) console.error('Error creating orders table:', err);
+    if (err) {
+      console.error('Error creating orders table:', err);
+      process.exit(1);
+    }
     db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)', (err) => {
-      if (err) console.error('Error creating idx_orders_created_at:', err);
+      if (err) {
+        console.error('Error creating idx_orders_created_at:', err);
+        process.exit(1);
+      }
     });
     db.run('CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status)', (err) => {
-      if (err) console.error('Error creating idx_orders_status:', err);
+      if (err) {
+        console.error('Error creating idx_orders_status:', err);
+        process.exit(1);
+      }
     });
+  });
+
+  db.run(`CREATE TABLE IF NOT EXISTS reasoning (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    trade_id INTEGER,
+    explanation TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )`, (err) => {
+    if (err) {
+      console.error('Error creating reasoning table:', err);
+      process.exit(1);
+    }
   });
 });
 
@@ -272,11 +296,13 @@ app.post('/api/order/dry_run', async (req, res) => {
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview), (err) => {
-      if (err) console.error('DB error:', err);
+      if (err) {
+        console.error('DB error:', err);
+        return res.status(500).json({ ok: false, error: 'Database operation failed' });
+      }
+      res.json({ ok: true, data: preview });
     });
     stmt.finalize();
-
-    res.json({ ok:true, data: preview });
   } catch (err) {
     console.error('dry_run error', err.message || err);
     res.status(500).json({ ok:false, error: 'Dry run operation failed' });
@@ -332,22 +358,24 @@ app.post('/api/order/execute', async (req, res) => {
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), (err) => {
-      if (err) console.error('DB error:', err);
+      if (err) {
+        console.error('DB error:', err);
+        return res.status(500).json({ ok: false, error: 'Database operation failed' });
+      }
+      io.emit('order_placed', { exchange, symbol, side, amount, price, response: orderResp });
+      res.json({ ok: true, data: orderResp });
     });
     stmt.finalize();
-
-    io.emit('order_placed', { exchange, symbol, side, amount, price, response: orderResp });
-
-    res.json({ ok:true, data: orderResp });
   } catch (err) {
     console.error('execute order error', err.message || err);
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err), (dbErr) => {
-      if (dbErr) console.error('DB error:', dbErr);
+      if (dbErr) {
+        console.error('DB error during error logging:', dbErr);
+      }
+      res.status(500).json({ ok: false, error: 'Order execution failed' });
     });
     stmt.finalize();
-
-    res.status(500).json({ ok:false, error: 'Order execution failed' });
   }
 });
 
@@ -544,18 +572,21 @@ app.post('/api/order/approve', async (req, res) => {
       const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'execute_approved_order', orderArgs);
 
       db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId], (err) => {
-        if (err) console.error('DB UPDATE error (placed):', err);
+        if (err) {
+          console.error('DB UPDATE error (placed):', err);
+          return res.status(500).json({ ok: false, error: 'Database operation failed' });
+        }
+        io.emit('order_placed', { id: orderId, ...orderArgs, response: orderResp });
+        res.json({ ok: true, data: orderResp });
       });
-
-      io.emit('order_placed', { id: orderId, ...orderArgs, response: orderResp });
-
-      res.json({ ok: true, data: orderResp });
     } catch (apiErr) {
       console.error('Execute error', apiErr);
       db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId], (err) => {
-        if (err) console.error('DB UPDATE error (error status):', err);
+        if (err) {
+          console.error('DB UPDATE error (error status):', err);
+        }
+        res.status(500).json({ ok: false, error: 'Order approval failed' });
       });
-      res.status(500).json({ ok: false, error: 'Order approval failed' });
     }
   });
 });
@@ -566,23 +597,12 @@ app.post('/api/order/reasoning', (req, res) => {
   const { trade_id, explanation } = req.body || {};
   if (!trade_id || !explanation) return res.status(400).json({ ok: false, error: 'Missing trade_id or explanation' });
 
-  db.run(`CREATE TABLE IF NOT EXISTS reasoning (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    trade_id INTEGER,
-    explanation TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-  )`, (err) => {
+  db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [trade_id, explanation], function(err) {
     if (err) {
-      console.error('Database table creation failed:', err);
+      console.error('Database insert failed:', err);
       return res.status(500).json({ ok: false, error: 'Database operation failed' });
     }
-    db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [trade_id, explanation], function(err2) {
-      if (err2) {
-        console.error('Database insert failed:', err2);
-        return res.status(500).json({ ok: false, error: 'Database insert failed' });
-      }
-      res.json({ ok: true });
-    });
+    res.json({ ok: true });
   });
 });
 
