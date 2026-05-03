@@ -17,9 +17,10 @@ sys.modules["web3.middleware"] = MagicMock()
 sys.modules["web3.gas_strategies.time_based"] = MagicMock()
 sys.modules["dotenv"] = MagicMock()
 sys.modules["eth_account"] = MagicMock()
+sys.modules["httpx"] = MagicMock()
 
 from unittest.mock import patch, MagicMock
-from onchain_mcp import eth_balance, gas_price, erc20_balance
+from onchain_mcp import eth_balance, gas_price, erc20_balance, tx_info
 
 
 @patch("onchain_mcp._get_web3")
@@ -111,6 +112,36 @@ async def test_get_dexscreener_trending(mock_get_client):
 
     assert result["status"] == "success"
     assert result["data"] == [{"id": 1}]
+
+
+@patch("onchain_mcp._get_web3")
+def test_tx_info_success(mock_get_web3):
+    mock_w3 = MagicMock()
+    mock_get_web3.return_value = mock_w3
+
+    mock_tx = {"hash": "0xabc", "blockNumber": 123}
+    mock_receipt = {"transactionHash": "0xabc", "status": 1}
+
+    mock_w3.eth.get_transaction.return_value = mock_tx
+    mock_w3.eth.get_transaction_receipt.return_value = mock_receipt
+
+    result = tx_info("0xabc")
+
+    assert result["tx"] == mock_tx
+    assert result["receipt"] == mock_receipt
+    mock_w3.eth.get_transaction.assert_called_once_with("0xabc")
+    mock_w3.eth.get_transaction_receipt.assert_called_once_with("0xabc")
+
+
+@patch("onchain_mcp._get_web3")
+def test_tx_info_failure(mock_get_web3):
+    mock_w3 = MagicMock()
+    mock_get_web3.return_value = mock_w3
+
+    mock_w3.eth.get_transaction.side_effect = Exception("Transaction not found")
+
+    with pytest.raises(Exception, match="Transaction not found"):
+        tx_info("0xinvalid")
 
 
 @pytest.mark.asyncio
