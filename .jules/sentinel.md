@@ -30,3 +30,8 @@
 **Vulnerability:** The `search_news` function in `news_mcp.py` used f-string interpolation to construct the CryptoPanic API URL: `f"...&currencies={query}"`. This allowed an attacker to inject additional query parameters (e.g., `&public=false`) by including them in the `query` string.
 **Learning:** Manual string interpolation for URLs is prone to injection and encoding issues.
 **Prevention:** Use the `params` argument in the `requests` library (or equivalent in other libraries) to handle query parameters. This ensures all keys and values are automatically and correctly URL-encoded, preventing parameter injection.
+
+## 2024-05-25 - [XSS] Sensitive Token Exposure in LocalStorage
+**Vulnerability:** The frontend application in `gui/frontend/src/auth.ts` used `localStorage.setItem('auth_token', token)` to store the `DASHBOARD_PASSWORD` authentication token.
+**Learning:** `localStorage` is persistent across sessions and tabs, and is vulnerable to Cross-Site Scripting (XSS). If an attacker manages to execute malicious JavaScript, they can easily read the token from `localStorage` (`localStorage.getItem('auth_token')`) and gain full persistent access to the application, bypassing authentication.
+**Prevention:** Do not store sensitive information like passwords, API keys, or long-lived authentication tokens in `localStorage`. Use `sessionStorage` for temporary, tab-scoped storage to limit exposure, or store tokens entirely in-memory and manage them securely through HTTP-only cookies if the architecture allows.
