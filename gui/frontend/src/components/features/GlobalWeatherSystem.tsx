@@ -2,7 +2,10 @@ import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-const Particles = ({ sentiment }: { sentiment: 'bull' | 'bear' | 'neutral' }) => {
+// ⚡ Bolt: Wrapped Particles component in React.memo to prevent expensive
+// recalculation and re-rendering of the 2000-particle InstancedMesh when the parent
+// GlobalWeatherSystem triggers frequent unrelated state updates (e.g. lightning).
+const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neutral' }) => {
   const mesh = useRef<THREE.InstancedMesh>(null);
   const count = 2000;
 
@@ -83,7 +86,7 @@ const Particles = ({ sentiment }: { sentiment: 'bull' | 'bear' | 'neutral' }) =>
       <meshBasicMaterial transparent opacity={0.6} depthWrite={false} blending={THREE.AdditiveBlending} />
     </instancedMesh>
   );
-};
+});
 
 export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentiment?: 'bull' | 'bear' | 'neutral' }) {
   const [lightning, setLightning] = useState(false);
