@@ -29,3 +29,7 @@
 ## 2024-05-18 - ⚡ Bolt: Optimize DexScreener API calls with httpx
 **Learning:** Replacing synchronous `requests.get()` with `httpx.AsyncClient().get()` in `onchain_mcp.py` allows non-blocking HTTP requests, significantly improving throughput when making multiple concurrent API calls (measured ~1.8x speedup for 10 requests).
 **Action:** When implementing new MCP tools that perform I/O-bound tasks (like external API calls), default to using `httpx` and `async/await` rather than synchronous `requests`.
+
+## 2024-05-24 - Unrelated State Updates Triggering Expensive Three.js Re-renders
+**Learning:** In components rendering React Three Fiber `<Canvas>` elements, frequent parent state updates (like animations or interval timers) can cause the entire Three.js sub-tree to be re-evaluated by React, even if the 3D data hasn't changed. This is a massive performance bottleneck.
+**Action:** Always isolate heavy Three.js components (like `InstancedMesh` with thousands of particles) using `React.memo` when their parent component manages unrelated, frequently updating state (e.g., overlay opacities or lightning flashes).
