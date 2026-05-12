@@ -470,9 +470,7 @@ app.post("/api/strategies", (req, res) => {
   stmt.finalize();
 });
 // Start server and handle errors (EADDRINUSE will be surfaced)
-server.listen(PORT, () => {
-  console.log('Crypto MCP GUI backend listening on http://127.0.0.1:' + PORT);
-});
+server.listen(PORT);
 
 server.on('error', (err) => {
   console.error('Server error:', err);
