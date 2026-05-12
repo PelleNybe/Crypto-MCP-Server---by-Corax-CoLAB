@@ -33,3 +33,7 @@
 ## 2024-05-24 - Unrelated State Updates Triggering Expensive Three.js Re-renders
 **Learning:** In components rendering React Three Fiber `<Canvas>` elements, frequent parent state updates (like animations or interval timers) can cause the entire Three.js sub-tree to be re-evaluated by React, even if the 3D data hasn't changed. This is a massive performance bottleneck.
 **Action:** Always isolate heavy Three.js components (like `InstancedMesh` with thousands of particles) using `React.memo` when their parent component manages unrelated, frequently updating state (e.g., overlay opacities or lightning flashes).
+
+## 2026-05-10 - Pre-calculating string transformations in loops
+**Learning:** Performing redundant string operations like `.upper()` inside loops or dictionary comprehensions unnecessarily increases CPU cycles and memory allocations, especially when the input list doesn't change.
+**Action:** Pre-calculate normalized versions of input strings once at the start of the function and reuse the resulting list in subsequent operations.

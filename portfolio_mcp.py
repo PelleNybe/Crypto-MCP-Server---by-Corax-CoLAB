@@ -48,8 +48,8 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     missing_keys = []
     missing_ids = []
 
-    for symbol in symbols:
-        key = symbol.upper()
+    upper_symbols = [s.upper() for s in symbols]
+    for key in upper_symbols:
         if key not in _CACHE["prices"]:
             coin_id = _CACHE.get("mapping", {}).get(key)
             if coin_id:
@@ -68,7 +68,7 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
             logger.debug("CoinGecko batch price lookup failed: %s", e)
 
     prices = _CACHE["prices"]
-    return {k: prices[k] for symbol in symbols if (k := symbol.upper()) in prices}
+    return {k: prices[k] for k in upper_symbols if k in prices}
 
 
 async def _get_price_ccxt(exchange, symbol):
