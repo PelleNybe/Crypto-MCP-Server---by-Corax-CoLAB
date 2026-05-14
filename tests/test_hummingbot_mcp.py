@@ -15,6 +15,7 @@ sys.modules["dotenv"] = MagicMock()
 
 import hummingbot_mcp
 
+
 def test_req_success():
     with patch("hummingbot_mcp.requests.request") as mock_request:
         mock_response = MagicMock()
@@ -29,9 +30,10 @@ def test_req_success():
         mock_request.assert_called_once()
         args, kwargs = mock_request.call_args
         assert kwargs["timeout"] == 15
-        assert kwargs["verify"] == False
+        assert kwargs["verify"] == hummingbot_mcp.HUMMINGBOT_VERIFY_SSL
         assert args[0] == "get"
         assert args[1].endswith("test/path")
+
 
 def test_req_exception():
     with patch("hummingbot_mcp.requests.request") as mock_request:
@@ -48,6 +50,7 @@ def test_req_exception():
         assert result["text"] == "Internal Server Error"
         assert "json" not in result
 
+
 def test_ping():
     with patch("hummingbot_mcp._req") as mock_req:
         mock_req.return_value = {"status_code": 200}
@@ -56,13 +59,21 @@ def test_ping():
         assert "status=200" in result
         mock_req.assert_called_once_with("")
 
+
 def test_get_balances():
     with patch("hummingbot_mcp._req") as mock_req:
         mock_req.return_value = {"status_code": 200, "json": {"balances": []}}
-        result = hummingbot_mcp.get_balances(network="ethereum", chain="mainnet", address="0x123")
+        result = hummingbot_mcp.get_balances(
+            network="ethereum", chain="mainnet", address="0x123"
+        )
         assert result["status_code"] == 200
         assert result["json"] == {"balances": []}
-        mock_req.assert_called_once_with("network/balances", method="post", json={"network": "ethereum", "chain": "mainnet", "address": "0x123"})
+        mock_req.assert_called_once_with(
+            "network/balances",
+            method="post",
+            json={"network": "ethereum", "chain": "mainnet", "address": "0x123"},
+        )
+
 
 def test_get_tokens():
     with patch("hummingbot_mcp._req") as mock_req:
@@ -70,23 +81,52 @@ def test_get_tokens():
         result = hummingbot_mcp.get_tokens(network="ethereum", chain="mainnet")
         assert result["status_code"] == 200
         assert result["json"] == {"tokens": []}
-        mock_req.assert_called_once_with("network/tokens", method="post", json={"network": "ethereum", "chain": "mainnet"})
+        mock_req.assert_called_once_with(
+            "network/tokens",
+            method="post",
+            json={"network": "ethereum", "chain": "mainnet"},
+        )
+
 
 def test_clob_markets():
     with patch("hummingbot_mcp._req") as mock_req:
         mock_req.return_value = {"status_code": 200, "json": {"markets": []}}
-        result = hummingbot_mcp.clob_markets(chain="mainnet", network="ethereum", connector="uniswap")
+        result = hummingbot_mcp.clob_markets(
+            chain="mainnet", network="ethereum", connector="uniswap"
+        )
         assert result["status_code"] == 200
         assert result["json"] == {"markets": []}
-        mock_req.assert_called_once_with("clob/markets", method="post", json={"chain": "mainnet", "network": "ethereum", "connector": "uniswap"})
+        mock_req.assert_called_once_with(
+            "clob/markets",
+            method="post",
+            json={"chain": "mainnet", "network": "ethereum", "connector": "uniswap"},
+        )
+
 
 def test_amm_price():
     with patch("hummingbot_mcp._req") as mock_req:
         mock_req.return_value = {"status_code": 200, "json": {"price": "100"}}
-        result = hummingbot_mcp.amm_price(chain="mainnet", network="ethereum", connector="uniswap", base="WETH", quote="USDT", amount="1", side="BUY")
+        result = hummingbot_mcp.amm_price(
+            chain="mainnet",
+            network="ethereum",
+            connector="uniswap",
+            base="WETH",
+            quote="USDT",
+            amount="1",
+            side="BUY",
+        )
         assert result["status_code"] == 200
         assert result["json"] == {"price": "100"}
-        mock_req.assert_called_once_with("amm/price", method="post", json={
-            "chain": "mainnet", "network": "ethereum", "connector": "uniswap",
-            "base": "WETH", "quote": "USDT", "amount": "1", "side": "BUY"
-        })
+        mock_req.assert_called_once_with(
+            "amm/price",
+            method="post",
+            json={
+                "chain": "mainnet",
+                "network": "ethereum",
+                "connector": "uniswap",
+                "base": "WETH",
+                "quote": "USDT",
+                "amount": "1",
+                "side": "BUY",
+            },
+        )
