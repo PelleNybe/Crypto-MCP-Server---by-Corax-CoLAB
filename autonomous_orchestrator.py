@@ -171,7 +171,13 @@ def calculate_consensus(votes):
     Evaluates the results from all active providers.
     Implements Majority Rule. If tie or no consensus, default is HOLD.
     """
-    decisions = [v.get("decision", "HOLD").upper() for v in votes]
+    decisions = []
+    for v in votes:
+        decision = v.get("decision")
+        decision_str = str(decision).upper() if isinstance(decision, str) else "HOLD"
+        decisions.append(
+            decision_str if decision_str in ["BUY", "SELL", "HOLD"] else "HOLD"
+        )
     vote_counts = {
         "BUY": decisions.count("BUY"),
         "SELL": decisions.count("SELL"),

@@ -125,3 +125,30 @@ def test_calculate_consensus_case_insensitivity():
     result = calculate_consensus(votes)
     assert result["decision"] == "BUY"
     assert result["vote_counts"]["BUY"] == 2
+
+
+def test_calculate_consensus_none_decision():
+    """Verifies that a vote with a None decision is gracefully handled and counted as HOLD."""
+    votes = [{"decision": None, "provider": "p1"}]
+    result = calculate_consensus(votes)
+    assert result["decision"] == "HOLD"
+    assert result["vote_counts"]["HOLD"] == 1
+    assert result["total_votes"] == 1
+
+
+def test_calculate_consensus_non_string_decision():
+    """Verifies that a vote with a non-string decision is gracefully handled and counted as HOLD."""
+    votes = [{"decision": 123, "provider": "p1"}]
+    result = calculate_consensus(votes)
+    assert result["decision"] == "HOLD"
+    assert result["vote_counts"]["HOLD"] == 1
+    assert result["total_votes"] == 1
+
+
+def test_calculate_consensus_unknown_decision():
+    """Verifies that a vote with an unknown decision string is gracefully handled and counted as HOLD."""
+    votes = [{"decision": "UNKNOWN", "provider": "p1"}]
+    result = calculate_consensus(votes)
+    assert result["decision"] == "HOLD"
+    assert result["vote_counts"]["HOLD"] == 1
+    assert result["total_votes"] == 1
