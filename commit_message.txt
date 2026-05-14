@@ -1,0 +1,5 @@
+🔒 Fix insecure randomness in Monte Carlo simulation
+
+🎯 **What:** The Monte Carlo simulation in `ta_mcp.py` was generating pseudo-random paths using a predictable PRNG seed derived from the current asset price (`np.random.seed(int(current_price * 100) % 100000)`).
+⚠️ **Risk:** An attacker or malicious user could predict the pseudo-random number generator's output sequence since the seed was based on publicly known data (the current price). This allows prediction or manipulation of the simulation paths, compromising the integrity of trading strategies based on this Monte Carlo simulation.
+🛡️ **Solution:** The predictable `np.random.seed` line was replaced with a cryptographically secure seed sourced directly from the operating system's entropy pool (`os.urandom(4)`). This ensures the simulated paths are unpredictable and cryptographically robust.

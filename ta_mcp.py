@@ -108,6 +108,10 @@ def monte_carlo_simulation(
 
         # Generate random paths
         # Z is standard normal distributed random variables
+        # Using a secure random seed from os.urandom
+        import os
+
+        np.random.seed(int.from_bytes(os.urandom(4), byteorder="little"))
         Z = norm.ppf(np.random.rand(future_steps, simulations))
         daily_returns = np.exp(drift + stdev * Z)
 
