@@ -29,21 +29,29 @@ CACHE_TTL = int(os.getenv("PORTFOLIO_CACHE_TTL", "30"))
 MAPPING_TTL = int(os.getenv("PORTFOLIO_MAPPING_TTL", "3600"))
 
 
+def _update_mapping_if_needed(now: float) -> bool:
+    if _CACHE["mapping"] is not None and (
+        now - _CACHE["mapping_timestamp"] <= MAPPING_TTL
+    ):
+        return True
+    try:
+        coins = cg.get_coins_list()
+        _CACHE["mapping"] = {c["symbol"].upper(): c["id"] for c in coins}
+        _CACHE["mapping_timestamp"] = now
+        return True
+    except Exception as e:
+        logger.debug("CoinGecko mapping lookup failed: %s", e)
+        return _CACHE["mapping"] is not None
+
+
 def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     now = time.time()
     if now - _CACHE["timestamp"] > CACHE_TTL:
         _CACHE["prices"] = {}
         _CACHE["timestamp"] = now
 
-    if _CACHE["mapping"] is None or (now - _CACHE["mapping_timestamp"] > MAPPING_TTL):
-        try:
-            coins = cg.get_coins_list()
-            _CACHE["mapping"] = {c["symbol"].upper(): c["id"] for c in coins}
-            _CACHE["mapping_timestamp"] = now
-        except Exception as e:
-            logger.debug("CoinGecko mapping lookup failed: %s", e)
-            if _CACHE["mapping"] is None:
-                return {}
+    if not _update_mapping_if_needed(now):
+        return {}
 
     missing_keys = []
     missing_ids = []
@@ -51,8 +59,7 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     upper_symbols = [s.upper() for s in symbols]
     for key in upper_symbols:
         if key not in _CACHE["prices"]:
-            coin_id = _CACHE.get("mapping", {}).get(key)
-            if coin_id:
+            if coin_id := _CACHE.get("mapping", {}).get(key):
                 missing_keys.append(key)
                 missing_ids.append(coin_id)
 
@@ -61,8 +68,7 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
             ids_str = ",".join(missing_ids)
             rp = cg.get_price(ids=ids_str, vs_currencies="usd")
             for key, coin_id in zip(missing_keys, missing_ids):
-                price = rp.get(coin_id, {}).get("usd")
-                if price:
+                if price := rp.get(coin_id, {}).get("usd"):
                     _CACHE["prices"][key] = price
         except Exception as e:
             logger.debug("CoinGecko batch price lookup failed: %s", e)
