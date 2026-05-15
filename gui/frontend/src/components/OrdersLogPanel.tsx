@@ -110,23 +110,27 @@ export default function OrdersLogPanel() {
       </table>
 
       {orders.length > rowsPerPage && (
-        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
+        <nav aria-label="Orders log pagination" style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '15px' }}>
           <button
             onClick={() => setPage(p => Math.max(1, p - 1))}
             disabled={page === 1}
+            aria-label="Previous page"
+            title={page === 1 ? "Already on the first page" : "Go to previous page"}
             className="btn-outline" style={{ padding: '5px 10px' }}>
             Prev
           </button>
-          <span style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', fontFamily: 'monospace' }}>
-            {page} / {totalPages}
+          <span aria-live="polite" aria-atomic="true" style={{ color: '#94a3b8', display: 'flex', alignItems: 'center', fontFamily: 'monospace' }}>
+            Page {page} of {totalPages}
           </span>
           <button
             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
             disabled={page === totalPages}
+            aria-label="Next page"
+            title={page === totalPages ? "Already on the last page" : "Go to next page"}
             className="btn-outline" style={{ padding: '5px 10px' }}>
             Next
           </button>
-        </div>
+        </nav>
       )}
     </div>
   );
