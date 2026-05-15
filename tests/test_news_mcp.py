@@ -44,7 +44,7 @@ def test_get_latest_news():
     mock_client.get.return_value = mock_response
     mock_client.__aenter__.return_value = mock_client
 
-    with patch("news_mcp.httpx.get", return_value=mock_response):
+    with patch("news_mcp.httpx.AsyncClient", return_value=mock_client):
         res = asyncio.run(get_latest_news())
         assert res["status"] == "success"
         assert len(res["news"]) == 2

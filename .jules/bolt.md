@@ -37,3 +37,6 @@
 ## 2026-05-10 - Pre-calculating string transformations in loops
 **Learning:** Performing redundant string operations like `.upper()` inside loops or dictionary comprehensions unnecessarily increases CPU cycles and memory allocations, especially when the input list doesn't change.
 **Action:** Pre-calculate normalized versions of input strings once at the start of the function and reuse the resulting list in subsequent operations.
+## 2025-05-18 - Async HTTP in news_mcp.py
+**Learning:** Using synchronous `httpx.get` calls inside `async def` MCP tools blocks the event loop, degrading performance and increasing response times.
+**Action:** Replace synchronous HTTP calls with `async with httpx.AsyncClient() as client: await client.get(...)` and ensure tests patch `httpx.AsyncClient` using an `AsyncMock` for the context manager.
