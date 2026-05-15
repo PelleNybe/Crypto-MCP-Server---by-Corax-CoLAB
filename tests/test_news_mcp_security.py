@@ -10,17 +10,23 @@ mock_mcp.server.fastmcp.FastMCP.return_value = mock_fastmcp
 sys.modules["mcp"] = mock_mcp
 sys.modules["mcp.server.fastmcp"] = MagicMock()
 sys.modules["mcp.server.fastmcp"].FastMCP = MagicMock(return_value=mock_fastmcp)
+sys.modules["httpx"] = MagicMock()
 sys.modules["requests"] = MagicMock()
 sys.modules["dotenv"] = MagicMock()
 
 from news_mcp import search_news
+from unittest.mock import AsyncMock
 
-@patch('news_mcp.httpx.get')
-def test_search_news_parameter_encoding(mock_get):
+@patch('news_mcp.httpx.AsyncClient')
+def test_search_news_parameter_encoding(mock_async_client_class):
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"results": []}
-    mock_get.return_value = mock_response
+
+    mock_client = AsyncMock()
+    mock_client.get.return_value = mock_response
+    mock_client.__aenter__.return_value = mock_client
+    mock_async_client_class.return_value = mock_client
 
     # Malicious query attempting to inject additional parameters
     malicious_query = "BTC&public=false"
@@ -28,7 +34,7 @@ def test_search_news_parameter_encoding(mock_get):
     asyncio.run(search_news(malicious_query))
 
     # Get the URL and params that were actually called
-    args, kwargs = mock_get.call_args
+    args, kwargs = mock_client.get.call_args
 
     if kwargs.get('params'):
         # If using params dict, requests handles encoding
