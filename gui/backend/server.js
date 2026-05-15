@@ -574,7 +574,9 @@ app.post('/api/order/approve', async (req, res) => {
           console.error('DB UPDATE error (placed):', err);
           return res.status(500).json({ ok: false, error: 'Database operation failed' });
         }
-        io.emit('order_placed', { id: orderId, ...orderArgs, response: orderResp });
+        // Extract fields to prevent leaking orderArgs.params (which contains DASHBOARD_PASSWORD)
+        const { params, ...safeArgs } = orderArgs;
+        io.emit('order_placed', { id: orderId, ...safeArgs, response: orderResp });
         res.json({ ok: true, data: orderResp });
       });
     } catch (apiErr) {
