@@ -3,26 +3,29 @@ import React, { useEffect, useState } from 'react';
 import OrbitalPortfolio from './features/OrbitalPortfolio'
 import socket from '../socket'
 import AssetUniverse from './features/AssetUniverse'
+import CyberpunkLoader from './CyberpunkLoader'
 
 export default function PortfolioPanel() {
   const [glitchKey, setGlitchKey] = useState(0);
   const [details, setDetails] = useState<any[]>([])
   const [total, setTotal] = useState<number>(0)
   const [viewMode, setViewMode] = useState<'3d' | 'list'>('3d')
+  const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
     authenticatedFetch('/api/portfolio?exchanges=binance').then(r=>r.json()).then(j=>{
       if (j.ok && j.data) {
         setDetails(j.data.details || [])
         setTotal(j.data.total_usd || 0)
+        setDataLoaded(true);
       }
     }).catch(console.error)
-
 
     socket.on('portfolio', (data:any) => {
       if (data) {
         setTotal(data.total_usd || 0)
         setDetails(data.details || [])
+        setDataLoaded(true);
       }
     })
     return ()=>{ socket.disconnect() }
@@ -30,15 +33,8 @@ export default function PortfolioPanel() {
 
   return (
     <div className="card interactive-element">
-      {!data ? <CyberpunkLoader message="Syncing Assets..." /> :
+      {!dataLoaded ? <CyberpunkLoader message="Syncing Assets..." /> :
       <>
-
-      {!data ? <CyberpunkLoader message="Syncing Assets..." /> :
-      <>
-
-      {!data ? <CyberpunkLoader message="Syncing Assets..." /> :
-      <>
-
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center', marginBottom: '1rem'}}>
         <h3 style={{margin: 0}}>Asset Universe</h3>
         <div style={{display:'flex', gap: '0.5rem'}}>
@@ -96,11 +92,7 @@ export default function PortfolioPanel() {
           </table>
         </div>
       )}
-          </>
-      }
-          </>
-      }
-          </>
+      </>
       }
     </div>
   )
