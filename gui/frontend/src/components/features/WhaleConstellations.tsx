@@ -144,11 +144,21 @@ export default function WhaleConstellations() {
     };
 
     fetchConstellations();
-    const interval = setInterval(fetchConstellations, 120000); // refresh every 2 minutes
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchConstellationsWithPolling = async () => {
+      try {
+        await fetchConstellations();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchConstellationsWithPolling, 120000);
+      }
+    };
+
+    fetchConstellationsWithPolling();
 
     return () => {
       active = false;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, []);
 

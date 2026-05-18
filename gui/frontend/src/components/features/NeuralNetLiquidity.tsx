@@ -87,8 +87,18 @@ export default function NeuralNetLiquidity() {
     };
 
     fetchLiquidity();
-    const interval = setInterval(fetchLiquidity, 30000);
-    return () => { active = false; clearInterval(interval); };
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchLiquidityWithPolling = async () => {
+      try {
+        await fetchLiquidity();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchLiquidityWithPolling, 30000);
+      }
+    };
+
+    fetchLiquidityWithPolling();
+    return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
   return (

@@ -13,9 +13,7 @@
 ## 2024-05-15 - React Three Fiber Memoization
 **Learning:** React Three Fiber components inside list maps (like `<Star>` in `<GalaxyView>`) re-render entire Three.js layouts when parent state changes. Even if internal Three.js hooks limit calculation overhead, the React reconciliation diffing is slow for a large number of Canvas objects.
 **Action:** Always wrap `<Canvas>` list item components in `React.memo` and provide stable event handlers via `useCallback` to prevent unnecessary massive Three.js sub-tree updates.
-## 2024-04-17 - Prevent API Piling
-**Learning:** High-frequency polling using `setInterval` can cause API requests to pile up and cause a DoS condition on the backend if responses are delayed.
-**Action:** Use a recursive `setTimeout` within a `finally` block inside an async polling function to ensure the next request is only scheduled after the previous one completes.
+
 ## 2025-04-24 - Optimize Dictionary Lookups
 **Learning:** Repeated dictionary key lookups and string method calls inside tight loops are significantly slower than dictionary comprehensions.
 **Action:** Use dictionary comprehensions, local variable aliasing, and the walrus operator () for inline assignments when processing dictionary lookups within loops.
@@ -23,12 +21,6 @@
 **Learning:** Repeated dictionary key lookups and string method calls inside tight loops are significantly slower than dictionary comprehensions.
 **Action:** Use dictionary comprehensions, local variable aliasing, and the walrus operator (`:=`) for inline assignments when processing dictionary lookups within loops.
 
-## 2025-05-15 - Asynchronous HTTP in FastMCP
-**Learning:** Using synchronous HTTP clients like `requests` in asynchronous FastMCP tools blocks the main event loop, severely degrading performance under concurrent load.
-**Action:** Always use asynchronous HTTP clients such as `httpx.AsyncClient` for network operations within FastMCP tools to maintain non-blocking execution and improve overall server throughput.
-## 2024-05-18 - ⚡ Bolt: Optimize DexScreener API calls with httpx
-**Learning:** Replacing synchronous `requests.get()` with `httpx.AsyncClient().get()` in `onchain_mcp.py` allows non-blocking HTTP requests, significantly improving throughput when making multiple concurrent API calls (measured ~1.8x speedup for 10 requests).
-**Action:** When implementing new MCP tools that perform I/O-bound tasks (like external API calls), default to using `httpx` and `async/await` rather than synchronous `requests`.
 
 ## 2024-05-24 - Unrelated State Updates Triggering Expensive Three.js Re-renders
 **Learning:** In components rendering React Three Fiber `<Canvas>` elements, frequent parent state updates (like animations or interval timers) can cause the entire Three.js sub-tree to be re-evaluated by React, even if the 3D data hasn't changed. This is a massive performance bottleneck.
@@ -37,9 +29,7 @@
 ## 2026-05-10 - Pre-calculating string transformations in loops
 **Learning:** Performing redundant string operations like `.upper()` inside loops or dictionary comprehensions unnecessarily increases CPU cycles and memory allocations, especially when the input list doesn't change.
 **Action:** Pre-calculate normalized versions of input strings once at the start of the function and reuse the resulting list in subsequent operations.
-## 2025-05-18 - Async HTTP in news_mcp.py
-**Learning:** Using synchronous `httpx.get` calls inside `async def` MCP tools blocks the event loop, degrading performance and increasing response times.
-**Action:** Replace synchronous HTTP calls with `async with httpx.AsyncClient() as client: await client.get(...)` and ensure tests patch `httpx.AsyncClient` using an `AsyncMock` for the context manager.
+
 ## 2025-05-19 - Prevent API Piling in GasHologram
 **Learning:** High-frequency polling using `setInterval` without waiting for the previous request to finish can cause API requests to pile up, degrading frontend performance and causing backend DoS conditions if responses are delayed.
 **Action:** Replaced `setInterval` with a recursive `setTimeout` inside a `finally` block in `fetchGas` to ensure the next request is scheduled only after the previous one completes.

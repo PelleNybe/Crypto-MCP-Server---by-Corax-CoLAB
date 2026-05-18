@@ -18,12 +18,13 @@ sys.modules["pycoingecko"] = MagicMock()
 from unittest.mock import patch, MagicMock
 from coingecko_mcp import get_coins_markets
 
-@patch('coingecko_mcp.cg')
+
+@patch("coingecko_mcp.cg")
 def test_get_coins_markets_success(mock_cg):
     # Setup mock
     mock_cg.get_coins_markets.return_value = [
         {"id": "bitcoin", "symbol": "btc", "name": "Bitcoin", "current_price": 50000},
-        {"id": "ethereum", "symbol": "eth", "name": "Ethereum", "current_price": 3000}
+        {"id": "ethereum", "symbol": "eth", "name": "Ethereum", "current_price": 3000},
     ]
 
     # Call function
@@ -35,7 +36,8 @@ def test_get_coins_markets_success(mock_cg):
     assert res[0]["id"] == "bitcoin"
     assert res[1]["id"] == "ethereum"
 
-@patch('coingecko_mcp.cg')
+
+@patch("coingecko_mcp.cg")
 def test_get_coins_markets_exception(mock_cg):
     # Setup mock to raise Exception
     mock_cg.get_coins_markets.side_effect = Exception("API rate limit exceeded")

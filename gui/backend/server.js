@@ -533,7 +533,8 @@ app.post('/api/order/pending', (req, res) => {
         return res.status(500).json({ ok: false, error: 'Database insert failed' });
       }
       const orderId = this.lastID;
-      io.emit('order_pending', { id: orderId, ...preview });
+      const { params: _params, ...safePreview } = preview;
+      io.emit('order_pending', { id: orderId, ...safePreview });
       res.json({ ok: true, id: orderId, data: preview });
     });
     stmt.finalize();

@@ -100,8 +100,18 @@ export default function RiskRadarPanel() {
     };
 
     fetchData();
-    const interval = setInterval(fetchData, 30000); // Check every 30s
-    return () => { active = false; clearInterval(interval); };
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchDataWithPolling = async () => {
+      try {
+        await fetchData();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchDataWithPolling, 30000);
+      }
+    };
+
+    fetchDataWithPolling();
+    return () => { active = false; clearTimeout(timeoutId); };
   }, [defcon, activeSymbol]);
 
 

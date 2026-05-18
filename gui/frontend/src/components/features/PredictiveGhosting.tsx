@@ -83,11 +83,21 @@ export default function PredictiveGhosting() {
     };
 
     fetchAndCalculate();
-    const interval = setInterval(fetchAndCalculate, 60000); // refresh every minute
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchAndCalculateWithPolling = async () => {
+      try {
+        await fetchAndCalculate();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchAndCalculateWithPolling, 60000);
+      }
+    };
+
+    fetchAndCalculateWithPolling();
 
     return () => {
         active = false;
-        clearInterval(interval);
+        clearTimeout(timeoutId);
     };
   }, [activeSymbolHook, activeExchange]);
 

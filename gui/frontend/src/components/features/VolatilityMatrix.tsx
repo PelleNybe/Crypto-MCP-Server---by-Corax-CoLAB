@@ -75,11 +75,20 @@ export default function VolatilityMatrix() {
     };
 
     fetchVolatilityData();
-    const interval = setInterval(fetchVolatilityData, 60000); // Check every minute
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchVolatilityDataWithPolling = async () => {
+      try {
+        await fetchVolatilityData();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchVolatilityDataWithPolling, 60000);
+      }
+    };
+    fetchVolatilityDataWithPolling();
 
     return () => {
       active = false;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, [activeSymbol]);
 

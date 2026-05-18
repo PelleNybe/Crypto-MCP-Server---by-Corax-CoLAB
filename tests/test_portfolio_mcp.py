@@ -17,10 +17,16 @@ sys.modules["dotenv"] = MagicMock()
 
 import portfolio_mcp
 
+
 class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
     async def asyncSetUp(self):
         # Reset cache and mocks
-        portfolio_mcp._CACHE = {"prices": {}, "timestamp": 0, "mapping": None, "mapping_timestamp": 0}
+        portfolio_mcp._CACHE = {
+            "prices": {},
+            "timestamp": 0,
+            "mapping": None,
+            "mapping_timestamp": 0,
+        }
 
     @patch("portfolio_mcp._get_prices_coingecko")
     @patch("portfolio_mcp._get_price_ccxt")
@@ -31,6 +37,7 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
         async def mock_ccxt_call(ex, symbol):
             await asyncio.sleep(0.01)
             return 100.0
+
         mock_ccxt.side_effect = mock_ccxt_call
 
         mock_ex = AsyncMock()
@@ -64,6 +71,7 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
 
         # Assertions
         self.assertEqual(results, [])
+
 
 if __name__ == "__main__":
     unittest.main()
