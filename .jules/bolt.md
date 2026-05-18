@@ -40,3 +40,6 @@
 ## 2025-05-18 - Async HTTP in news_mcp.py
 **Learning:** Using synchronous `httpx.get` calls inside `async def` MCP tools blocks the event loop, degrading performance and increasing response times.
 **Action:** Replace synchronous HTTP calls with `async with httpx.AsyncClient() as client: await client.get(...)` and ensure tests patch `httpx.AsyncClient` using an `AsyncMock` for the context manager.
+## 2025-05-19 - Prevent API Piling in GasHologram
+**Learning:** High-frequency polling using `setInterval` without waiting for the previous request to finish can cause API requests to pile up, degrading frontend performance and causing backend DoS conditions if responses are delayed.
+**Action:** Replaced `setInterval` with a recursive `setTimeout` inside a `finally` block in `fetchGas` to ensure the next request is scheduled only after the previous one completes.

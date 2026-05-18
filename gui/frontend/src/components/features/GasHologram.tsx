@@ -119,6 +119,8 @@ export default function GasHologram() {
   useEffect(() => {
     let active = true;
 
+    let timeoutId: NodeJS.Timeout;
+
     const fetchGas = async () => {
         try {
             const data = await callMcpEndpoint('MCP_ONCHAIN', 'gas_price', {});
@@ -128,12 +130,16 @@ export default function GasHologram() {
         } catch (err) {
             console.error("Error fetching gas price:", err);
             // No fallback allowed
+        } finally {
+            if (active) {
+                // ⚡ Bolt: Replaced setInterval with recursive setTimeout to prevent API piling
+                timeoutId = setTimeout(fetchGas, 15000); // 15 sec
+            }
         }
     };
 
     fetchGas();
-    const interval = setInterval(fetchGas, 15000); // 15 sec
-    return () => { active = false; clearInterval(interval); };
+    return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
   return (
