@@ -1,5 +1,7 @@
-🔒 Fix insecure randomness in Monte Carlo simulation
+🛡️ Sentinel: [HIGH] Fix SSRF and Prototype Pollution in MCP proxy endpoint
 
-🎯 **What:** The Monte Carlo simulation in `ta_mcp.py` was generating pseudo-random paths using a predictable PRNG seed derived from the current asset price (`np.random.seed(int(current_price * 100) % 100000)`).
-⚠️ **Risk:** An attacker or malicious user could predict the pseudo-random number generator's output sequence since the seed was based on publicly known data (the current price). This allows prediction or manipulation of the simulation paths, compromising the integrity of trading strategies based on this Monte Carlo simulation.
-🛡️ **Solution:** The predictable `np.random.seed` line was replaced with a cryptographically secure seed sourced directly from the operating system's entropy pool (`os.urandom(4)`). This ensures the simulated paths are unpredictable and cryptographically robust.
+🚨 Severity: HIGH
+💡 Vulnerability: The `/api/mcp` endpoint in `gui/backend/server.js` used unvalidated property access (`mcpUrls[mcp]`) and only checked for a falsy value (`!mcpUrl`). By passing a built-in object property like `__proto__` or `toString`, an attacker could bypass the check and cause Server-Side Request Forgery or Application crash.
+🎯 Impact: An attacker could bypass the `Unknown MCP endpoint` validation, causing unhandled exceptions when passing built-in functions to Axios, or potentially discovering and exploiting internal network structure.
+🔧 Fix: Used `typeof mcp === 'string'` and `Object.prototype.hasOwnProperty.call()` to safely validate that the requested key actually exists on the `mcpUrls` object itself, and verified the fetched URL is a string.
+✅ Verification: Ran a custom fetch test to submit `mcp: "__proto__"` and verified it now securely returns `400 Bad Request` with `Unknown MCP endpoint`.

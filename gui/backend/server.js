@@ -233,8 +233,11 @@ app.post('/api/mcp', async (req, res) => {
   const { mcp, method, params } = req.body;
   if (!mcp || !method) return res.status(400).json({ ok: false, error: 'Missing mcp or method' });
 
+  if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
+    return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
+  }
   const mcpUrl = mcpUrls[mcp];
-  if (!mcpUrl) return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
+  if (typeof mcpUrl !== 'string') return res.status(400).json({ ok: false, error: 'Invalid MCP endpoint' });
 
   try {
     const result = await callMCP(mcpUrl, method, params || {});
