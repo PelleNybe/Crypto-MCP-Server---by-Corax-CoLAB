@@ -32,11 +32,13 @@ import GasHologram from "./components/features/GasHologram"
 import { getAuthToken, setAuthToken } from './auth'
 import { callMcpEndpoint } from './api_mcp'
 import { useActivePortfolioSymbol } from './hooks/useActivePortfolioSymbol'
+import { Loader } from 'lucide-react';
 
 export default function App() {
   const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral');
   const [isAuthenticated, setIsAuthenticated] = useState(!!getAuthToken());
   const [password, setPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
 
   useEffect(() => {
@@ -71,8 +73,13 @@ export default function App() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    setAuthToken(password);
-    setIsAuthenticated(true);
+    setIsLoggingIn(true);
+    // Simulate slight delay for feedback
+    setTimeout(() => {
+      setAuthToken(password);
+      setIsAuthenticated(true);
+      setIsLoggingIn(false);
+    }, 500);
   };
 
   if (!isAuthenticated) {
@@ -80,18 +87,8 @@ export default function App() {
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #000 100%)' }}>
         <form onSubmit={handleLogin} className="card interactive-element" style={{ width: 350, display: 'flex', flexDirection: 'column', gap: 16, border: '1px solid #334155', boxShadow: '0 0 30px rgba(16, 185, 129, 0.1)' }}>
           <div style={{display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center'}}>
-
-
-
-
-
             <div style={{width: '20px', height: '20px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981'}}></div>
             <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '2px', color: '#fff' }}>SYSTEM AUTHENTICATION</h3>
-
-
-
-
-
           </div>
           <p className="small-muted" style={{textAlign: 'center', fontFamily: 'monospace'}}><a href="https://coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Corax CoLAB</a> | <a href="https://pellenybe.github.io" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Pelle Nyberg</a> (<a href="https://github.com/PelleNybe" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>GitHub</a>) | <a href="https://cryptop.coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Crypto P's Crypto Circus</a></p>
           <input
@@ -104,14 +101,18 @@ export default function App() {
             style={{ padding: '12px', borderRadius: '4px', border: '1px solid #334155', background: 'rgba(0,0,0,0.5)', color: '#10b981', fontFamily: 'monospace', outline: 'none', transition: 'border 0.3s' }}
             onFocus={(e) => e.target.style.border = '1px solid #10b981'}
             onBlur={(e) => e.target.style.border = '1px solid #334155'}
+            disabled={isLoggingIn}
           />
-          <button type="submit" className="btn-primary" style={{fontFamily: 'monospace', letterSpacing: '2px'}}>INITIALIZE LINK</button>
+          <button
+            type="submit"
+            className="btn-primary"
+            style={{fontFamily: 'monospace', letterSpacing: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'}}
+            disabled={isLoggingIn}
+            aria-busy={isLoggingIn}
+          >
+            {isLoggingIn ? <><Loader size={16} className="lucide-spin" style={{ animation: 'spin 2s linear infinite' }} /> INITIALIZING...</> : "INITIALIZE LINK"}
+          </button>
         </form>
-
-
-
-
-
       </div>
     );
   }
@@ -126,23 +127,13 @@ export default function App() {
         backgroundSize: '30px 30px',
         zIndex: 0,
         pointerEvents: 'none'
-
-
-
-
-
       }}></div>
 
       {/* Sentiment Toggles (Manual override) */}
       <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 9999, display: 'flex', gap: '10px' }}>
-        <button aria-label="Set Bull Market Mode" onClick={() => { setSentiment('bull'); document.body.setAttribute('data-sentiment', 'bull'); }} className="btn-outline" style={{ color: '#10b981', borderColor: sentiment === 'bull' ? '#10b981' : '#333' }}>BULL MODE</button>
-        <button aria-label="Set Neutral Market Mode" onClick={() => { setSentiment('neutral'); document.body.setAttribute('data-sentiment', 'neutral'); }} className="btn-outline" style={{ color: '#60a5fa', borderColor: sentiment === 'neutral' ? '#60a5fa' : '#333' }}>NEUTRAL</button>
-        <button aria-label="Set Bear Market Mode" onClick={() => { setSentiment('bear'); document.body.setAttribute('data-sentiment', 'bear'); }} className="btn-outline" style={{ color: '#ef4444', borderColor: sentiment === 'bear' ? '#ef4444' : '#333' }}>BEAR MODE</button>
-
-
-
-
-
+        <button aria-label="Set Bull Market Mode" aria-pressed={sentiment === 'bull'} onClick={() => { setSentiment('bull'); document.body.setAttribute('data-sentiment', 'bull'); }} className="btn-outline" style={{ color: '#10b981', borderColor: sentiment === 'bull' ? '#10b981' : '#333' }}>BULL MODE</button>
+        <button aria-label="Set Neutral Market Mode" aria-pressed={sentiment === 'neutral'} onClick={() => { setSentiment('neutral'); document.body.setAttribute('data-sentiment', 'neutral'); }} className="btn-outline" style={{ color: '#60a5fa', borderColor: sentiment === 'neutral' ? '#60a5fa' : '#333' }}>NEUTRAL</button>
+        <button aria-label="Set Bear Market Mode" aria-pressed={sentiment === 'bear'} onClick={() => { setSentiment('bear'); document.body.setAttribute('data-sentiment', 'bear'); }} className="btn-outline" style={{ color: '#ef4444', borderColor: sentiment === 'bear' ? '#ef4444' : '#333' }}>BEAR MODE</button>
       </div>
 
       <div className="main-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
