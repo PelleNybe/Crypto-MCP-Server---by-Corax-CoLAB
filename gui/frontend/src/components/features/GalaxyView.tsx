@@ -96,8 +96,18 @@ export default function GalaxyView() {
     };
 
     fetchCoins();
-    const interval = setInterval(fetchCoins, 60000); // 1 min
-    return () => { active = false; clearInterval(interval); };
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchCoinsWithPolling = async () => {
+      try {
+        await fetchCoins();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchCoinsWithPolling, 60000);
+      }
+    };
+
+    fetchCoinsWithPolling();
+    return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
   // ⚡ Bolt: Wrapped onSelect in useCallback to prevent child React.memo invalidation.

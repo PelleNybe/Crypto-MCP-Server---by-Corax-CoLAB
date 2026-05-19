@@ -72,8 +72,18 @@ export default function MarketSentimentAnalyzer() {
     };
 
     fetchSentiment();
-    const interval = setInterval(fetchSentiment, 60000);
-    return () => clearInterval(interval);
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchSentimentWithPolling = async () => {
+      try {
+        await fetchSentiment();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchSentimentWithPolling, 60000);
+      }
+    };
+
+    fetchSentimentWithPolling();
+    return () => clearTimeout(timeoutId);
   }, [activeSymbol]);
 
   const getStyleColor = () => {

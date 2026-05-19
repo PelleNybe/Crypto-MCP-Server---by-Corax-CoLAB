@@ -181,8 +181,18 @@ export default function OrbitalPortfolio() {
     };
 
     fetchPortfolioData();
-    const interval = setInterval(fetchPortfolioData, 30000);
-    return () => { active = false; clearInterval(interval); };
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchPortfolioDataWithPolling = async () => {
+      try {
+        await fetchPortfolioData();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchPortfolioDataWithPolling, 30000);
+      }
+    };
+
+    fetchPortfolioDataWithPolling();
+    return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
   return (

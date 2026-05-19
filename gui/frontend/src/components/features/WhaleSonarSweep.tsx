@@ -59,11 +59,21 @@ export default function WhaleSonarSweep() {
     };
 
     fetchSonarData();
-    const interval = setInterval(fetchSonarData, 60000); // refresh every minute
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchSonarDataWithPolling = async () => {
+      try {
+        await fetchSonarData();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchSonarDataWithPolling, 60000);
+      }
+    };
+
+    fetchSonarDataWithPolling();
 
     return () => {
       active = false;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, []);
 

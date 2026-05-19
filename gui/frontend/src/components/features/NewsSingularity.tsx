@@ -85,11 +85,21 @@ export default function NewsSingularity() {
         };
 
         fetchMarketDataAndCreateNews();
-        const interval = setInterval(fetchMarketDataAndCreateNews, 60000); // refresh every minute
+        let timeoutId: NodeJS.Timeout;
+
+    const fetchMarketDataAndCreateNewsWithPolling = async () => {
+      try {
+        await fetchMarketDataAndCreateNews();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchMarketDataAndCreateNewsWithPolling, 60000);
+      }
+    };
+
+    fetchMarketDataAndCreateNewsWithPolling();
 
         return () => {
             active = false;
-            clearInterval(interval);
+            clearTimeout(timeoutId);
         };
     }, []);
 

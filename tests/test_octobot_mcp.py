@@ -15,6 +15,7 @@ sys.modules["dotenv"] = MagicMock()
 
 import octobot_mcp
 
+
 def test_req_success():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_response = MagicMock()
@@ -32,6 +33,7 @@ def test_req_success():
         assert args[0] == "get"
         assert args[1].endswith("api/test")
 
+
 def test_req_exception():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_response = MagicMock()
@@ -46,6 +48,7 @@ def test_req_exception():
         assert "text" in result
         assert result["text"] == "Internal Server Error"
         assert "json" not in result
+
 
 def test_req_headers_with_api_key():
     with patch("octobot_mcp.requests.request") as mock_request:
@@ -65,6 +68,7 @@ def test_req_headers_with_api_key():
         finally:
             octobot_mcp.OCTOBOT_API_KEY = original_api_key
 
+
 def test_req_headers_without_api_key():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_response = MagicMock()
@@ -82,6 +86,7 @@ def test_req_headers_without_api_key():
         finally:
             octobot_mcp.OCTOBOT_API_KEY = original_api_key
 
+
 def test_req_request_exception():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_request.side_effect = Exception("Connection Timeout")
@@ -92,6 +97,7 @@ def test_req_request_exception():
         assert "text" in result
         assert result["text"] == "Connection Timeout"
         assert "json" not in result
+
 
 def test_status_success():
     with patch("octobot_mcp.requests.request") as mock_request:
@@ -108,6 +114,7 @@ def test_status_success():
         args, kwargs = mock_request.call_args
         assert args[1].endswith("api/bot/status")
 
+
 def test_status_error():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_request.side_effect = Exception("API connection failed")
@@ -119,10 +126,12 @@ def test_status_error():
         assert result["text"] == "API connection failed"
         assert "json" not in result
 
+
 def test_ping():
     result = octobot_mcp.ping()
     assert "octobot_mcp alive" in result
     assert octobot_mcp.OCTOBOT_REST_URL in result
+
 
 def test_portfolio_success():
     with patch("octobot_mcp.requests.request") as mock_request:
@@ -138,6 +147,7 @@ def test_portfolio_success():
         mock_request.assert_called_once()
         args, kwargs = mock_request.call_args
         assert args[1].endswith("api/portfolio/get_portfolio")
+
 
 def test_start_bot_success():
     with patch("octobot_mcp.requests.request") as mock_request:
@@ -155,6 +165,7 @@ def test_start_bot_success():
         assert args[0] == "post"
         assert args[1].endswith("api/bot/start")
 
+
 def test_stop_bot_success():
     with patch("octobot_mcp.requests.request") as mock_request:
         mock_response = MagicMock()
@@ -170,6 +181,7 @@ def test_stop_bot_success():
         args, kwargs = mock_request.call_args
         assert args[0] == "post"
         assert args[1].endswith("api/bot/stop")
+
 
 def test_history_success():
     with patch("octobot_mcp.requests.request") as mock_request:

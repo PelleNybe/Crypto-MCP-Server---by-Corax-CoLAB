@@ -93,8 +93,18 @@ export default function SentimentWordCloud() {
     };
 
     fetchNews();
-    const interval = setInterval(fetchNews, 120000); // 2 min
-    return () => { active = false; clearInterval(interval); };
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchNewsWithPolling = async () => {
+      try {
+        await fetchNews();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchNewsWithPolling, 120000);
+      }
+    };
+
+    fetchNewsWithPolling();
+    return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
   return (

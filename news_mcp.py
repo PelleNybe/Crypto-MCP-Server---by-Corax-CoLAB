@@ -28,10 +28,7 @@ async def get_latest_news(limit: int = 10) -> dict:
     try:
         # CryptoPanic public API for recent news
         url = "https://cryptopanic.com/api/v1/posts/"
-        params = {
-            "auth_token": "public",
-            "public": "true"
-        }
+        params = {"auth_token": "public", "public": "true"}
         async with httpx.AsyncClient() as client:
             response = await client.get(url, params=params, timeout=10)
 
@@ -88,11 +85,7 @@ async def search_news(query: str, limit: int = 10) -> dict:
     """
     try:
         url = "https://cryptopanic.com/api/v1/posts/"
-        params = {
-            "auth_token": "public",
-            "public": "true",
-            "currencies": query
-        }
+        params = {"auth_token": "public", "public": "true", "currencies": query}
         async with httpx.AsyncClient() as client:
             response = await client.get(url, params=params, timeout=10)
         if response.status_code == 200:

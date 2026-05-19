@@ -115,11 +115,21 @@ export default function QuantumRiskMap() {
     };
 
     fetchRiskParams();
-    const interval = setInterval(fetchRiskParams, 60000); // Check every minute
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchRiskParamsWithPolling = async () => {
+      try {
+        await fetchRiskParams();
+      } finally {
+        if (active) timeoutId = setTimeout(fetchRiskParamsWithPolling, 60000);
+      }
+    };
+
+    fetchRiskParamsWithPolling();
 
     return () => {
       active = false;
-      clearInterval(interval);
+      clearTimeout(timeoutId);
     };
   }, [activeSymbol, activeExchange]);
 
