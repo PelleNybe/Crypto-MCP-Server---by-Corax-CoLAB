@@ -126,9 +126,9 @@ export default function BacktestArenaPanel() {
 
   // Handle Playback
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let timeoutId: NodeJS.Timeout;
     if (isPlaying) {
-      interval = setInterval(() => {
+      const stepPlayback = () => {
         setProgress(p => {
           if (p >= 100) {
             setIsPlaying(false);
@@ -136,9 +136,11 @@ export default function BacktestArenaPanel() {
           }
           return p + speed;
         });
-      }, 100);
+        timeoutId = setTimeout(stepPlayback, 100);
+      };
+      stepPlayback();
     }
-    return () => clearInterval(interval);
+    return () => clearTimeout(timeoutId);
   }, [isPlaying, speed]);
 
   // Render Chart

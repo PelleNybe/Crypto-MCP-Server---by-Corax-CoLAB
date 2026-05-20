@@ -66,9 +66,19 @@ export default function App() {
         }
     };
 
-    fetchGlobalSentiment();
-    const interval = setInterval(fetchGlobalSentiment, 120000); // Check every 2 minutes
-    return () => clearInterval(interval);
+
+    let timeoutId: NodeJS.Timeout;
+
+    const fetchGlobalSentimentWithPolling = async () => {
+      try {
+        await
+      } finally {
+        timeoutId = setTimeout(fetchGlobalSentimentWithPolling, 120000);
+      }
+    };
+
+    fetchGlobalSentimentWithPolling();
+    return () => clearTimeout(timeoutId);
   }, [isAuthenticated, activeSymbol]);
 
   const handleLogin = (e: React.FormEvent) => {
