@@ -6,3 +6,4 @@
 - Fix Hardcoded Password Exposure in Socket.io (`gui/backend/server.js`)
 - Fix API Piling caused by setInterval (`gui/frontend/src/components/features/*.tsx`)
 - Fix async HTTP in FastMCP Tools (`news_mcp.py` etc.)
+Removed API piling issues

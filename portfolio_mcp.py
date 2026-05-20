@@ -56,7 +56,11 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     missing_keys = []
     missing_ids = []
 
-    upper_symbols = [s.upper() for s in symbols]
+
+    # If this is called from fetch_exchange_balance, symbols are already upper-cased
+    # But just in case it is called directly from elsewhere, we map them here once.
+    # To optimize this when called from fetch_exchange_balance we just check if it's uppercase
+    upper_symbols = [s if s.isupper() else s.upper() for s in symbols]
     for key in upper_symbols:
         if key not in _CACHE["prices"]:
             if coin_id := _CACHE.get("mapping", {}).get(key):
@@ -103,22 +107,22 @@ async def fetch_exchange_balance(exch_low: str):
     try:
         bal = await ex.fetch_balance()
 
-        # Collect non-zero balances
-        balances = {
-            coin: amount
-            for coin, amount in bal.get("total", {}).items()
-            if amount and amount > 0
-        }
-        coins = list(balances.keys())
+        # Collect non-zero balances and pre-calculate upper symbols
+        balances = {}
+        upper_coins = []
+        for coin, amount in bal.get("total", {}).items():
+            if amount and amount > 0:
+                balances[coin] = amount
+                upper_coins.append(coin.upper())
 
-        # Batch fetch prices from Coingecko
+        # Batch fetch prices from Coingecko using pre-calculated upper symbols
         cg_prices = (
-            await asyncio.to_thread(_get_prices_coingecko, coins) if coins else {}
+            await asyncio.to_thread(_get_prices_coingecko, upper_coins) if upper_coins else {}
         )
 
         # For missing prices, prepare CCXT fallback tasks
-        async def _get_asset_price_ccxt_fallback(coin, amount):
-            price = cg_prices.get(coin.upper())
+        async def _get_asset_price_ccxt_fallback(coin, upper_coin, amount):
+            price = cg_prices.get(upper_coin)
             if price is None:
                 price = await _get_price_ccxt(ex, coin)
 
@@ -132,7 +136,8 @@ async def fetch_exchange_balance(exch_low: str):
 
         tasks = []
         for coin, amount in balances.items():
-            tasks.append(_get_asset_price_ccxt_fallback(coin, amount))
+            upper_coin = coin.upper()
+            tasks.append(_get_asset_price_ccxt_fallback(coin, upper_coin, amount))
 
         if tasks:
             details = await asyncio.gather(*tasks)

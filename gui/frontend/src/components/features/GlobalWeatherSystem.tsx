@@ -94,7 +94,9 @@ export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentime
   useEffect(() => {
     if (sentiment === 'bear') {
       let tick = 0;
-      const interval = setInterval(() => {
+      let timeoutId: NodeJS.Timeout;
+
+      const tickLightning = () => {
         tick++;
         // Trigger lightning deterministically based on tick
         if (tick % 5 === 0 || tick % 17 === 0) {
@@ -103,8 +105,11 @@ export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentime
           setTimeout(() => setLightning(true), 150);
           setTimeout(() => setLightning(false), 200);
         }
-      }, 1000);
-      return () => clearInterval(interval);
+        timeoutId = setTimeout(tickLightning, 1000);
+      };
+
+      tickLightning();
+      return () => clearTimeout(timeoutId);
     }
   }, [sentiment]);
 
