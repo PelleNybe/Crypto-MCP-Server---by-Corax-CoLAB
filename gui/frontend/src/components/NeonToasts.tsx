@@ -43,6 +43,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       >
         {toasts.map(toast => (
           <div key={toast.id} role="alert" style={{
+            position: 'relative',
+            overflow: 'hidden',
             background: 'rgba(2, 2, 5, 0.9)',
             border: `1px solid ${toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#60a5fa'}`,
             boxShadow: `0 0 15px ${toast.type === 'success' ? 'rgba(16,185,129,0.3)' : toast.type === 'error' ? 'rgba(239,68,68,0.3)' : 'rgba(96,165,250,0.3)'}`,
@@ -65,6 +67,14 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
               background: toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#60a5fa'
             }} />
             {toast.message}
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 0,
+              height: '3px',
+              background: toast.type === 'success' ? '#10b981' : toast.type === 'error' ? '#ef4444' : '#60a5fa',
+              animation: 'toast-progress 5s linear forwards'
+            }} />
           </div>
         ))}
       </div>

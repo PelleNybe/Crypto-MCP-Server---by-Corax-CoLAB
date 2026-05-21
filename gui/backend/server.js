@@ -15,6 +15,7 @@ const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 const crypto = require('crypto');
+const rateLimit = require('express-rate-limit');
 
 let DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD;
 if (!DASHBOARD_PASSWORD) {
@@ -26,6 +27,22 @@ if (!DASHBOARD_PASSWORD) {
   process.exit(1);
 }
 const app = express();
+
+// Security: General API rate limiting
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 500, // limit each IP to 500 requests per windowMs
+  message: { ok: false, error: 'Too many requests, please try again later.' }
+});
+app.use('/api/', apiLimiter);
+
+// Security: Stricter rate limiting for sensitive endpoints
+const sensitiveLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 30, // limit each IP to 30 requests per minute for sensitive endpoints
+  message: { ok: false, error: 'Rate limit exceeded for sensitive operation.' }
+});
+
 
 // Security: Restrict CORS to allowed origins to prevent unauthorized cross-origin requests
 const allowedOrigins = process.env.ALLOWED_ORIGINS
@@ -109,6 +126,51 @@ const PORT = parseInt(process.env.PORT || '4000', 10);
 
 // Initialize SQLite DB
 const DB_PATH = path.resolve(__dirname, 'orders.db');
+
+// Automated SQLite Backups
+const fsModule = require('fs');
+const backupDir = path.join(__dirname, 'backups');
+
+if (!fsModule.existsSync(backupDir)) {
+  fsModule.mkdirSync(backupDir, { recursive: true });
+}
+
+function backupDatabase() {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+  const backupFile = path.join(backupDir, `orders_backup_${timestamp}.db`);
+
+  db.serialize(() => {
+      db.run('BEGIN EXCLUSIVE', [], (err) => {
+        if (!err) {
+            try {
+              fsModule.copyFileSync(DB_PATH, backupFile);
+              console.log(`[Backup] Successfully created database backup: ${backupFile}`);
+
+              const files = fsModule.readdirSync(backupDir)
+                  .filter(f => f.startsWith('orders_backup_') && f.endsWith('.db'))
+                  .sort()
+                  .reverse();
+
+              if (files.length > 5) {
+                  files.slice(5).forEach(file => {
+                      fsModule.unlinkSync(path.join(backupDir, file));
+                  });
+              }
+            } catch (copyErr) {
+              console.error('[Backup] Failed to copy database file:', copyErr);
+            } finally {
+              db.run('COMMIT');
+            }
+        } else {
+            console.error('[Backup] Failed to lock database for backup:', err);
+        }
+      });
+  });
+}
+
+setInterval(backupDatabase, 6 * 60 * 60 * 1000);
+setTimeout(backupDatabase, 10000);
+
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
     console.error('Failed to open DB', err);
@@ -260,7 +322,7 @@ app.get('/api/ticker', async (req, res) => {
 });
 
 // POST /api/order/dry_run
-app.post('/api/order/dry_run', async (req, res) => {
+app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, params } = req.body || {};
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
@@ -313,7 +375,7 @@ app.post('/api/order/dry_run', async (req, res) => {
 });
 
 // POST /api/order/execute
-app.post('/api/order/execute', async (req, res) => {
+app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, execute, params } = req.body || {};
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
@@ -492,7 +554,7 @@ process.on('unhandledRejection', (reason) => {
 
 // POST /api/order/pending
 // Called by ccxt_mcp when AI tries to create an order
-app.post('/api/order/pending', (req, res) => {
+app.post('/api/order/pending', sensitiveLimiter, (req, res) => {
   const { exchange, symbol, side, type, amount, price, params, estimated_usd } = req.body || {};
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok: false, error: 'Missing or invalid required fields' });
@@ -546,7 +608,7 @@ app.post('/api/order/pending', (req, res) => {
 
 // POST /api/order/approve
 // Called by Dashboard UI to approve a pending order
-app.post('/api/order/approve', async (req, res) => {
+app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
   const { orderId } = req.body || {};
   if (!orderId) {
     return res.status(400).json({ ok: false, error: 'Missing orderId' });

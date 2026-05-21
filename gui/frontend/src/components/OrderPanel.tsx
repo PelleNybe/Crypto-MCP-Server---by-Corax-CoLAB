@@ -1,6 +1,7 @@
 import NeuralTradeVisualizer from './features/NeuralTradeVisualizer'
 import { authenticatedFetch } from "../auth"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useDebounce } from '../hooks/useDebounce'
 import { useToast } from './NeonToasts'
 
 export default function OrderPanel(){
@@ -14,6 +15,27 @@ export default function OrderPanel(){
   const [result,setResult]=useState<any>(null)
   const [routingActive, setRoutingActive] = useState(false)
   const { addToast } = useToast()
+
+  const debouncedExchange = useDebounce(exchange, 500);
+  const debouncedSymbol = useDebounce(symbol, 500);
+  const debouncedSide = useDebounce(side, 500);
+  const debouncedType = useDebounce(type, 500);
+  const debouncedAmount = useDebounce(amount, 500);
+  const debouncedPrice = useDebounce(price, 500);
+
+  useEffect(() => {
+    if (debouncedExchange && debouncedSymbol && debouncedAmount > 0) {
+      previewOrderDebounced();
+    }
+  }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice]);
+
+  async function previewOrderDebounced(){
+    setRoutingActive(true)
+    const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange: debouncedExchange,symbol: debouncedSymbol,side: debouncedSide,type: debouncedType,amount: debouncedAmount,price: debouncedPrice})})
+    const j = await resp.json()
+    if (j.ok) setPreview(j.data); // Suppress errors for auto-preview
+    setTimeout(() => setRoutingActive(false), 500)
+  }
 
   async function previewOrder(){
     setRoutingActive(true)
@@ -45,7 +67,7 @@ export default function OrderPanel(){
         <input aria-label="Enter Trade Amount" title="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
         {type==='limit' && <input aria-label="Enter Limit Price" title="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} />}
         <div style={{display:'flex',gap:8}}>
-          <button className="btn-primary" onClick={previewOrder} disabled={routingActive}>{routingActive ? "Routing..." : "Preview"}</button>
+          <button className="btn-primary" onClick={previewOrder} disabled={routingActive}>{routingActive ? "Routing..." : "Force Preview"}</button>
           <button onClick={placeOrder} disabled={routingActive}>{routingActive ? "Placing..." : "Place"}</button>
         </div>
         {preview && <pre style={{background:'#334155',padding:8, overflowX: 'auto'}}>{JSON.stringify(preview,null,2)}</pre>}

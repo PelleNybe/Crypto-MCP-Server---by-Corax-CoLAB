@@ -137,6 +137,24 @@ We provide a `multi_mcp_config.example.json` file that shows you how to connect 
 This setup is completely hardware- and OS-agnostic. Use `start_server.sh` or Docker to run the local Corax Server seamlessly on any environment!
 
 
+## 🚀 Recent Upgrades
+
+### Technical Improvements
+1. **Component Code Splitting**: Implemented React.lazy and Suspense for heavy UI components in the dashboard to optimize chunk size and initial load time.
+2. **API Rate Limiting**: Added express-rate-limit to the Node.js backend to enforce request limits on all API endpoints, with stricter rules for order execution routes.
+3. **WebSocket State Management**: Enhanced socket.io integration with auto-reconnection logic and a live UI indicator reflecting the connection state.
+4. **Debounced Auto-Preview**: Upgraded the OrderPanel to automatically preview orders upon input changes utilizing a custom debounce hook, eliminating manual clicks and preventing API spam.
+5. **Automated SQLite Backups**: Implemented a recurring backup routine in the backend server that copies the orders database and maintains a rolling window of 5 backups to prevent data loss.
+
+
+### Visual Improvements
+1. **Cyberpunk Tabbed Navigation**: Restructured the frontend layout with a tabbed interface (Dashboard, Analytics, System Logs) using glassmorphism styling to reduce scrolling clutter.
+2. **Custom Web Fonts Integration**: Imported and applied 'Orbitron' and 'JetBrains Mono' Google Fonts to headers, tables, and numeric data for a consistent premium aesthetic.
+3. **Animated Skeleton Loaders**: Replaced static loading text with animated CSS shimmer and pulse effects in the CyberpunkLoader component.
+4. **Toast Notification Progress Bars**: Enhanced NeonToasts notifications by incorporating an animated, decreasing progress bar at the bottom of each toast.
+5. **Interactive Sentiment Background**: Developed a dynamic, sentiment-reactive background featuring a CSS scanline effect that alters its color and speed based on real-time market conditions.
+
+
 ## 🤖 Autonomous Orchestrator Mode (Agentic Loop)
 
 We are introducing **Track 2: Agentic Orchestration**, evolving the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework.
