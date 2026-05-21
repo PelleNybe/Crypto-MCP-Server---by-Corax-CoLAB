@@ -1,35 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import PortfolioPanel from './components/PortfolioPanel'
-import TickerPanel from './components/TickerPanel'
-import OrderPanel from './components/OrderPanel'
-import OrdersLogPanel from './components/OrdersLogPanel'
-import OracleCopilot from './components/features/OracleCopilot'
-import MarketSentimentAnalyzer from "./components/features/MarketSentimentAnalyzer";
-import GlobalWeatherSystem from './components/features/GlobalWeatherSystem'
-import WhaleSonarSweep from './components/features/WhaleSonarSweep'
-import VolatilityMatrix from './components/features/VolatilityMatrix'
-import PredictiveGhosting from './components/features/PredictiveGhosting'
-import RiskRadarPanel from './components/features/RiskRadarPanel'
-import BacktestArenaPanel from './components/features/BacktestArenaPanel'
-import ArbitrageWormhole from './components/features/ArbitrageWormhole'
-import NewsSingularity from './components/features/NewsSingularity'
-import AlgoGridArchitect from './components/features/AlgoGridArchitect'
-import QuantumRiskMap from './components/features/QuantumRiskMap'
-import WhaleConstellations from './components/features/WhaleConstellations'
-import SystemOverview from './components/features/SystemOverview'
-import NeuralNetLiquidity from './components/features/NeuralNetLiquidity';
-import HoloTopographicOrderBook from './components/features/HoloTopographicOrderBook';
-import OrbitalPortfolio from './components/features/OrbitalPortfolio';
+import React, { useState, useEffect, Suspense } from 'react'
+const PortfolioPanel = React.lazy(() => import('./components/PortfolioPanel'));const TickerPanel = React.lazy(() => import('./components/TickerPanel'));const OrderPanel = React.lazy(() => import('./components/OrderPanel'));const OrdersLogPanel = React.lazy(() => import('./components/OrdersLogPanel'));const OracleCopilot = React.lazy(() => import('./components/features/OracleCopilot'));const MarketSentimentAnalyzer = React.lazy(() => import('./components/features/MarketSentimentAnalyzer'));
+const GlobalWeatherSystem = React.lazy(() => import('./components/features/GlobalWeatherSystem'));const WhaleSonarSweep = React.lazy(() => import('./components/features/WhaleSonarSweep'));const VolatilityMatrix = React.lazy(() => import('./components/features/VolatilityMatrix'));const PredictiveGhosting = React.lazy(() => import('./components/features/PredictiveGhosting'));const RiskRadarPanel = React.lazy(() => import('./components/features/RiskRadarPanel'));const BacktestArenaPanel = React.lazy(() => import('./components/features/BacktestArenaPanel'));const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'));const NewsSingularity = React.lazy(() => import('./components/features/NewsSingularity'));const AlgoGridArchitect = React.lazy(() => import('./components/features/AlgoGridArchitect'));const QuantumRiskMap = React.lazy(() => import('./components/features/QuantumRiskMap'));const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'));const SystemOverview = React.lazy(() => import('./components/features/SystemOverview'));const NeuralNetLiquidity = React.lazy(() => import('./components/features/NeuralNetLiquidity'));
+const HoloTopographicOrderBook = React.lazy(() => import('./components/features/HoloTopographicOrderBook'));
+const OrbitalPortfolio = React.lazy(() => import('./components/features/OrbitalPortfolio'));
 
-import DarkPoolSonar from "./components/features/DarkPoolSonar"
-import FlashCrashMatrix from "./components/features/FlashCrashMatrix"
-import GalaxyView from "./components/features/GalaxyView"
-import SentimentWordCloud from "./components/features/SentimentWordCloud"
-
-import GasHologram from "./components/features/GasHologram"
-
-
-import { getAuthToken, setAuthToken } from './auth'
+const DarkPoolSonar = React.lazy(() => import('./components/features/DarkPoolSonar'));const FlashCrashMatrix = React.lazy(() => import('./components/features/FlashCrashMatrix'));const GalaxyView = React.lazy(() => import('./components/features/GalaxyView'));const SentimentWordCloud = React.lazy(() => import('./components/features/SentimentWordCloud'));const GasHologram = React.lazy(() => import('./components/features/GasHologram'));import { getAuthToken, setAuthToken } from './auth'
+import socket from './socket'
 import { callMcpEndpoint } from './api_mcp'
 import { useActivePortfolioSymbol } from './hooks/useActivePortfolioSymbol'
 import { Loader } from 'lucide-react';
@@ -37,9 +13,25 @@ import { Loader } from 'lucide-react';
 export default function App() {
   const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral');
   const [isAuthenticated, setIsAuthenticated] = useState(!!getAuthToken());
+  const [socketConnected, setSocketConnected] = useState(socket.connected);
   const [password, setPassword] = useState('');
   const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'system'>('dashboard');
   const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
+
+
+  useEffect(() => {
+    function onConnect() { setSocketConnected(true); }
+    function onDisconnect() { setSocketConnected(false); }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+    };
+  }, []);
 
   useEffect(() => {
     const handleAuthError = () => setIsAuthenticated(false);
@@ -71,7 +63,7 @@ export default function App() {
 
     const fetchGlobalSentimentWithPolling = async () => {
       try {
-        await
+        await fetchGlobalSentiment();
       } finally {
         timeoutId = setTimeout(fetchGlobalSentimentWithPolling, 120000);
       }
@@ -130,6 +122,8 @@ export default function App() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#020205' }}>
       <GlobalWeatherSystem sentiment={sentiment} />
+      <div className="bg-sentiment" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none' }}></div>
+      <div className="scanline-effect"></div>
       {/* Background grid effect */}
       <div style={{
         position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
@@ -140,90 +134,109 @@ export default function App() {
       }}></div>
 
       {/* Sentiment Toggles (Manual override) */}
-      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 9999, display: 'flex', gap: '10px' }}>
+      <div style={{ position: 'absolute', top: 20, right: 20, zIndex: 9999, display: 'flex', gap: '10px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginRight: '10px' }}>
+          <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: socketConnected ? '#10b981' : '#ef4444', boxShadow: `0 0 8px ${socketConnected ? '#10b981' : '#ef4444'}` }}></div>
+          <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'monospace' }}>{socketConnected ? 'WS LIVE' : 'WS DISCONNECTED'}</span>
+        </div>
         <button aria-label="Set Bull Market Mode" aria-pressed={sentiment === 'bull'} onClick={() => { setSentiment('bull'); document.body.setAttribute('data-sentiment', 'bull'); }} className="btn-outline" style={{ color: '#10b981', borderColor: sentiment === 'bull' ? '#10b981' : '#333' }}>BULL MODE</button>
         <button aria-label="Set Neutral Market Mode" aria-pressed={sentiment === 'neutral'} onClick={() => { setSentiment('neutral'); document.body.setAttribute('data-sentiment', 'neutral'); }} className="btn-outline" style={{ color: '#60a5fa', borderColor: sentiment === 'neutral' ? '#60a5fa' : '#333' }}>NEUTRAL</button>
         <button aria-label="Set Bear Market Mode" aria-pressed={sentiment === 'bear'} onClick={() => { setSentiment('bear'); document.body.setAttribute('data-sentiment', 'bear'); }} className="btn-outline" style={{ color: '#ef4444', borderColor: sentiment === 'bear' ? '#ef4444' : '#333' }}>BEAR MODE</button>
       </div>
 
-      <div className="main-grid" style={{ position: 'relative', zIndex: 1, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
 
-
-        {/* Feature 0: System Overview (Spans full width) */}
-        <SystemOverview />
-        {/* Feature 1: Neural Net Liquidity */}
-        <NeuralNetLiquidity />
-        {/* Feature 2: Liquidity Trench */}
-        <HoloTopographicOrderBook />
-
-
-
-        {/* Feature 1: Arbitrage Wormhole (Spans full width) */}
-
-        {/* NEW WORLD CLASS FEATURES */}
-
-
-        {/* NEW WORLD CLASS FEATURES */}
-
-
-        {/* NEW WORLD CLASS FEATURES */}
-
-        <ArbitrageWormhole />
-
-        {/* Feature 3: Algo Grid Architect (Spans full width) */}
-        <AlgoGridArchitect />
-
-        {/* Left Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <PortfolioPanel />
-          <TickerPanel />
-          {/* Feature 2: News Singularity */}
-          <NewsSingularity />
-          <PredictiveGhosting />
-        {/* Feature 4: Orbital Portfolio */}
-        <OrbitalPortfolio />
-
-          <BacktestArenaPanel />
-          <WhaleSonarSweep />
-
-
-
-
-
-        </div>
-
-        {/* Right Column */}
-        <aside style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Feature 4: Quantum Risk Topography */}
-          <QuantumRiskMap />
-          <RiskRadarPanel />
-          {/* Feature 5: Whale Constellations */}
-          <WhaleConstellations />
-          <VolatilityMatrix />
-          <OrderPanel />
-          <OrdersLogPanel />
-        </aside>
-
-
-
-
-
+      {/* Cyberpunk Navigation Tabs */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px', position: 'relative', zIndex: 10, borderBottom: '1px solid rgba(16, 185, 129, 0.2)', marginBottom: '20px', background: 'rgba(2, 2, 5, 0.8)', backdropFilter: 'blur(10px)' }}>
+        <button
+          onClick={() => setActiveTab('dashboard')}
+          className="btn-outline"
+          style={{
+            borderColor: activeTab === 'dashboard' ? 'var(--primary-border)' : 'rgba(255,255,255,0.2)',
+            color: activeTab === 'dashboard' ? 'var(--primary-border)' : '#fff',
+            boxShadow: activeTab === 'dashboard' ? '0 0 10px var(--primary-glow)' : 'none',
+            fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal'
+          }}
+        >DASHBOARD</button>
+        <button
+          onClick={() => setActiveTab('analytics')}
+          className="btn-outline"
+          style={{
+            borderColor: activeTab === 'analytics' ? 'var(--primary-border)' : 'rgba(255,255,255,0.2)',
+            color: activeTab === 'analytics' ? 'var(--primary-border)' : '#fff',
+            boxShadow: activeTab === 'analytics' ? '0 0 10px var(--primary-glow)' : 'none',
+            fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'analytics' ? 'bold' : 'normal'
+          }}
+        >ANALYTICS</button>
+        <button
+          onClick={() => setActiveTab('system')}
+          className="btn-outline"
+          style={{
+            borderColor: activeTab === 'system' ? 'var(--primary-border)' : 'rgba(255,255,255,0.2)',
+            color: activeTab === 'system' ? 'var(--primary-border)' : '#fff',
+            boxShadow: activeTab === 'system' ? '0 0 10px var(--primary-glow)' : 'none',
+            fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'system' ? 'bold' : 'normal'
+          }}
+        >SYSTEM LOGS</button>
       </div>
 
-      {/* Original Co-Pilot */}
-      <DarkPoolSonar />
-<FlashCrashMatrix />
-<GalaxyView />
-<SentimentWordCloud />
-<GasHologram />
-<MarketSentimentAnalyzer />
-      <OracleCopilot />
+      <div className="main-grid" style={{ position: 'relative', zIndex: 1, padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
+      <React.Suspense fallback={<div style={{color: '#10b981', textAlign: 'center', gridColumn: '1 / -1'}}>Loading Dashboard Elements...</div>}>
 
 
 
 
+        {activeTab === 'dashboard' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <PortfolioPanel />
+              <TickerPanel />
+              <OrderPanel />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <OrbitalPortfolio />
+              <HoloTopographicOrderBook />
+              <NeuralNetLiquidity />
+            </div>
+          </div>
+        )}
 
+        {activeTab === 'analytics' && (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <QuantumRiskMap />
+              <RiskRadarPanel />
+              <VolatilityMatrix />
+              <FlashCrashMatrix />
+              <MarketSentimentAnalyzer />
+              <SentimentWordCloud />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <WhaleSonarSweep />
+              <WhaleConstellations />
+              <DarkPoolSonar />
+              <GasHologram />
+              <PredictiveGhosting />
+              <NewsSingularity />
+              <GalaxyView />
+            </div>
+          </div>
+        )}
 
+        {activeTab === 'system' && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            <SystemOverview />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+              <OrdersLogPanel />
+              <AlgoGridArchitect />
+            </div>
+            <ArbitrageWormhole />
+            <BacktestArenaPanel />
+            <OracleCopilot />
+          </div>
+        )}
+
+      </React.Suspense>
+      </div>
     </div>
   )
 }

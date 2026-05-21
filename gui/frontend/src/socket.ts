@@ -4,6 +4,7 @@ import { getAuthToken } from './auth';
 const socket = io('/', {
   reconnection: true,
   reconnectionDelay: 1000,
+  randomizationFactor: 0.5,
   reconnectionDelayMax: 5000,
   reconnectionAttempts: Infinity,
   timeout: 10000,
