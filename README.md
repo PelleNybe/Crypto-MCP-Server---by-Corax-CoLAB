@@ -37,18 +37,18 @@
 <div align="center">
   <table>
     <tr>
-      <td align="center">
+      <td align="center" width="50%">
         <h3><a href="https://pellenybe.github.io" target="_blank">Pelle Nyberg</a></h3>
         <p>Lead Developer & Architect</p>
         <a href="https://github.com/PelleNybe"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/></a>
         <a href="https://www.linkedin.com/in/pellenyberg/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
         <a href="https://pellenybe.github.io"><img src="https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=Web&logoColor=white" alt="Portfolio"/></a>
       </td>
-      <td align="center">
+      <td align="center" width="50%">
         <h3><a href="https://coraxcolab.com" target="_blank">Corax CoLAB</a></h3>
         <p>Innovation & AI Solutions</p>
         <a href="https://coraxcolab.com"><img src="https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=Google-Chrome&logoColor=white" alt="Website"/></a>
-        <a href="https://cryptop.coraxcolab.com"><img src="https://img.shields.io/badge/Crypto_Dashboard-10b981?style=for-the-badge&logo=Bitcoin&logoColor=white" alt="Crypto Dashboard"/></a>
+        <a href="https://cryptop.coraxcolab.com"><img src="https://img.shields.io/badge/Crypto_Hub_Live-10B981?style=for-the-badge&logo=planet&logoColor=white" alt="Live Project"/></a>
       </td>
     </tr>
   </table>
@@ -60,130 +60,64 @@
 
 ---
 
-## 📚 Table of contents
+## ✨ Features & Capabilities
 
-<details open>
-  <summary><b>Click to expand/collapse contents</b></summary>
-  <ul>
-    <li><a href="#-developer--company">👨‍💻 Developer & Company</a></li>
-    <li><a href="#-100-real-data-integration--visualizer-dynamics-upgraded-v30">🌌 100% Real Data Integration & Visualizer Dynamics</a></li>
-    <li><a href="#️-system-overview--architecture">🗺️ System Overview & Architecture</a></li>
-    <li><a href="#-quick-start--automated">✅ Quick start — automated</a></li>
-    <li><a href="#-manual-install">🛠 Manual install</a></li>
-    <li><a href="#️-configuration">⚙️ Configuration</a></li>
-    <li><a href="#-claude-desktop-integration">🔗 Claude Desktop integration</a></li>
-    <li><a href="#-dashboard-user-manual">🖥 Dashboard user manual</a></li>
-    <li><a href="#-security--best-practices">🔒 Security & best practices</a></li>
-  </ul>
+Our terminal is a living, breathing **Hedge Fund AI Orchestrator**, packed with cutting-edge tools.
+
+### 🤖 Autonomous Orchestrator Mode (Agentic Loop)
+Evolving from a passive Multi-MCP tool, the server acts as an autonomous 24/7 trading agent framework running a continuous **Observe-Analyze-Act (OODA)** loop.
+* **Observe (`gather_market_data`)**: Queries multiple MCPs (e.g. Technical indicators, News sentiment, On-chain data).
+* **Analyze (`analyze_with_llm`)**: Evaluates signals using an LLM (Gemini, Claude, or OpenAI) for a structured decision (BUY, SELL, HOLD).
+* **Act (`execute_trade`)**: Executes trades via the local CCXT MCP.
+* **Agentic Backtesting**: Safely test AI prompts and models against historical OHLCV data without risking real funds.
+* **Proof of Brain (Trading Diary)**: Comprehensive markdown reports detailing the "Board of Directors" reasoning for every action taken.
+
+### 📱 Telegram Command Center
+Receive real-time alerts and command your trading agent via Telegram.
+* **`/status`**: View active AI providers and last decisions.
+* **`/report`**: Receive your latest "Proof of Brain" report.
+* **`/analyze`**: Trigger a manual OODA cycle.
+
+### 🌌 100% Real Data Integration & Visualizer Dynamics (v3.0)
+The Crypto MCP Server uses **real data** across all visualizers. The entire system operates without a single mockup!
+* 🎯 **Dark Pool Sonar:** Real-time 3D sonar pings for large volume "whale" trades on central exchanges using `@react-three/fiber`.
+* 🔥 **Flash-Crash Prediction Matrix:** Glowing heatmap grid of bids to asks, tracking liquidity drains.
+* 🚀 **Galaxy View (Gravity Well):** 3D mapping of the top 50 cryptocurrencies.
+* 🧠 **AI Sentiment Word-Cloud Sphere:** Extracts trending keywords and sentiment from real-time news to form an interactive 3D floating sphere.
+* ⚡ **Gas & Network Congestion Hologram:** Visualizes Ethereum network congestion as a glowing, pulsating reactor core.
+
+---
+
+## 🚀 The Multi-MCP Ecosystem
+
+This repository comes bundled with over a dozen powerful MCPs (Model Context Protocol). They provide execution, raw data, analysis, and external system integrations.
+
+<details>
+<summary><b>🛠️ View Included MCPs (Click to expand)</b></summary>
+<br>
+
+| MCP Server | Description | Port |
+| :--- | :--- | :--- |
+| **`ccxt_mcp`** | The core exchange trading & market data integration via CCXT. | `7001` |
+| **`onchain_mcp`** | ETH balances, ERC20 balances, transaction info, and live Gas Prices. | `7002` |
+| **`ta_mcp`** | Compute Technical Indicators (RSI, MACD, SMA50, BB) and Monte Carlo Simulations. | `7003` |
+| **`portfolio_mcp`** | Aggregated portfolio balances and performance tracking. | `7004` |
+| **`coingecko_mcp`** | Deep market stats, top coins, and historical trends. | `7005` |
+| **`llm_mcp`** | Local/Remote LLM operations and Copilot interactions. | `7006` |
+| **`notifier_mcp`** | System notifications, alerts, and Telegram broadcasting. | `7007` |
+| **`freqtrade_mcp`** | Interfaces with local Freqtrade instances via REST APIs. | `7011` |
+| **`octobot_mcp`** | Interfaces with local OctoBot instances via REST APIs. | `7012` |
+| **`hummingbot_mcp`** | Controls local Hummingbot Gateway APIs. | `7013` |
+| **`superalgos_mcp`** | Interacts with the Superalgos platform API. | `7014` |
+| **`news_mcp`** | Fetches the latest crypto news from CryptoPanic. | `7017` |
+
 </details>
 
 ---
 
-
-
-## ✨ 10 Technical and Visual Upgrades
-1. **Async Portfolio MCP**: The `portfolio_mcp.py` now fetches concurrent exchange balances using `ccxt.async_support` for incredibly fast dashboard load times.
-2. **Robust Proxy Timeouts**: The Node backend implements robust `AbortSignal` logic for MCP communication, preventing hanging connections.
-3. **SQLite Indices**: The backend automatically initializes proper database indices on `orders.db` for `created_at` and `status` to dramatically speed up log querying.
-4. **WebSocket Resilience**: The React frontend implements a centralized, self-healing `Socket.io` client ensuring the dashboard never goes stale if the backend restarts.
-5. **Strict Input Validation**: Backend order execution endpoints rigorously validate symbol format, trade side, and order type before dispatching to the MCP.
-6. **Cyberpunk Loaders**: Components like `PortfolioPanel` and `TickerPanel` feature animated, stylized loading states during data decryption.
-7. **Neon Toasts**: A custom notification system provides sleek, auto-dismissing visual feedback for system events and order executions.
-8. **Enhanced Orders Table**: The `OrdersLogPanel` is upgraded with pagination, neon-color-coded status badges, and interactive hover effects.
-9. **Glitch Effects**: Critical data changes trigger subtle CSS glitch animations, enhancing the cyberpunk aesthetic.
-10. **Dynamic Theme Colors**: The entire dashboard reacts to global market sentiment, shifting its neon glowing borders based on whether the market is bullish or bearish.
-
-## 🌌 100% Real Data Integration & Visualizer Dynamics (Upgraded v3.0)
-
-The Crypto MCP Server has been heavily upgraded to ensure **every single conceptual placeholder has been actively replaced with real data mechanisms**. The entire system operates without a single mockup across visualizers. All 3D graphs reflect live local data.
-
-*   🎯 **Dark Pool Sonar:** Real-time 3D sonar pings for large volume "whale" trades on central exchanges. Connected to `MCP_CCXT` to monitor `fetch_trades` data and renders physics-based 3D ripples with `@react-three/fiber`.
-*   🔥 **Flash-Crash Prediction Matrix:** Visualizes the ratio of bids to asks as a dynamic glowing heatmap grid, tracking potential liquidity drains using `MCP_CCXT` `fetch_order_book`.
-*   🚀 **Galaxy View (Gravity Well):** Maps the top 50 cryptocurrencies in a 3D galaxy using `MCP_COINGECKO`. Star size = Market Cap, orbit speed = Volume, color = 24h change.
-*   🧠 **AI Sentiment Word-Cloud Sphere:** Fetches recent crypto news via `MCP_NEWS` and extracts trending keywords and sentiment to form a 3D interactive floating word sphere.
-*   ⚡ **Gas & Network Congestion Hologram:** Visualizes current Ethereum network congestion as a glowing, pulsating reactor core using `MCP_ONCHAIN` `gas_price`. Faster pulsing/red colors indicate high congestion.
-
-### 🏛 Legacy Visualizers
-*   **Arbitrage Wormhole:** Live Cross-DEX arbitrage detection using multi-exchange CCXT MCP polling.
-*   **Neural Trade Visualizer:** Calculates genuine diagnostic routing data retrieved from live orderbooks (L2 Bids/Asks) using `react-three-fiber`.
-*   **Quantum Risk Map:** Real-time 3D topography of your portfolio risk exposure.
-*   **Orbital Portfolio Deck:** A dynamic, physics-based 3D visualization of your actual asset allocation.
-*   **Global Weather System:** An interactive background system that reacts to the current market sentiment (Bull, Bear, Neutral), altering the entire visual environment.
-
----
-
-
-## 🚀 The Multi-MCP Ecosystem
-
-This repository has evolved into a **Multi-MCP Hub** - a Hedge Fund AI Orchestrator. The vision is that anyone downloading this repo can easily configure their AI agent to use our server for execution/raw data, combined with external public MCPs for analysis.
-
-Synergy examples:
-*   **Aarna ATARS:** High-frequency sentiment signals and specialized DeFi analytics.
-*   **Blockscout:** Contract safety, verified smart contract readouts.
-*   **LunarCrush:** Social sentiment and trending metrics.
-*   **Corax Crypto MCP (This repo):** Trade execution, real-time monitoring, and local AI reasoning.
-
-### How to use the Multi-MCP Configuration
-
-We provide a `multi_mcp_config.example.json` file that shows you how to connect your AI client (like Claude Desktop or Cursor) to multiple servers simultaneously.
-
-1.  Open your AI client's MCP configuration file.
-    *   **Claude Desktop:** `~/Library/Application Support/Claude/claude_desktop_config.json` (Mac) or `%APPDATA%\Claude\claude_desktop_config.json` (Windows).
-    *   **Cursor:** Add servers in Cursor Settings > Features > MCP.
-2.  Copy the structure from `multi_mcp_config.example.json`.
-3.  Fill in any required API keys (like `LUNARCRUSH_API_KEY`).
-4.  Restart your AI client.
-
-This setup is completely hardware- and OS-agnostic. Use `start_server.sh` or Docker to run the local Corax Server seamlessly on any environment!
-
-
-## 🚀 Recent Upgrades
-
-### Technical Improvements
-1. **Component Code Splitting**: Implemented React.lazy and Suspense for heavy UI components in the dashboard to optimize chunk size and initial load time.
-2. **API Rate Limiting**: Added express-rate-limit to the Node.js backend to enforce request limits on all API endpoints, with stricter rules for order execution routes.
-3. **WebSocket State Management**: Enhanced socket.io integration with auto-reconnection logic and a live UI indicator reflecting the connection state.
-4. **Debounced Auto-Preview**: Upgraded the OrderPanel to automatically preview orders upon input changes utilizing a custom debounce hook, eliminating manual clicks and preventing API spam.
-5. **Automated SQLite Backups**: Implemented a recurring backup routine in the backend server that copies the orders database and maintains a rolling window of 5 backups to prevent data loss.
-
-
-### Visual Improvements
-1. **Cyberpunk Tabbed Navigation**: Restructured the frontend layout with a tabbed interface (Dashboard, Analytics, System Logs) using glassmorphism styling to reduce scrolling clutter.
-2. **Custom Web Fonts Integration**: Imported and applied 'Orbitron' and 'JetBrains Mono' Google Fonts to headers, tables, and numeric data for a consistent premium aesthetic.
-3. **Animated Skeleton Loaders**: Replaced static loading text with animated CSS shimmer and pulse effects in the CyberpunkLoader component.
-4. **Toast Notification Progress Bars**: Enhanced NeonToasts notifications by incorporating an animated, decreasing progress bar at the bottom of each toast.
-5. **Interactive Sentiment Background**: Developed a dynamic, sentiment-reactive background featuring a CSS scanline effect that alters its color and speed based on real-time market conditions.
-
-
-## 🤖 Autonomous Orchestrator Mode (Agentic Loop)
-
-We are introducing **Track 2: Agentic Orchestration**, evolving the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework.
-
-The `autonomous_orchestrator.py` script acts as an MCP Client, automatically connecting to the MCPs defined in your `multi_mcp_config.example.json`.
-
-It runs a continuous **Observe-Analyze-Act** (OODA) loop:
-1. **Observe (`gather_market_data`):** Queries Aarna ATARS for technical signals and LunarCrush for sentiment.
-2. **Analyze (`analyze_with_llm`):** Evaluates signals using an LLM (e.g., Gemini or Claude) to return a structured decision (BUY, SELL, HOLD).
-3. **Act (`execute_trade`):** If a trade is decided, it calls the local Corax MCP to execute the trade.
-
-### How to use the Autonomous Orchestrator
-1. Ensure your API keys are set correctly in `.env` and your multi-MCP configuration.
-2. You can test the orchestrator locally:
-   ```bash
-   python3 autonomous_orchestrator.py
-   ```
-3. **Run 24/7 as a background service:**
-   We provide a systemd service template `systemd/corax_orchestrator.service`.
-   Copy it to your systemd folder, enable it, and start it to let your AI daemon trade fully autonomously:
-   ```bash
-   sudo cp systemd/corax_orchestrator.service /etc/systemd/system/
-   sudo systemctl daemon-reload
-   sudo systemctl enable --now corax_orchestrator.service
-   ```
-
 ## 🗺️ System Overview & Architecture
 
-The image series below illustrates the key stages of the Crypto MCP Server, bridging AI (Claude Desktop), local tools, and blockchain technology.
+Explore the architecture, installation success, and security models below:
 
 <details>
 <summary><b>1️⃣ Architectural Overview (Click to expand)</b></summary>
@@ -254,11 +188,6 @@ If you prefer to do everything yourself:
    pip3 install -r requirements.txt
    ```
 
-   ```bash
-   sudo apt update
-   sudo apt install -y curl build-essential ca-certificates git
-   ```
-
 2. **Install Node.js (if needed):**
    ```bash
    curl -sL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -307,6 +236,12 @@ MAX_TRADE_USD=100.0 # Maximum allowed trade amount per transaction
 # API Keys
 BINANCE_API_KEY=your_key
 BINANCE_API_SECRET=your_secret
+
+# --- Autonomous Orchestrator Settings ---
+ACTIVE_LLM_PROVIDER="gemini"
+GEMINI_API_KEY="your_google_gemini_key_here"
+TELEGRAM_BOT_TOKEN="your_token_here"
+TELEGRAM_CHAT_ID="your_chat_id_here"
 ```
 
 ---
@@ -322,19 +257,19 @@ BINANCE_API_SECRET=your_secret
    *   **Description:** `CCXT MCP – exchange trading & market data`
    *   **Transport:** `http`
    *   **Endpoint:** `http://127.0.0.1:7001/mcp` (if Claude runs on Pi) or `http://<pi-ip>:7001/mcp` (if Claude runs on laptop)
-5. Save. Repeat for other MCPs (`coingecko`, `portfolio`, `onchain`, `ta`, `notifier`, `llm`, etc.) with their respective ports.
+5. Save. Repeat for other MCPs (`coingecko`, `portfolio`, `onchain`, `ta`, `news`, etc.) with their respective ports.
 
 ---
 
 ## 🖥 Dashboard user manual
 
-*   📊 **Portfolio:** View aggregated balances & USD value (async fetching for speed).
+*   📊 **Portfolio:** View aggregated balances & USD value.
 *   📈 **Ticker:** Live market data (via ccxt MCP).
 *   🛒 **Order / Trade:**
     *   **Preview (dry_run):** Calculates estimated cost and logs a preview.
-    *   **Confirm → Place order:** Sends create_order to CCXT MCP (backend requires `execute:true`).
-*   📜 **Orders log:** Shows previews and executed orders (real-time updates via socket.io, paginated with indices).
-*   🤖 **AI Copilot:** Voice-activated command center powered by real local LLMs.
+    *   **Confirm → Place order:** Sends create_order to CCXT MCP.
+*   📜 **Orders log:** Real-time updates via socket.io, paginated with indices.
+*   🤖 **AI Copilot:** Voice-activated command center powered by local LLMs.
 
 > ⚠️ **Safety:** Always test with testnet keys. The UI requires confirmation to execute live orders.
 
@@ -343,72 +278,12 @@ BINANCE_API_SECRET=your_secret
 ## 🔒 Security & best practices
 
 *   **Testnet First:** Use testnet keys while testing.
-*   **Environment Variables:** Keep API keys out of repo — store them in the MCP server config or in secure `.env` not committed.
-*   **Network Isolation:** Restrict access to MCP endpoints to LAN only (UFW rules) or use VPN/SSH tunnels.
-*   **Authentication:** Auth bypass vulnerabilities via insecure `req.ip` validation on localhost have been successfully patched. `/api/order/pending` and `/api/order/reasoning` endpoints are now fully secured with `DASHBOARD_PASSWORD` verification.
+*   **Environment Variables:** Keep API keys out of repo.
+*   **Network Isolation:** Restrict access to MCP endpoints to LAN only.
+*   **Authentication:** Endpoints are fully secured with `DASHBOARD_PASSWORD` verification.
 
 <div align="center">
   <img src="https://raw.githubusercontent.com/PelleNybe/PelleNybe/main/assets/line.svg" width="100%" height="2" onerror="this.style.display='none'"/>
   <p><i>Stay Cypherpunk. Keep Building. ⚡</i></p>
 </div>
 
-## 🤖 Autonomous Orchestrator Mode
-
-The Autonomous Orchestrator Mode evolves the project from a passive Multi-MCP tool into an autonomous, 24/7 trading agent framework. It features a "Board of Directors" consensus logic, Telegram Command Center, and an Agentic Backtesting Engine. It runs a continuous Observe-Orient-Decide-Act (OODA) loop, connecting to external MCPs like Aarna ATARS and LunarCrush to gather market signals, and then utilizes an LLM to analyze the data and make trading decisions. The local Corax MCP is then instructed to execute trades if necessary.
-
-To enable and configure the orchestrator, you can simply edit your `.env` file to select the LLM "brain" of your choice without editing any Python logic:
-
-```env
-# --- Autonomous Orchestrator Settings ---
-# Choose your provider: 'gemini', 'anthropic', or 'openai'
-ACTIVE_LLM_PROVIDER="gemini"
-
-# API Keys for the LLM providers (only the active one is required)
-GEMINI_API_KEY="your_google_gemini_key_here"
-ANTHROPIC_API_KEY="your_claude_api_key_here"
-OPENAI_API_KEY="your_openai_api_key_here"
-```
-
-### Proof of Brain / Trading Diary
-
-To provide full transparency, the Autonomous Orchestrator includes a "Proof of Brain" module. After every complete OODA cycle (Observe, Analyze, Act), a comprehensive Markdown report is generated in the `trading_diary/` directory.
-
-These reports document every decision made by the AI Board of Directors, answering *why* a specific action was taken. They include:
-*   The raw market data the orchestrator gathered from its MCPs.
-*   The individual votes and reasoning from the Technical Analyst (Gemini), Macro Strategist (OpenAI), and Risk Manager (Anthropic).
-*   The final consensus reached and execution parameters.
-
-Reports are saved even if the board's decision is "HOLD", ensuring a fully auditable track record of the agent's logic.
-
-### Telegram Command Center
-
-The Autonomous Orchestrator includes a built-in Telegram integration allowing you to receive real-time alerts and send commands to your trading agent.
-
-1.  **Create a Bot:** Talk to `@BotFather` on Telegram, create a new bot, and get the HTTP API Token.
-2.  **Get Chat ID:** Message your new bot, then go to `https://api.telegram.org/bot<YourBOTToken>/getUpdates` to find your `chat_id`.
-3.  **Update `.env`:**
-    ```env
-    TELEGRAM_BOT_TOKEN="your_token_here"
-    TELEGRAM_CHAT_ID="your_chat_id_here"
-    TELEGRAM_NOTIFICATIONS_ENABLED="true"
-    ```
-
-**Available Commands:**
-*   `/status` - Returns the current active AI providers, the target ticker, and the last known decision.
-*   `/report` - Directly sends you the latest "Proof of Brain" markdown report as a document.
-*   `/analyze` - Manually triggers the agent to run an OODA cycle instantly without executing a trade.
-
-### Agentic Backtesting
-
-To safely test the AI prompts and model configurations against past market behavior, we provide an Agentic Backtesting Engine. This allows you to simulate the "Board of Directors" consensus logic without risking real funds.
-
-The backtest uses the `ccxt` library to fetch actual historical OHLCV data and simulates the market environment the orchestrator would have seen at that time.
-
-**To run a backtest:**
-```bash
-python3 backtest_orchestrator.py
-```
-
-After the simulation finishes, a detailed markdown report summarizing the starting period, ending period, total simulated actions (BUYS, SELLS, HOLDS), and the AI's reasoning will be generated in the `trading_diary/` directory (e.g., `YYYYMMDD_HHMMSS_[TICKER]_BACKTEST.md`).
-
-A `systemd/corax_orchestrator.service` template is provided to run the `autonomous_orchestrator.py` script as a 24/7 background daemon on Linux.
