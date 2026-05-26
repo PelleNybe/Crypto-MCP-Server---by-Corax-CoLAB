@@ -34,10 +34,14 @@ const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neu
   useFrame((state) => {
     if (!mesh.current) return;
 
-    let targetColor = sentiment === 'bull' ? '#10b981' : sentiment === 'bear' ? '#ef4444' : '#60a5fa';
+    const targetColor = sentiment === 'bull' ? '#10b981' : sentiment === 'bear' ? '#ef4444' : '#60a5fa';
 
     particleData.forEach((particle, i) => {
-      let { x, y, z, speed, offset } = particle;
+      let x = particle.x;
+      let y = particle.y;
+      const z = particle.z;
+      const speed = particle.speed;
+      const offset = particle.offset;
 
       if (sentiment === 'bear') {
         // Digital Rain falling down fast

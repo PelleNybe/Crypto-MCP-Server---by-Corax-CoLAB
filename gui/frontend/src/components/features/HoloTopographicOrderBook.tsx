@@ -49,8 +49,8 @@ export default function HoloTopographicOrderBook() {
     let active = true;
     const fetchOrderBook = async () => {
       try {
-        let targetExchange = 'binance';
-        let targetSymbol = activeSymbol;
+        const targetExchange = 'binance';
+        const targetSymbol = activeSymbol;
 
         // Fetch real order book from CCXT
         const obData = await callMcpEndpoint('MCP_CCXT', 'fetch_order_book', { exchange: targetExchange, symbol: targetSymbol, limit: 30 });

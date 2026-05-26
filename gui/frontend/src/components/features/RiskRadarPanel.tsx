@@ -59,7 +59,7 @@ export default function RiskRadarPanel() {
 
         // Add a "Risk Node" representing market volatility
         try {
-            let targetSymbol = activeSymbol;
+            const targetSymbol = activeSymbol;
             const taData = await callMcpEndpoint('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: targetSymbol, timeframe: '1h' });
             if (taData && taData.signal) {
                 let statusMsg = '[INFO] Market indicators normal.';

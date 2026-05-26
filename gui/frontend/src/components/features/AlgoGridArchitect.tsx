@@ -92,7 +92,7 @@ export default function AlgoGridArchitect() {
             }
         }
 
-        let pair = activeSymbol;
+        const pair = activeSymbol;
 
         setNodes([
           { id: 1, type: 'source', title: 'Market Data Feed', pos: { x: 50, y: 150 } },

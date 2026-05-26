@@ -131,7 +131,7 @@ export default function OrbitalPortfolio() {
         const data = await callMcpEndpoint('MCP_PORTFOLIO', 'portfolio_value', { exchanges: ['binance'] });
         if (!active || !data || !data.portfolio) return;
 
-        let total = data.total_usd || 0;
+        const total = data.total_usd || 0;
         if (total === 0) {
             setAssets([]);
             setTotalValue(0);

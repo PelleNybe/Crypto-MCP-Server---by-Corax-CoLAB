@@ -144,7 +144,7 @@ export default function ArbitrageWormhole() {
 
     const fetchArbitrage = async () => {
       try {
-        let pair = activeSymbol;
+        const pair = activeSymbol;
 
         // Fetch tickers from different exchanges to compare spread
         const t1 = await callMcpEndpoint('MCP_CCXT', 'get_ticker', { exchange: 'kraken', symbol: pair });

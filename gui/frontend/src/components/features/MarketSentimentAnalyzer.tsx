@@ -15,8 +15,8 @@ export default function MarketSentimentAnalyzer() {
       setAnalysis('Querying LLM MCP for latest market data synthesis...');
 
       try {
-        let targetExchange = 'binance';
-        let targetSymbol = activeSymbol;
+        const targetExchange = 'binance';
+        const targetSymbol = activeSymbol;
 
         const btcTickerResp = await callMcpEndpoint('MCP_CCXT', 'get_ticker', { exchange: targetExchange, symbol: targetSymbol });
 

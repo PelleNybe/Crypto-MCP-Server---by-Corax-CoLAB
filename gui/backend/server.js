@@ -140,7 +140,7 @@ function backupDatabase() {
   const backupFile = path.join(backupDir, `orders_backup_${timestamp}.db`);
 
   db.serialize(() => {
-      db.run('BEGIN EXCLUSIVE', [], (err) => {
+      db.run('BEGIN EXCLUSIVE', [], (err) => { if (err) { console.error('Error on BEGIN EXCLUSIVE', err); return; }
         if (!err) {
             try {
               fsModule.copyFileSync(DB_PATH, backupFile);
@@ -159,7 +159,7 @@ function backupDatabase() {
             } catch (copyErr) {
               console.error('[Backup] Failed to copy database file:', copyErr);
             } finally {
-              db.run('COMMIT');
+              db.run('COMMIT', (err) => { if (err) console.error('COMMIT error:', err); });
             }
         } else {
             console.error('[Backup] Failed to lock database for backup:', err);
@@ -595,8 +595,7 @@ app.post('/api/order/pending', sensitiveLimiter, (req, res) => {
         return res.status(500).json({ ok: false, error: 'Database insert failed' });
       }
       const orderId = this.lastID;
-      const { params: _params, ...safePreview } = preview;
-      io.emit('order_pending', { id: orderId, ...safePreview });
+      io.emit('order_pending', { id: orderId, exchange: preview.exchange, symbol: preview.symbol, side: preview.side, type: preview.type, amount: preview.amount, price: preview.price, estimatedCost: preview.estimatedCost, note: preview.note });
       res.json({ ok: true, id: orderId, data: preview });
     });
     stmt.finalize();
@@ -641,8 +640,7 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
           return res.status(500).json({ ok: false, error: 'Database operation failed' });
         }
         // Extract fields to prevent leaking orderArgs.params (which contains DASHBOARD_PASSWORD)
-        const { params, ...safeArgs } = orderArgs;
-        io.emit('order_placed', { id: orderId, ...safeArgs, response: orderResp });
+        io.emit('order_placed', { id: orderId, exchange: orderArgs.exchange, symbol: orderArgs.symbol, side: orderArgs.side, type: orderArgs.type, amount: orderArgs.amount, price: orderArgs.price, response: orderResp });
         res.json({ ok: true, data: orderResp });
       });
     } catch (apiErr) {

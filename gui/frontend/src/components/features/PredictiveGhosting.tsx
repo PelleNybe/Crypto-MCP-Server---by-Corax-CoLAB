@@ -15,8 +15,8 @@ export default function PredictiveGhosting() {
 
     const fetchAndCalculate = async () => {
         try {
-            let targetExchange = activeExchange;
-            let targetSymbol = activeSymbolHook;
+            const targetExchange = activeExchange;
+            const targetSymbol = activeSymbolHook;
 
             const ohlcvData = await callMcpEndpoint('MCP_CCXT', 'fetch_ohlcv', { exchange: targetExchange, symbol: targetSymbol, timeframe: '1h', limit: 50 });
 
