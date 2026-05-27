@@ -12,7 +12,7 @@ export default function NeuralNetLiquidity() {
     let active = true;
     const fetchLiquidity = async () => {
       try {
-        let exchanges = ['binance', 'kraken', 'kucoin'];
+        const exchanges = ['binance', 'kraken', 'kucoin'];
         let pairs = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT'];
 
         try {
@@ -27,10 +27,10 @@ export default function NeuralNetLiquidity() {
                      ];
                  }
              }
-        } catch (e) {}
+        } catch (e) { console.error("Error", e); }
 
-        let nodes = [];
-        let links = [];
+        const nodes = [];
+        const links = [];
 
         exchanges.forEach(ex => {
             nodes.push({ id: ex, group: 'exchange', size: 20, color: '#facc15' });
@@ -74,7 +74,7 @@ export default function NeuralNetLiquidity() {
                              }
                         }
                     }
-                } catch(e) {}
+                } catch(e) { console.error("Error connecting", e); }
             }
         }
 

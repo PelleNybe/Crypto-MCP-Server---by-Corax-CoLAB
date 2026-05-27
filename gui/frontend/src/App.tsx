@@ -1,3 +1,4 @@
+import MatrixRain from "./components/MatrixRain";
 import React, { useState, useEffect, Suspense } from 'react'
 const PortfolioPanel = React.lazy(() => import('./components/PortfolioPanel'));const TickerPanel = React.lazy(() => import('./components/TickerPanel'));const OrderPanel = React.lazy(() => import('./components/OrderPanel'));const OrdersLogPanel = React.lazy(() => import('./components/OrdersLogPanel'));const OracleCopilot = React.lazy(() => import('./components/features/OracleCopilot'));const MarketSentimentAnalyzer = React.lazy(() => import('./components/features/MarketSentimentAnalyzer'));
 const GlobalWeatherSystem = React.lazy(() => import('./components/features/GlobalWeatherSystem'));const WhaleSonarSweep = React.lazy(() => import('./components/features/WhaleSonarSweep'));const VolatilityMatrix = React.lazy(() => import('./components/features/VolatilityMatrix'));const PredictiveGhosting = React.lazy(() => import('./components/features/PredictiveGhosting'));const RiskRadarPanel = React.lazy(() => import('./components/features/RiskRadarPanel'));const BacktestArenaPanel = React.lazy(() => import('./components/features/BacktestArenaPanel'));const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'));const NewsSingularity = React.lazy(() => import('./components/features/NewsSingularity'));const AlgoGridArchitect = React.lazy(() => import('./components/features/AlgoGridArchitect'));const QuantumRiskMap = React.lazy(() => import('./components/features/QuantumRiskMap'));const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'));const SystemOverview = React.lazy(() => import('./components/features/SystemOverview'));const NeuralNetLiquidity = React.lazy(() => import('./components/features/NeuralNetLiquidity'));
@@ -9,6 +10,7 @@ import socket from './socket'
 import { callMcpEndpoint } from './api_mcp'
 import { useActivePortfolioSymbol } from './hooks/useActivePortfolioSymbol'
 import { Loader } from 'lucide-react';
+import TiltWrapper from './components/TiltWrapper';
 
 export default function App() {
   const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral');
@@ -45,7 +47,7 @@ export default function App() {
 
     const fetchGlobalSentiment = async () => {
         try {
-            let targetSymbol = activeSymbol;
+            const targetSymbol = activeSymbol;
 
             const taData = await callMcpEndpoint('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: targetSymbol, timeframe: '1h' });
             if (taData && taData.signal) {
@@ -87,10 +89,11 @@ export default function App() {
   if (!isAuthenticated) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #000 100%)' }}>
+        <TiltWrapper>
         <form onSubmit={handleLogin} className="card interactive-element" style={{ width: 350, display: 'flex', flexDirection: 'column', gap: 16, border: '1px solid #334155', boxShadow: '0 0 30px rgba(16, 185, 129, 0.1)' }}>
           <div style={{display: 'flex', alignItems: 'center', gap: '10px', justifyContent: 'center'}}>
             <div style={{width: '20px', height: '20px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 10px #10b981'}}></div>
-            <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '2px', color: '#fff' }}>SYSTEM AUTHENTICATION</h3>
+            <h3 className="glitch" data-text="SYSTEM AUTHENTICATION" style={{ margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#fff" }}>SYSTEM AUTHENTICATION</h3>
           </div>
           <p className="small-muted" style={{textAlign: 'center', fontFamily: 'monospace'}}><a href="https://coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Corax CoLAB</a> | <a href="https://pellenybe.github.io" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Pelle Nyberg</a> (<a href="https://github.com/PelleNybe" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>GitHub</a>) | <a href="https://cryptop.coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Crypto P's Crypto Circus</a></p>
           <input
@@ -115,6 +118,7 @@ export default function App() {
             {isLoggingIn ? <><Loader size={16} className="lucide-spin" style={{ animation: 'spin 2s linear infinite' }} /> INITIALIZING...</> : "INITIALIZE LINK"}
           </button>
         </form>
+        </TiltWrapper>
       </div>
     );
   }
@@ -122,6 +126,7 @@ export default function App() {
   return (
     <div style={{ position: 'relative', minHeight: '100vh', background: '#020205' }}>
       <GlobalWeatherSystem sentiment={sentiment} />
+      <MatrixRain />
       <div className="bg-sentiment" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none' }}></div>
       <div className="scanline-effect"></div>
       {/* Background grid effect */}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../socket';
 import { authenticatedFetch } from '../auth';
+import TypewriterText from './TypewriterText';
 
 export default function OrdersLogPanel() {
   const [orders, setOrders] = useState<any[]>([]);

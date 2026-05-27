@@ -50,8 +50,8 @@ export default function VolatilityMatrix() {
     const fetchVolatilityData = async () => {
       try {
         setLoading(true);
-        let targetExchange = 'binance';
-        let targetSymbol = activeSymbol;
+        const targetExchange = 'binance';
+        const targetSymbol = activeSymbol;
 
         // Using Bollinger Bands width as proxy for 3D volatility surface height
         const taData = await callMcpEndpoint('MCP_TA', 'compute_indicators', { exchange: targetExchange, symbol: targetSymbol, timeframe: '1h' });

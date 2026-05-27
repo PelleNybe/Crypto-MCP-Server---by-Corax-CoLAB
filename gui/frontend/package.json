@@ -6,6 +6,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --port 5174",
+    "lint": "eslint src --ext ts,tsx --report-unused-disable-directives ",
     "test": "playwright test"
   },
   "dependencies": {
@@ -25,6 +26,11 @@
     "@vitejs/plugin-react": "^4.0.0",
     "playwright": "^1.58.2",
     "typescript": "^5.2.2",
-    "vite": "^5.2.0"
+    "vite": "^5.2.0",
+    "eslint": "^8.56.0",
+    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react-refresh": "^0.4.5",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0"
   }
 }

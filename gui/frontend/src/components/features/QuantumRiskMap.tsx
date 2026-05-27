@@ -6,7 +6,7 @@ import { ShieldAlert, TrendingDown } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-const Terrain = ({ stressLevel }: { stressLevel: number }) => {
+const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
 
   const size = 30;
@@ -60,7 +60,7 @@ const Terrain = ({ stressLevel }: { stressLevel: number }) => {
       <meshStandardMaterial color={materialColor} wireframe emissive={materialColor} emissiveIntensity={stressLevel > 0 ? 0.8 : 0.2} roughness={0.8} />
     </mesh>
   );
-};
+});
 
 export default function QuantumRiskMap() {
   const [stress, setStress] = useState(0);
@@ -74,8 +74,8 @@ export default function QuantumRiskMap() {
     const fetchRiskParams = async () => {
       try {
         setLoading(true);
-        let targetExchange = activeExchange;
-        let targetSymbol = activeSymbol;
+        const targetExchange = activeExchange;
+        const targetSymbol = activeSymbol;
 
         const taData = await callMcpEndpoint('MCP_TA', 'compute_indicators', { exchange: targetExchange, symbol: targetSymbol, timeframe: '1h' });
 

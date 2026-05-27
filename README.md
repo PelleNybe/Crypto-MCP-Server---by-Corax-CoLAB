@@ -62,6 +62,14 @@
 
 ## ✨ Features & Capabilities
 
+### 🎨 Visual & Technical Upgrades (Bolt & Palette)
+* **Matrix Digital Rain:** Ambient, immersive cyberpunk background animations.
+* **Cyberpunk Glitch Text:** Immersive text glitching effects across core UI headers.
+* **Interactive 3D Card Tilt:** Hover over dashboard elements to see them dynamically tilt in 3D space.
+* **Holographic Sweeps:** Primary buttons feature an animated light-sweep effect to represent active scanning.
+* **Typewriter AI Reasoning:** AI logic is animated character-by-character for a more authentic 'terminal' feel.
+* **Performance & Security:** Includes memoized 3D components, SSRF protection on endpoints, error-fallback for ERC20 contracts, and `hmac.compare_digest` for timing-safe equality in backend services.
+
 Our terminal is a living, breathing **Hedge Fund AI Orchestrator**, packed with cutting-edge tools.
 
 ### 🤖 Autonomous Orchestrator Mode (Agentic Loop)
