@@ -31,8 +31,8 @@ def test_telegram_manager_init_enabled(
     # Setup
     mock_getenv.side_effect = lambda k, d=None: {
         "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-        "TELEGRAM_BOT_TOKEN": "fake_token",
-        "TELEGRAM_CHAT_ID": "fake_chat_id",
+        "TELEGRAM_BOT_TOKEN": "test_token",
+        "TELEGRAM_CHAT_ID": "test_chat_id",
     }.get(k, d)
 
     mock_app = MagicMock()
@@ -47,10 +47,10 @@ def test_telegram_manager_init_enabled(
 
     # Assert
     assert tm.enabled is True
-    assert tm.bot_token == "fake_token"
-    assert tm.chat_id == "fake_chat_id"
+    assert tm.bot_token == "test_token"
+    assert tm.chat_id == "test_chat_id"
     assert tm.app == mock_app
-    mock_app_builder.return_value.token.assert_called_once_with("fake_token")
+    mock_app_builder.return_value.token.assert_called_once_with("test_token")
     assert mock_app.add_handler.call_count == 3
 
 
@@ -60,8 +60,8 @@ def test_telegram_manager_init_error(mock_getenv, mock_app_builder, mock_callbac
     # Setup
     mock_getenv.side_effect = lambda k, d=None: {
         "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-        "TELEGRAM_BOT_TOKEN": "fake_token",
-        "TELEGRAM_CHAT_ID": "fake_chat_id",
+        "TELEGRAM_BOT_TOKEN": "test_token",
+        "TELEGRAM_CHAT_ID": "test_chat_id",
     }.get(k, d)
 
     mock_app_builder.return_value.token.return_value.build.side_effect = Exception(
@@ -103,7 +103,7 @@ def test_telegram_manager_init_missing_credentials(mock_getenv, mock_callbacks):
     # Setup
     mock_getenv.side_effect = lambda k, d=None: {
         "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-        "TELEGRAM_BOT_TOKEN": "fake_token",
+        "TELEGRAM_BOT_TOKEN": "test_token",
         # TELEGRAM_CHAT_ID is missing
     }.get(k, d)
 
@@ -132,8 +132,8 @@ def test_start(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -162,8 +162,8 @@ def test_start_error(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -190,8 +190,8 @@ def test_send_telegram_alert_success(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -205,7 +205,7 @@ def test_send_telegram_alert_success(mock_callbacks):
 
             # Assert
             mock_app.bot.send_message.assert_called_once_with(
-                chat_id="fake_chat_id", text="Test Alert"
+                chat_id="test_chat_id", text="Test Alert"
             )
 
 
@@ -237,8 +237,8 @@ def test_send_telegram_alert_error(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -260,8 +260,8 @@ def test_handle_status(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -283,7 +283,7 @@ def test_handle_status(mock_callbacks):
 
 def test_handle_report_success(mock_callbacks, tmp_path):
     report_file = tmp_path / "report.pdf"
-    report_file.write_text("fake content")
+    report_file.write_text("test content")
     mock_callbacks["get_report"].return_value = str(report_file)
 
     with patch("telegram_manager.ApplicationBuilder"):
@@ -291,8 +291,8 @@ def test_handle_report_success(mock_callbacks, tmp_path):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -322,8 +322,8 @@ def test_handle_report_not_found(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -346,7 +346,7 @@ def test_handle_report_not_found(mock_callbacks):
 
 def test_handle_report_error(mock_callbacks, tmp_path):
     report_file = tmp_path / "report.pdf"
-    report_file.write_text("fake content")
+    report_file.write_text("test content")
     mock_callbacks["get_report"].return_value = str(report_file)
 
     with patch("telegram_manager.ApplicationBuilder"):
@@ -354,8 +354,8 @@ def test_handle_report_error(mock_callbacks, tmp_path):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(
@@ -386,8 +386,8 @@ def test_handle_analyze(mock_callbacks):
             "os.getenv",
             side_effect=lambda k, d=None: {
                 "TELEGRAM_NOTIFICATIONS_ENABLED": "true",
-                "TELEGRAM_BOT_TOKEN": "fake_token",
-                "TELEGRAM_CHAT_ID": "fake_chat_id",
+                "TELEGRAM_BOT_TOKEN": "test_token",
+                "TELEGRAM_CHAT_ID": "test_chat_id",
             }.get(k, d),
         ):
             tm = TelegramManager(

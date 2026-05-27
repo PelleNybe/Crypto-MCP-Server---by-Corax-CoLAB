@@ -56,7 +56,6 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     missing_keys = []
     missing_ids = []
 
-
     # If this is called from fetch_exchange_balance, symbols are already upper-cased
     # But just in case it is called directly from elsewhere, we map them here once.
     # To optimize this when called from fetch_exchange_balance we just check if it's uppercase
@@ -117,7 +116,9 @@ async def fetch_exchange_balance(exch_low: str):
 
         # Batch fetch prices from Coingecko using pre-calculated upper symbols
         cg_prices = (
-            await asyncio.to_thread(_get_prices_coingecko, upper_coins) if upper_coins else {}
+            await asyncio.to_thread(_get_prices_coingecko, upper_coins)
+            if upper_coins
+            else {}
         )
 
         # For missing prices, prepare CCXT fallback tasks
