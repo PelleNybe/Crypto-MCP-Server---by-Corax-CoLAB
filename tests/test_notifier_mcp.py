@@ -43,8 +43,8 @@ def test_ping():
     assert "alive" in res
 
 
-@patch("notifier_mcp.TELEGRAM_TOKEN", "fake_token")
-@patch("notifier_mcp.TELEGRAM_CHAT", "fake_chat")
+@patch("notifier_mcp.TELEGRAM_TOKEN", "test_token")
+@patch("notifier_mcp.TELEGRAM_CHAT", "test_chat")
 @patch("notifier_mcp.requests.post")
 def test_send_telegram_success(mock_post):
     # Setup
@@ -60,8 +60,8 @@ def test_send_telegram_success(mock_post):
     assert res["status"] == 200
     assert res["result"]["ok"] is True
     mock_post.assert_called_once_with(
-        "https://api.telegram.org/botfake_token/sendMessage",
-        json={"chat_id": "fake_chat", "text": "test message"},
+        "https://api.telegram.org/bottest_token/sendMessage",
+        json={"chat_id": "test_chat", "text": "test message"},
     )
 
 
