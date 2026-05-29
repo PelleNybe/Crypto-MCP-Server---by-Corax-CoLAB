@@ -60,9 +60,11 @@ def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
     # But just in case it is called directly from elsewhere, we map them here once.
     # To optimize this when called from fetch_exchange_balance we just check if it's uppercase
     upper_symbols = [s if s.isupper() else s.upper() for s in symbols]
+    prices_cache = _CACHE["prices"]
+    mapping_cache = _CACHE.get("mapping", {})
     for key in upper_symbols:
-        if key not in _CACHE["prices"]:
-            if coin_id := _CACHE.get("mapping", {}).get(key):
+        if key not in prices_cache:
+            if coin_id := mapping_cache.get(key):
                 missing_keys.append(key)
                 missing_ids.append(coin_id)
 

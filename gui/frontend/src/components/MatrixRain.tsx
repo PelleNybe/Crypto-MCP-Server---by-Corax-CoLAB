@@ -33,7 +33,21 @@ const MatrixRain = () => {
             }
         };
 
-        const interval = setInterval(draw, 33);
+        let animationFrameId: number;
+        let lastDrawTime = 0;
+        const fps = 30;
+        const fpsInterval = 1000 / fps;
+
+        const loop = (time: number) => {
+            animationFrameId = requestAnimationFrame(loop);
+            const elapsed = time - lastDrawTime;
+            if (elapsed > fpsInterval) {
+                lastDrawTime = time - (elapsed % fpsInterval);
+                draw();
+            }
+        };
+        animationFrameId = requestAnimationFrame(loop);
+
         const handleResize = () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
@@ -41,7 +55,7 @@ const MatrixRain = () => {
         window.addEventListener('resize', handleResize);
 
         return () => {
-            clearInterval(interval);
+            cancelAnimationFrame(animationFrameId);
             window.removeEventListener('resize', handleResize);
         };
     }, []);

@@ -168,7 +168,18 @@ function backupDatabase() {
   });
 }
 
-setInterval(backupDatabase, 6 * 60 * 60 * 1000);
+
+function scheduleBackup() {
+  setTimeout(() => {
+    try {
+      backupDatabase();
+    } finally {
+      scheduleBackup();
+    }
+  }, 6 * 60 * 60 * 1000);
+}
+scheduleBackup();
+
 setTimeout(backupDatabase, 10000);
 
 const db = new sqlite3.Database(DB_PATH, (err) => {

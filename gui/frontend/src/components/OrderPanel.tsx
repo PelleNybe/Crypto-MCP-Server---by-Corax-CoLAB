@@ -67,8 +67,8 @@ export default function OrderPanel(){
         <input aria-label="Enter Trade Amount" title="Enter Trade Amount" Enter="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
         {type==='limit' && <input aria-label="Enter Limit Price" title="Enter Limit Price" Enter="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} />}
         <div style={{display:'flex',gap:8}}>
-          <button className="btn-primary" onClick={previewOrder} disabled={routingActive}>{routingActive ? "Routing..." : "Force Preview"}</button>
-          <button onClick={placeOrder} disabled={routingActive}>{routingActive ? "Placing..." : "Place"}</button>
+          <button className="btn-primary" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive}>{routingActive ? "Routing..." : "Force Preview"}</button>
+          <button onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive}>{routingActive ? "Placing..." : "Place"}</button>
         </div>
         {preview && <pre style={{background:'#334155',padding:8, overflowX: 'auto'}}>{JSON.stringify(preview,null,2)}</pre>}
         {result && <pre style={{background:'#064e3b',padding:8, overflowX: 'auto'}}>{JSON.stringify(result,null,2)}</pre>}
