@@ -7,3 +7,6 @@
 - Fix API Piling caused by setInterval (`gui/frontend/src/components/features/*.tsx`)
 - Fix async HTTP in FastMCP Tools (`news_mcp.py` etc.)
 Removed API piling issues
+- Replaced remaining setInterval with recursive setTimeout/requestAnimationFrame.
+- Added aria-labels to icon/iconless buttons for accessibility.
+- Optimized dictionary lookups in portfolio_mcp.py loops.

@@ -1,11 +1,6 @@
-🎨 Palette: Added 5 Visuals & 🛡️ Sentinel: Fixed 5 Security/Backend bugs
+⚡ Bolt: Performance and accessibility optimizations
 
-🎯 What:
-- Frontend visuals: Added Matrix Digital Rain, Cyberpunk Glitch Text headers, Interactive 3D Card Tilt on panels, Typewriter AI reasoning text animation, and Holographic Sweeps on primary buttons.
-- Frontend optimization: Memoized heavy 3D react-three-fiber child components, added frontend linting.
-- Backend/Security: Fixed SSRF via `hasOwnProperty` check, solved missing SQLite `err` callbacks preventing unhandled promise rejections, fixed Socket.io event emissions leaking passwords via spread operator, replaced `setInterval` with concurrent-safe recursive `setTimeout`, verified python `erc20_balance` default fallback to 18 decimals and `compare_digest` usage.
-- Updates: Readme features list and dependencies installed for testing.
-
-⚠️ Risk: Minimal visual risk. High security reward reducing unhandled crashes and info leaks.
-
-🛡️ Solution: Implemented React memoization to lower rendering overhead and strict parameter picking in event emitters.
+💡 What: Replaced setInterval with recursive setTimeout and requestAnimationFrame, added aria-label to buttons, and optimized dictionary lookups.
+🎯 Why: To prevent API piling, fix accessibility issues for screen readers on buttons without text, and improve performance in tight loops fetching coingecko prices.
+📊 Impact: Prevents backend DoS, improves screen reader support, and reduces overhead on portfolio value fetching.
+🔬 Measurement: Verified with tests and UI inspection.

@@ -109,6 +109,7 @@ export default function App() {
             disabled={isLoggingIn}
           />
           <button
+            aria-label="Submit Authentication"
             type="submit"
             className="btn-primary"
             style={{fontFamily: 'monospace', letterSpacing: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'}}
@@ -153,6 +154,7 @@ export default function App() {
       {/* Cyberpunk Navigation Tabs */}
       <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px', position: 'relative', zIndex: 10, borderBottom: '1px solid rgba(16, 185, 129, 0.2)', marginBottom: '20px', background: 'rgba(2, 2, 5, 0.8)', backdropFilter: 'blur(10px)' }}>
         <button
+          aria-label="Dashboard Tab"
           onClick={() => setActiveTab('dashboard')}
           className="btn-outline"
           style={{
@@ -163,6 +165,7 @@ export default function App() {
           }}
         >DASHBOARD</button>
         <button
+          aria-label="Analytics Tab"
           onClick={() => setActiveTab('analytics')}
           className="btn-outline"
           style={{
@@ -173,6 +176,7 @@ export default function App() {
           }}
         >ANALYTICS</button>
         <button
+          aria-label="System Logs Tab"
           onClick={() => setActiveTab('system')}
           className="btn-outline"
           style={{
