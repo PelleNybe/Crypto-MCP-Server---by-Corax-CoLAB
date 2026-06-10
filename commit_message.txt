@@ -1,6 +1,4 @@
-⚡ Bolt: Performance and accessibility optimizations
-
-💡 What: Replaced setInterval with recursive setTimeout and requestAnimationFrame, added aria-label to buttons, and optimized dictionary lookups.
-🎯 Why: To prevent API piling, fix accessibility issues for screen readers on buttons without text, and improve performance in tight loops fetching coingecko prices.
-📊 Impact: Prevents backend DoS, improves screen reader support, and reduces overhead on portfolio value fetching.
-🔬 Measurement: Verified with tests and UI inspection.
+💡 What: Added React.memo to Terrain in VolatilityMatrix.tsx and Wall in HoloOrderFlow.tsx
+🎯 Why: High-frequency polling and state updates in parent components caused child Three.js components to re-render unnecessarily, leading to GPU strain and UI lag.
+📊 Impact: Prevents expensive layout recalculations and reduces massive Three.js sub-tree updates, improving frame rates during polling.
+🔬 Measurement: Verify smooth animations in VolatilityMatrix and HoloOrderFlow via React Profiler.

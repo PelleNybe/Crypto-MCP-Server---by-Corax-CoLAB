@@ -4,7 +4,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Line, Box, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-const Wall = ({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
+const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
   const height = maxVolume > 0 ? (volume / maxVolume) * 5 : 0;
   const color = type === 'bid' ? '#10b981' : '#ef4444'; // Green for bids, Red for asks
   const positionX = type === 'bid' ? -index * 0.3 - 0.5 : index * 0.3 + 0.5;
@@ -35,7 +35,7 @@ const Wall = ({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', 
       )}
     </group>
   );
-};
+});
 
 export default function HoloOrderFlow({ price, symbol }: { price: number, symbol: string }) {
   const [bids, setBids] = useState<{price: number, volume: number}[]>([]);

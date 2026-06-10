@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-const Terrain = ({ waveHeight }: { waveHeight: number }) => {
+const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
   const mesh = useRef<THREE.Mesh>(null);
 
   // Create a grid geometry
@@ -37,7 +37,7 @@ const Terrain = ({ waveHeight }: { waveHeight: number }) => {
       <meshStandardMaterial color="#8b5cf6" wireframe={true} emissive="#8b5cf6" emissiveIntensity={0.5} transparent opacity={0.6} />
     </mesh>
   );
-};
+});
 
 export default function VolatilityMatrix() {
   const [waveHeight, setWaveHeight] = useState(1.5);
