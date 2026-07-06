@@ -9,3 +9,6 @@
 ## 2024-05-18 - Missing ARIA Labels and Loading States on Login Form
 **Learning:** The authentication form (the first thing a user sees) lacked critical accessibility attributes (`aria-label`, `aria-busy`) and provided no visual feedback when a login attempt was processing, making it unresponsive and screen-reader unfriendly. Additionally, deeply nested ternary operations mimicking component routing in React were causing rendering inconsistencies and excessive bundle sizes when using `pnpm build`.
 **Action:** Always wrap async form submissions with loading state flags (`isLoggingIn`), implement `aria-busy` on submission buttons to signal state changes to screen readers, and refactor deeply nested conditional rendering into cleaner JSX logic.
+## 2024-07-28 - Fixing non-standard input placeholder attributes
+**Learning:** React inputs in this codebase were incorrectly using `Enter="placeholder text"` instead of standard HTML `placeholder="placeholder text"`. This caused the hint text to not render for the user, worsening form UX.
+**Action:** Always use standard HTML attributes like `placeholder` for text input hints to ensure they are parsed and rendered correctly by the browser.

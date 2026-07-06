@@ -102,7 +102,7 @@ export default function App() {
             onChange={(e) => setPassword(e.target.value)}
             aria-label="Enter Access Key"
             title="Enter Access Key"
-            Enter="Enter Access Key"
+            placeholder="Enter Access Key"
             style={{ padding: '12px', borderRadius: '4px', border: '1px solid #334155', background: 'rgba(0,0,0,0.5)', color: '#10b981', fontFamily: 'monospace', outline: 'none', transition: 'border 0.3s' }}
             onFocus={(e) => e.target.style.border = '1px solid #10b981'}
             onBlur={(e) => e.target.style.border = '1px solid #334155'}

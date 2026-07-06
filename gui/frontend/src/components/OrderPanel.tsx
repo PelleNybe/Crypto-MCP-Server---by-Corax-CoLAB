@@ -58,14 +58,14 @@ export default function OrderPanel(){
     <div className="card interactive-element">
       <h3>Order / Trade</h3>
       <div style={{display:'grid',gap:8}}>
-        <input aria-label="Enter Exchange Name" title="Enter Exchange Name" Enter="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
-        <input aria-label="Enter Trading Symbol" title="Enter Trading Symbol" Enter="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
+        <input aria-label="Enter Exchange Name" title="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
+        <input aria-label="Enter Trading Symbol" title="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
         <div style={{display:'flex',gap:8}}>
           <select aria-label="Order Side" title="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
           <select aria-label="Order Type" title="Order Type" value={type} onChange={e=>setType(e.target.value)}><option>market</option><option>limit</option></select>
         </div>
-        <input aria-label="Enter Trade Amount" title="Enter Trade Amount" Enter="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
-        {type==='limit' && <input aria-label="Enter Limit Price" title="Enter Limit Price" Enter="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} />}
+        <input aria-label="Enter Trade Amount" title="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
+        {type==='limit' && <input aria-label="Enter Limit Price" title="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} />}
         <div style={{display:'flex',gap:8}}>
           <button className="btn-primary" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive}>{routingActive ? "Routing..." : "Force Preview"}</button>
           <button onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive}>{routingActive ? "Placing..." : "Place"}</button>
