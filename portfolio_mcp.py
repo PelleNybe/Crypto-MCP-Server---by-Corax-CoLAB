@@ -109,12 +109,15 @@ async def fetch_exchange_balance(exch_low: str):
         bal = await ex.fetch_balance()
 
         # Collect non-zero balances and pre-calculate upper symbols
+        # ⚡ Bolt: Store the pre-calculated upper_coin in the balances dictionary
+        # to avoid redundant .upper() calls in the subsequent loop.
         balances = {}
         upper_coins = []
         for coin, amount in bal.get("total", {}).items():
             if amount and amount > 0:
-                balances[coin] = amount
-                upper_coins.append(coin.upper())
+                upper_coin = coin.upper()
+                balances[coin] = (amount, upper_coin)
+                upper_coins.append(upper_coin)
 
         # Batch fetch prices from Coingecko using pre-calculated upper symbols
         cg_prices = (
@@ -138,8 +141,8 @@ async def fetch_exchange_balance(exch_low: str):
             }
 
         tasks = []
-        for coin, amount in balances.items():
-            upper_coin = coin.upper()
+        for coin, (amount, upper_coin) in balances.items():
+            # ⚡ Bolt: Use the pre-calculated upper_coin instead of calling coin.upper() again
             tasks.append(_get_asset_price_ccxt_fallback(coin, upper_coin, amount))
 
         if tasks:
