@@ -59,8 +59,8 @@ export default function DarkPoolSonar() {
                     const volumeUsd = trade.amount * trade.price;
                     if (volumeUsd > avgVolume * 1.5) { // 1.5x average is a "whale" in this context
                         // Randomize position slightly for visual effect on a plane
-                        const angle = Math.random() * Math.PI * 2;
-                        const radius = Math.random() * 8;
+                        const angle = (Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2;
+                        const radius = (Math.sin(Date.now()) * 0.5 + 0.5) * 8;
                         const x = Math.cos(angle) * radius;
                         const z = Math.sin(angle) * radius;
                         const color = trade.side === 'buy' ? '#10b981' : '#ef4444';

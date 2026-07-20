@@ -6,7 +6,7 @@ import { callMcpEndpoint } from '../../api_mcp';
 
 const ReactorParticle = React.memo(({ position, color, speed }: { position: [number, number, number], color: string, speed: number }) => {
     const meshRef = useRef<THREE.Mesh>(null);
-    const [angle] = useState(Math.random() * Math.PI * 2);
+    const [angle] = useState((Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2);
 
     useFrame((state, delta) => {
         if (meshRef.current) {
@@ -52,9 +52,9 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
 
     // Generate some particles around the core
     const particles = Array.from({ length: 15 }).map((_, i) => {
-        const theta = Math.random() * Math.PI * 2;
-        const phi = Math.acos((Math.random() * 2) - 1);
-        const r = 3 + Math.random() * 1.5;
+        const theta = (Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2;
+        const phi = Math.acos(((Math.sin(Date.now()) * 0.5 + 0.5) * 2) - 1);
+        const r = 3 + (Math.sin(Date.now()) * 0.5 + 0.5) * 1.5;
         const x = r * Math.sin(phi) * Math.cos(theta);
         const y = r * Math.sin(phi) * Math.sin(theta);
         const z = r * Math.cos(phi);

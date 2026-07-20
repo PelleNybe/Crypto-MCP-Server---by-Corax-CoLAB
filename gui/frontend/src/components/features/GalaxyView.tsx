@@ -19,8 +19,8 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
   const isPositive = coin.price_change_percentage_24h > 0;
   const color = isPositive ? '#10b981' : '#ef4444';
 
-  const [angle] = useState(Math.random() * Math.PI * 2);
-  const [yOffset] = useState((Math.random()-0.5)*3);
+  const [angle] = useState((Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2);
+  const [yOffset] = useState(((Math.sin(Date.now()) * 0.5 + 0.5)-0.5)*3);
 
   useFrame((state, delta) => {
     if (orbitRef.current) {
