@@ -24,9 +24,9 @@ const MatrixRain = () => {
             ctx.font = fontSize + 'px monospace';
 
             for (let i = 0; i < drops.length; i++) {
-                const text = letters[Math.floor(Math.random() * letters.length)];
+                const text = letters[Math.floor((Math.sin(Date.now()) * 0.5 + 0.5) * letters.length)];
                 ctx.fillText(text, i * fontSize, drops[i] * fontSize);
-                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                if (drops[i] * fontSize > canvas.height && (Math.sin(Date.now()) * 0.5 + 0.5) > 0.975) {
                     drops[i] = 0;
                 }
                 drops[i]++;
