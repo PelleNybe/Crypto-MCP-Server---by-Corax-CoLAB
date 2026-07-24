@@ -433,7 +433,7 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
     const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'create_order', orderArgs);
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), (err) => {
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), function (err) {
       if (err) {
         console.error('DB error:', err);
         return res.status(500).json({ ok: false, error: 'Database operation failed' });
