@@ -113,6 +113,23 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
     );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ gasPriceGwei, particles }: { gasPriceGwei: number, particles: any[] }) => {
+  return (
+<Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[0, 0, 0]} intensity={2} distance={20} />
+
+              <Stars radius={20} depth={20} count={500} factor={2} saturation={0} fade speed={1} />
+
+              <ReactorCore gasPriceGwei={gasPrice} />
+
+              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
+          </Canvas>
+  );
+});
+
 export default function GasHologram() {
   const [gasPrice, setGasPrice] = useState<number>(0);
 
@@ -154,16 +171,7 @@ export default function GasHologram() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[0, 0, 0]} intensity={2} distance={20} />
-
-              <Stars radius={20} depth={20} count={500} factor={2} saturation={0} fade speed={1} />
-
-              <ReactorCore gasPriceGwei={gasPrice} />
-
-              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
-          </Canvas>
+          <CanvasScene gasPriceGwei={gasPriceGwei} particles={particles} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
               STATUS: {gasPrice > 50 ? 'CRITICAL (HIGH FEES)' : gasPrice > 20 ? 'ELEVATED' : 'OPTIMAL'}

@@ -21,16 +21,16 @@
     "three": "^0.183.2"
   },
   "devDependencies": {
-    "@playwright/test": "^1.58.2",
+    "@playwright/test": "^1.62.0",
     "@types/three": "^0.183.1",
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
     "@vitejs/plugin-react": "^6.0.2",
-    "playwright": "^1.58.2",
-    "typescript": "^5.2.2",
-    "vite": "^8.0.16",
     "eslint": "^8.56.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "@typescript-eslint/eslint-plugin": "^7.0.0",
-    "@typescript-eslint/parser": "^7.0.0"
+    "playwright": "^1.62.0",
+    "typescript": "^5.2.2",
+    "vite": "^8.0.16"
   }
 }

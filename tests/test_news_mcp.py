@@ -27,6 +27,7 @@ if "news_mcp" in sys.modules:
 from news_mcp import get_latest_news
 import news_mcp
 
+
 def test_get_latest_news():
     mock_response = MagicMock()
     mock_response.status_code = 200

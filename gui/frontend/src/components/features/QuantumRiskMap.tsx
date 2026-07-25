@@ -62,6 +62,30 @@ const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ stress }: { stress: number }) => {
+  return (
+<Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
+        <color attach="background" args={['#020205']} />
+        <ambientLight intensity={0.5} />
+        <pointLight position={[0, 10, 0]} intensity={stress > 0.5 ? 5 : 2} color={stress > 0.5 ? '#ef4444' : '#ffffff'} />
+
+        <Terrain stressLevel={stress} />
+
+        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2 - 0.1} autoRotate={stress < 0.2} autoRotateSpeed={0.5} />
+      </Canvas>
+  );
+});
+
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ stress }: { stress: number }) => {
+  return (
+<CanvasScene stress={stress} />
+  );
+});
+
 export default function QuantumRiskMap() {
   const [stress, setStress] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -155,15 +179,7 @@ export default function QuantumRiskMap() {
         </div>
       )}
 
-      <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
-        <color attach="background" args={['#020205']} />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[0, 10, 0]} intensity={stress > 0.5 ? 5 : 2} color={stress > 0.5 ? '#ef4444' : '#ffffff'} />
-
-        <Terrain stressLevel={stress} />
-
-        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2 - 0.1} autoRotate={stress < 0.2} autoRotateSpeed={0.5} />
-      </Canvas>
+      <CanvasScene stress={stress} />
       <style>{`
         @keyframes blink { 0% { opacity: 1 } 50% { opacity: 0 } 100% { opacity: 1 } }
       `}</style>

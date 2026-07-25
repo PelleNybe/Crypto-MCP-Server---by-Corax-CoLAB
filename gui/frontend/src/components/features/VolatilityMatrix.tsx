@@ -39,6 +39,19 @@ const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ waveHeight }: { waveHeight: number }) => {
+  return (
+<Canvas camera={{ position: [0, 8, 15], fov: 45 }}>
+          <ambientLight intensity={0.5} />
+          <pointLight position={[10, 10, 10]} intensity={2} color="#8b5cf6" />
+          <Terrain waveHeight={waveHeight} />
+          <OrbitControls enableZoom={false} autoRotate={true} autoRotateSpeed={0.5} />
+        </Canvas>
+  );
+});
+
 export default function VolatilityMatrix() {
   const [waveHeight, setWaveHeight] = useState(1.5);
   const [loading, setLoading] = useState(true);
@@ -104,12 +117,7 @@ export default function VolatilityMatrix() {
       </div>
 
       <div style={{ flex: 1, position: 'relative' }}>
-        <Canvas camera={{ position: [0, 8, 15], fov: 45 }}>
-          <ambientLight intensity={0.5} />
-          <pointLight position={[10, 10, 10]} intensity={2} color="#8b5cf6" />
-          <Terrain waveHeight={waveHeight} />
-          <OrbitControls enableZoom={false} autoRotate={true} autoRotateSpeed={0.5} />
-        </Canvas>
+        <CanvasScene waveHeight={waveHeight} />
       </div>
     </div>
   );

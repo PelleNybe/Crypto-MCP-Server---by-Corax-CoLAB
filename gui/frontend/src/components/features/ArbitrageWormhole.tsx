@@ -132,6 +132,34 @@ const ArbitrageParticle = React.memo(({ start, end, speed }: { start: THREE.Vect
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ selectedExchanges, prices, arbitragePairs }: { selectedExchanges: string[], prices: any, arbitragePairs: any[] }) => {
+  return (
+<Canvas camera={{ position: [0, 5, 10], fov: 60 }}>
+        <color attach="background" args={['#020205']} />
+        <ambientLight intensity={0.2} />
+
+        <ExchangeHub position={[-4, 0, 0]} name={opportunities[0]?.source || 'Scanning...'} price={opportunities[0]?.p1 || 0} />
+        <ExchangeHub position={[4, 0, 0]} name={opportunities[0]?.target || 'Scanning...'} price={opportunities[0]?.p2 || 0} isTarget />
+
+        {opportunities.length > 0 && (
+          <>
+            <WormholeTunnel />
+            {Array.from({ length: 20 }).map((_, i) => (
+              <ArbitrageParticle key={i} start={sourcePos} end={targetPos} speed={0.5 + (i % 3) * 0.5} />
+            ))}
+          </>
+        )}
+
+        {/* Scanning grid */}
+        <gridHelper args={[20, 20, '#334155', '#1e293b']} position={[0, -2, 0]} />
+
+        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} minDistance={5} maxDistance={20} />
+      </Canvas>
+  );
+});
+
 export default function ArbitrageWormhole() {
   const [opportunities, setOpportunities] = useState<any[]>([]);
 
@@ -203,27 +231,7 @@ export default function ArbitrageWormhole() {
         </div>
       )}
 
-      <Canvas camera={{ position: [0, 5, 10], fov: 60 }}>
-        <color attach="background" args={['#020205']} />
-        <ambientLight intensity={0.2} />
-
-        <ExchangeHub position={[-4, 0, 0]} name={opportunities[0]?.source || 'Scanning...'} price={opportunities[0]?.p1 || 0} />
-        <ExchangeHub position={[4, 0, 0]} name={opportunities[0]?.target || 'Scanning...'} price={opportunities[0]?.p2 || 0} isTarget />
-
-        {opportunities.length > 0 && (
-          <>
-            <WormholeTunnel />
-            {Array.from({ length: 20 }).map((_, i) => (
-              <ArbitrageParticle key={i} start={sourcePos} end={targetPos} speed={0.5 + (i % 3) * 0.5} />
-            ))}
-          </>
-        )}
-
-        {/* Scanning grid */}
-        <gridHelper args={[20, 20, '#334155', '#1e293b']} position={[0, -2, 0]} />
-
-        <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} minDistance={5} maxDistance={20} />
-      </Canvas>
+      <CanvasScene selectedExchanges={selectedExchanges} prices={prices} arbitragePairs={arbitragePairs} />
       <style>{`
         @keyframes pulseBg {
           0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
