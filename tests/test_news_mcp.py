@@ -25,7 +25,7 @@ from unittest.mock import patch
 if "news_mcp" in sys.modules:
     del sys.modules["news_mcp"]
 from news_mcp import get_latest_news
-
+import news_mcp
 
 def test_get_latest_news():
     mock_response = MagicMock()
@@ -42,9 +42,8 @@ def test_get_latest_news():
 
     mock_client = AsyncMock()
     mock_client.get.return_value = mock_response
-    mock_client.__aenter__.return_value = mock_client
 
-    with patch("news_mcp.httpx.AsyncClient", return_value=mock_client):
+    with patch.object(news_mcp, "_client", mock_client):
         res = asyncio.run(get_latest_news())
         assert res["status"] == "success"
         assert len(res["news"]) == 2

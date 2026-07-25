@@ -18,6 +18,10 @@ mcp = FastMCP(
     name="news", stateless_http=True, json_response=True, host="0.0.0.0", port=7017
 )
 
+# ⚡ Bolt: Maintain a module-level httpx.AsyncClient to reuse connection pools
+# across multiple concurrent MCP tool calls. This significantly reduces latency
+# compared to instantiating a new client per request.
+_client = httpx.AsyncClient(timeout=10.0)
 
 @mcp.tool()
 async def get_latest_news(limit: int = 10) -> dict:
@@ -29,8 +33,8 @@ async def get_latest_news(limit: int = 10) -> dict:
         # CryptoPanic public API for recent news
         url = "https://cryptopanic.com/api/v1/posts/"
         params = {"auth_token": "public", "public": "true"}
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=params, timeout=10)
+
+        response = await _client.get(url, params=params)
 
         if response.status_code == 200:
             data = response.json()
@@ -74,7 +78,7 @@ async def get_latest_news(limit: int = 10) -> dict:
         else:
             return {"error": f"CryptoPanic API error: {response.status_code}"}
     except Exception as e:
-        logger.error(f"Error fetching news: {e}")
+        logger.error(f"Error fetching news: %s", e)
         return {"error": str(e)}
 
 
@@ -86,8 +90,9 @@ async def search_news(query: str, limit: int = 10) -> dict:
     try:
         url = "https://cryptopanic.com/api/v1/posts/"
         params = {"auth_token": "public", "public": "true", "currencies": query}
-        async with httpx.AsyncClient() as client:
-            response = await client.get(url, params=params, timeout=10)
+
+        response = await _client.get(url, params=params)
+
         if response.status_code == 200:
             return {
                 "status": "success",

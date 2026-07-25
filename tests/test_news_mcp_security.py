@@ -14,26 +14,28 @@ sys.modules["httpx"] = MagicMock()
 sys.modules["requests"] = MagicMock()
 sys.modules["dotenv"] = MagicMock()
 
-from news_mcp import search_news
 from unittest.mock import AsyncMock
 
+if "news_mcp" in sys.modules:
+    del sys.modules["news_mcp"]
 
-@patch("news_mcp.httpx.AsyncClient")
-def test_search_news_parameter_encoding(mock_async_client_class):
+import news_mcp
+from news_mcp import search_news
+
+def test_search_news_parameter_encoding():
     mock_response = MagicMock()
     mock_response.status_code = 200
     mock_response.json.return_value = {"results": []}
 
     mock_client = AsyncMock()
     mock_client.get.return_value = mock_response
-    mock_client.__aenter__.return_value = mock_client
-    mock_async_client_class.return_value = mock_client
 
     # Malicious query attempting to inject additional parameters
     malicious_query = "BTC&public=false"
     import asyncio
 
-    asyncio.run(search_news(malicious_query))
+    with patch.object(news_mcp, "_client", mock_client):
+        asyncio.run(search_news(malicious_query))
 
     # Get the URL and params that were actually called
     args, kwargs = mock_client.get.call_args
@@ -48,7 +50,6 @@ def test_search_news_parameter_encoding(mock_async_client_class):
         # It SHOULD be encoded
         assert "currencies=BTC%26public%3Dfalse" in actual_url
         assert "currencies=BTC&public=false" not in actual_url
-
 
 if __name__ == "__main__":
     import pytest

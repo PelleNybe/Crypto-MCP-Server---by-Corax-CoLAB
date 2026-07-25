@@ -111,13 +111,14 @@ async def fetch_exchange_balance(exch_low: str):
         # Collect non-zero balances and pre-calculate upper symbols
         # ⚡ Bolt: Store the pre-calculated upper_coin in the balances dictionary
         # to avoid redundant .upper() calls in the subsequent loop.
-        balances = {}
-        upper_coins = []
-        for coin, amount in bal.get("total", {}).items():
-            if amount and amount > 0:
-                upper_coin = coin.upper()
-                balances[coin] = (amount, upper_coin)
-                upper_coins.append(upper_coin)
+        # ⚡ Bolt: Use dictionary comprehensions and walrus operator (:=) for inline
+        # assignments to optimize dictionary lookups and string operations within tight loops.
+        balances = {
+            coin: (amount, (upper_coin := coin.upper()))
+            for coin, amount in bal.get("total", {}).items()
+            if amount and amount > 0
+        }
+        upper_coins = [u for _, u in balances.values()]
 
         # Batch fetch prices from Coingecko using pre-calculated upper symbols
         cg_prices = (
