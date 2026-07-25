@@ -37,6 +37,31 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
     );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ words, targetSymbol }: { words: any[], targetSymbol: string }) => {
+  return (
+<Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
+              <ambientLight intensity={1} />
+              <fog attach="fog" args={['#020205', 10, 25]} />
+
+              <group>
+                  {words.map((w, i) => (
+                      <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
+                  ))}
+              </group>
+
+              {/* Connecting lines sphere effect */}
+              <mesh>
+                  <sphereGeometry args={[5.8, 16, 16]} />
+                  <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.05} />
+              </mesh>
+
+              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={1.2} />
+          </Canvas>
+  );
+});
+
 export default function SentimentWordCloud() {
   const [words, setWords] = useState<any[]>([]);
 
@@ -119,24 +144,7 @@ export default function SentimentWordCloud() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020205', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
-              <ambientLight intensity={1} />
-              <fog attach="fog" args={['#020205', 10, 25]} />
-
-              <group>
-                  {words.map((w, i) => (
-                      <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
-                  ))}
-              </group>
-
-              {/* Connecting lines sphere effect */}
-              <mesh>
-                  <sphereGeometry args={[5.8, 16, 16]} />
-                  <meshBasicMaterial color="#3b82f6" wireframe transparent opacity={0.05} />
-              </mesh>
-
-              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={1.2} />
-          </Canvas>
+          <CanvasScene words={words} targetSymbol={targetSymbol} />
 
           <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>
               <span style={{ color: '#10b981', fontSize: '10px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>

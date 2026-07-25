@@ -62,6 +62,26 @@ const Constellation = React.memo(({ nodes, links }: { nodes: any[], links: any[]
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ nodes, links }: { nodes: any[], links: any[] }) => {
+  return (
+<Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
+        <color attach="background" args={['#020205']} />
+
+        {/* Deep space background */}
+        <mesh position={[0, 0, -20]}>
+          <planeGeometry args={[100, 100]} />
+          <meshBasicMaterial color="#000" />
+        </mesh>
+
+        {data.nodes.length > 0 && <Constellation nodes={data.nodes} links={data.links} />}
+
+        <OrbitControls autoRotate autoRotateSpeed={0.5} minDistance={5} maxDistance={30} />
+      </Canvas>
+  );
+});
+
 export default function WhaleConstellations() {
   const [data, setData] = useState({ nodes: [], links: [] });
 
@@ -174,19 +194,7 @@ export default function WhaleConstellations() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: 4 }}><div style={{width:8, height:8, background:'#c084fc', borderRadius:'50%'}}></div> TRENDING NODES</div>
       </div>
 
-      <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
-        <color attach="background" args={['#020205']} />
-
-        {/* Deep space background */}
-        <mesh position={[0, 0, -20]}>
-          <planeGeometry args={[100, 100]} />
-          <meshBasicMaterial color="#000" />
-        </mesh>
-
-        {data.nodes.length > 0 && <Constellation nodes={data.nodes} links={data.links} />}
-
-        <OrbitControls autoRotate autoRotateSpeed={0.5} minDistance={5} maxDistance={30} />
-      </Canvas>
+      <CanvasScene nodes={nodes} links={links} />
     </div>
   );
 }

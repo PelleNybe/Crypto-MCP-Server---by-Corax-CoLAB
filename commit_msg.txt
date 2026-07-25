@@ -1,0 +1,17 @@
+Dev, PelleNybe/Corax CoLAB: [security and performance improvements]
+
+💡 What:
+- Added explicit type validation in backend endpoints.
+- Implemented robust `React.memo` isolation for heavy `<Canvas>` Three.js components across the frontend to prevent massive sub-tree rendering.
+- Addressed master log security and performance learnings.
+
+🎯 Why:
+- Mitigate potential prototype pollution / injection vulnerabilities.
+- Drastically improve React frontend performance by avoiding repeated 3D topology calculations when unrelated parent state changes (e.g., animations).
+
+📊 Impact:
+- Eliminates heavy 3D scene re-renders.
+- Enhances backend API stability against malformed JSON data.
+
+🔬 Measurement:
+- Tests run locally.

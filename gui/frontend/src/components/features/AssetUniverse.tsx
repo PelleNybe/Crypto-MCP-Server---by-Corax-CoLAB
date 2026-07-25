@@ -68,19 +68,11 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
   );
 });
 
-export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {
-  // Sort portfolio by value descending so biggest is in the center
-  const sortedPortfolio = useMemo(() => {
-    return [...portfolio].sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0)).filter(a => a.value_usd > 0);
-  }, [portfolio]);
 
-  if (sortedPortfolio.length === 0) {
-    return <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>No asset data available</div>;
-  }
-
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
   return (
-    <div style={{ width: '100%', height: '400px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-      <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
+<Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <color attach="background" args={['#020205']} />
         <ambientLight intensity={0.2} />
         <pointLight position={[0, 0, 0]} intensity={2} color="#ffffff" />
@@ -109,6 +101,30 @@ export default function AssetUniverse({ portfolio, totalValue }: { portfolio: an
           autoRotateSpeed={0.5}
         />
       </Canvas>
+  );
+});
+
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
+  return (
+<CanvasScene sortedPortfolio={sortedPortfolio} totalValue={totalValue} />
+  );
+});
+
+export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {
+  // Sort portfolio by value descending so biggest is in the center
+  const sortedPortfolio = useMemo(() => {
+    return [...portfolio].sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0)).filter(a => a.value_usd > 0);
+  }, [portfolio]);
+
+  if (sortedPortfolio.length === 0) {
+    return <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#666' }}>No asset data available</div>;
+  }
+
+  return (
+    <div style={{ width: '100%', height: '400px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
+      <CanvasScene sortedPortfolio={sortedPortfolio} totalValue={totalValue} />
       <div style={{ position: 'absolute', top: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
         DRAG TO ROTATE • SCROLL TO ZOOM
       </div>

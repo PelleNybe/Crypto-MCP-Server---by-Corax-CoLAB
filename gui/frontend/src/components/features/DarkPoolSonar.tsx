@@ -36,6 +36,44 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
+  return (
+<Canvas camera={{ position: [0, 8, 8], fov: 60 }}>
+              <ambientLight intensity={0.5} />
+
+              {/* Sonar Grid */}
+              <gridHelper args={[20, 20, '#334155', '#1e293b']} position={[0, -0.1, 0]} />
+
+              {/* Radar Sweep Effect (Simple rotation) */}
+              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
+                  <circleGeometry args={[10, 64]} />
+                  <meshBasicMaterial color="#8b5cf6" transparent opacity={0.05} />
+              </mesh>
+
+              {pings.map((ping) => (
+                  <group key={ping.id}>
+                    <SonarPing
+                        position={ping.position}
+                        color={ping.color}
+                        size={ping.size}
+                        onComplete={() => removePing(ping.id)}
+                    />
+                    <Html position={[ping.position[0], 0.5, ping.position[2]]} center>
+                        <div style={{ color: ping.color, fontSize: '10px', fontFamily: 'monospace', pointerEvents: 'none', background: 'rgba(0,0,0,0.7)', padding: '4px 6px', borderRadius: '4px', border: `1px solid ${ping.color}`, textShadow: `0 0 5px ${ping.color}` }}>
+                            {ping.trade.side.toUpperCase()}<br/>
+                            ${(ping.trade.amount * ping.trade.price).toLocaleString(undefined, {maximumFractionDigits:0})}
+                        </div>
+                    </Html>
+                  </group>
+              ))}
+
+              <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={true} autoRotateSpeed={1.0} />
+          </Canvas>
+  );
+});
+
 export default function DarkPoolSonar() {
   const [pings, setPings] = useState<any[]>([]);
   const { targetSymbol: activeSymbolHook, targetExchange: activeExchange } = useActivePortfolioSymbol();
@@ -111,37 +149,7 @@ export default function DarkPoolSonar() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 8, 8], fov: 60 }}>
-              <ambientLight intensity={0.5} />
-
-              {/* Sonar Grid */}
-              <gridHelper args={[20, 20, '#334155', '#1e293b']} position={[0, -0.1, 0]} />
-
-              {/* Radar Sweep Effect (Simple rotation) */}
-              <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -0.05, 0]}>
-                  <circleGeometry args={[10, 64]} />
-                  <meshBasicMaterial color="#8b5cf6" transparent opacity={0.05} />
-              </mesh>
-
-              {pings.map((ping) => (
-                  <group key={ping.id}>
-                    <SonarPing
-                        position={ping.position}
-                        color={ping.color}
-                        size={ping.size}
-                        onComplete={() => removePing(ping.id)}
-                    />
-                    <Html position={[ping.position[0], 0.5, ping.position[2]]} center>
-                        <div style={{ color: ping.color, fontSize: '10px', fontFamily: 'monospace', pointerEvents: 'none', background: 'rgba(0,0,0,0.7)', padding: '4px 6px', borderRadius: '4px', border: `1px solid ${ping.color}`, textShadow: `0 0 5px ${ping.color}` }}>
-                            {ping.trade.side.toUpperCase()}<br/>
-                            ${(ping.trade.amount * ping.trade.price).toLocaleString(undefined, {maximumFractionDigits:0})}
-                        </div>
-                    </Html>
-                  </group>
-              ))}
-
-              <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={true} autoRotateSpeed={1.0} />
-          </Canvas>
+          <CanvasScene activeSymbolHook={activeSymbolHook} trades={trades} pings={pings} onPingComplete={onPingComplete} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
               SCANNING {activeExchange.toUpperCase()} {activeSymbolHook}

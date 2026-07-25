@@ -19,6 +19,45 @@ const MatrixBar = React.memo(({ position, height, color, label }: { position: [n
     );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
+  return (
+<Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} intensity={1} />
+              <gridHelper args={[12, 12, '#334155', '#1e293b']} position={[0, -0.01, 0]} />
+
+              <group position={[-4.5, 0, 0]}>
+                  {matrixData.map((bucket, i) => {
+                      const color = bucket.imbalance > 0 ? '#10b981' : '#ef4444'; // Green if more bids, Red if more asks
+                      const height = Math.max(0.1, bucket.normalizedHeight);
+
+                      return (
+                          <MatrixBar
+                              key={i}
+                              position={[i, 0, 0]}
+                              height={height}
+                              color={color}
+                              label={`$${bucket.price.toFixed(0)}`}
+                          />
+                      );
+                  })}
+              </group>
+
+              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={0.5} />
+          </Canvas>
+  );
+});
+
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
+  return (
+<CanvasScene matrixData={matrixData} />
+  );
+});
+
 export default function FlashCrashMatrix() {
   const [matrixData, setMatrixData] = useState<any[]>([]);
   const { targetSymbol: activeSymbolHook, targetExchange: activeExchange } = useActivePortfolioSymbol();
@@ -106,30 +145,7 @@ export default function FlashCrashMatrix() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020205', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
-              <ambientLight intensity={0.5} />
-              <pointLight position={[10, 10, 10]} intensity={1} />
-              <gridHelper args={[12, 12, '#334155', '#1e293b']} position={[0, -0.01, 0]} />
-
-              <group position={[-4.5, 0, 0]}>
-                  {matrixData.map((bucket, i) => {
-                      const color = bucket.imbalance > 0 ? '#10b981' : '#ef4444'; // Green if more bids, Red if more asks
-                      const height = Math.max(0.1, bucket.normalizedHeight);
-
-                      return (
-                          <MatrixBar
-                              key={i}
-                              position={[i, 0, 0]}
-                              height={height}
-                              color={color}
-                              label={`$${bucket.price.toFixed(0)}`}
-                          />
-                      );
-                  })}
-              </group>
-
-              <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={0.5} />
-          </Canvas>
+          <CanvasScene matrixData={matrixData} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
               ANALYZING LIQUIDITY: {activeSymbolHook}

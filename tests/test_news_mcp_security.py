@@ -22,6 +22,7 @@ if "news_mcp" in sys.modules:
 import news_mcp
 from news_mcp import search_news
 
+
 def test_search_news_parameter_encoding():
     mock_response = MagicMock()
     mock_response.status_code = 200
@@ -50,6 +51,7 @@ def test_search_news_parameter_encoding():
         # It SHOULD be encoded
         assert "currencies=BTC%26public%3Dfalse" in actual_url
         assert "currencies=BTC&public=false" not in actual_url
+
 
 if __name__ == "__main__":
     import pytest

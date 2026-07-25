@@ -77,6 +77,40 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCoins: any[], handleSelect: any, activeSymbolHook: string }) => {
+  return (
+<Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
+              <ambientLight intensity={0.2} />
+              <pointLight position={[0, 0, 0]} intensity={2} color="#f59e0b" distance={50} />
+
+              <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
+
+              {/* Supermassive Black Hole (Center) */}
+              <mesh position={[0,0,0]}>
+                  <sphereGeometry args={[1, 32, 32]} />
+                  <meshBasicMaterial color="#000000" />
+              </mesh>
+              <mesh position={[0,0,0]}>
+                  <sphereGeometry args={[1.2, 32, 32]} />
+                  <meshBasicMaterial color="#f59e0b" transparent opacity={0.2} blending={THREE.AdditiveBlending} />
+              </mesh>
+
+              {coins.map((coin) => (
+                  <CryptoStar
+                      key={coin.id}
+                      coin={coin}
+                      onSelect={handleSelect}
+                      selected={selectedCoin?.id === coin.id}
+                  />
+              ))}
+
+              <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={!selectedCoin} autoRotateSpeed={0.5} />
+          </Canvas>
+  );
+});
+
 export default function GalaxyView() {
   const [coins, setCoins] = useState<any[]>([]);
   const [selectedCoin, setSelectedCoin] = useState<any>(null);
@@ -127,33 +161,7 @@ export default function GalaxyView() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
-              <ambientLight intensity={0.2} />
-              <pointLight position={[0, 0, 0]} intensity={2} color="#f59e0b" distance={50} />
-
-              <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
-
-              {/* Supermassive Black Hole (Center) */}
-              <mesh position={[0,0,0]}>
-                  <sphereGeometry args={[1, 32, 32]} />
-                  <meshBasicMaterial color="#000000" />
-              </mesh>
-              <mesh position={[0,0,0]}>
-                  <sphereGeometry args={[1.2, 32, 32]} />
-                  <meshBasicMaterial color="#f59e0b" transparent opacity={0.2} blending={THREE.AdditiveBlending} />
-              </mesh>
-
-              {coins.map((coin) => (
-                  <CryptoStar
-                      key={coin.id}
-                      coin={coin}
-                      onSelect={handleSelect}
-                      selected={selectedCoin?.id === coin.id}
-                  />
-              ))}
-
-              <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={!selectedCoin} autoRotateSpeed={0.5} />
-          </Canvas>
+          <CanvasScene sortedCoins={sortedCoins} handleSelect={handleSelect} activeSymbolHook={activeSymbolHook} />
 
           {/* Overlay info */}
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>

@@ -37,6 +37,51 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
   );
 });
 
+
+// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
+const CanvasScene = React.memo(({ bids, asks, maxVol }: { bids: any[], asks: any[], maxVol: number }) => {
+  return (
+<Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
+        <color attach="background" args={['#020205']} />
+        <ambientLight intensity={0.5} />
+        <pointLight position={[10, 10, 10]} intensity={1} />
+
+        {/* Grid Floor */}
+        <gridHelper args={[20, 20, '#10b981', '#222222']} position={[0, 0, 0]} />
+
+        {/* Current Price Marker */}
+        <group position={[0, 0, 0]}>
+           <mesh position={[0, 2.5, 0]}>
+             <cylinderGeometry args={[0.05, 0.05, 5, 16]} />
+             <meshBasicMaterial color="#ffffff" transparent opacity={0.3} />
+           </mesh>
+           <Text position={[0, 5.5, 0]} color="#ffffff" fontSize={0.4} outlineWidth={0.05} outlineColor="#000000">
+             {price ? price.toFixed(2) : 'Loading...'}
+           </Text>
+        </group>
+
+        {/* Render Bids */}
+        {bids.map((bid, index) => (
+          <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={maxVolume} index={index} />
+        ))}
+
+        {/* Render Asks */}
+        {asks.map((ask, index) => (
+          <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={maxVolume} index={index} />
+        ))}
+
+        <OrbitControls
+          enablePan={true}
+          enableZoom={true}
+          minPolarAngle={0}
+          maxPolarAngle={Math.PI / 2 - 0.1}
+          autoRotate={true}
+          autoRotateSpeed={0.5}
+        />
+      </Canvas>
+  );
+});
+
 export default function HoloOrderFlow({ price, symbol }: { price: number, symbol: string }) {
   const [bids, setBids] = useState<{price: number, volume: number}[]>([]);
   const [asks, setAsks] = useState<{price: number, volume: number}[]>([]);
@@ -90,44 +135,7 @@ export default function HoloOrderFlow({ price, symbol }: { price: number, symbol
 
   return (
     <div style={{ width: '100%', height: '300px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-      <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
-        <color attach="background" args={['#020205']} />
-        <ambientLight intensity={0.5} />
-        <pointLight position={[10, 10, 10]} intensity={1} />
-
-        {/* Grid Floor */}
-        <gridHelper args={[20, 20, '#10b981', '#222222']} position={[0, 0, 0]} />
-
-        {/* Current Price Marker */}
-        <group position={[0, 0, 0]}>
-           <mesh position={[0, 2.5, 0]}>
-             <cylinderGeometry args={[0.05, 0.05, 5, 16]} />
-             <meshBasicMaterial color="#ffffff" transparent opacity={0.3} />
-           </mesh>
-           <Text position={[0, 5.5, 0]} color="#ffffff" fontSize={0.4} outlineWidth={0.05} outlineColor="#000000">
-             {price ? price.toFixed(2) : 'Loading...'}
-           </Text>
-        </group>
-
-        {/* Render Bids */}
-        {bids.map((bid, index) => (
-          <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={maxVolume} index={index} />
-        ))}
-
-        {/* Render Asks */}
-        {asks.map((ask, index) => (
-          <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={maxVolume} index={index} />
-        ))}
-
-        <OrbitControls
-          enablePan={true}
-          enableZoom={true}
-          minPolarAngle={0}
-          maxPolarAngle={Math.PI / 2 - 0.1}
-          autoRotate={true}
-          autoRotateSpeed={0.5}
-        />
-      </Canvas>
+      <CanvasScene bids={bids} asks={asks} maxVol={maxVol} />
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#10b981', fontSize: '12px', fontFamily: 'monospace', textShadow: '0 0 5px #10b981' }}>
         HOLOGRAPHIC DEPTH: BIDS
       </div>

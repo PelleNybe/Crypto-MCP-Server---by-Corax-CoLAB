@@ -23,6 +23,7 @@ mcp = FastMCP(
 # compared to instantiating a new client per request.
 _client = httpx.AsyncClient(timeout=10.0)
 
+
 @mcp.tool()
 async def get_latest_news(limit: int = 10) -> dict:
     """

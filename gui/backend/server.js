@@ -304,7 +304,7 @@ app.get('/api/portfolio', async (req, res) => {
 // GET /api/mcp
 app.post('/api/mcp', async (req, res) => {
   const { mcp, method, params } = req.body;
-  if (!mcp || !method) return res.status(400).json({ ok: false, error: 'Missing mcp or method' });
+  if (!mcp || !method || typeof method !== 'string') return res.status(400).json({ ok: false, error: 'Missing or invalid mcp or method' });
 
   if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
     return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
