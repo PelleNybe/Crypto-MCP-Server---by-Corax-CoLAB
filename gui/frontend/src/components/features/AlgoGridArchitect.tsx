@@ -4,7 +4,7 @@ import { authenticatedFetch } from '../../auth';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-const Node = ({ type, title, position, active }: { type: 'source' | 'logic' | 'action', title: string, position: {x: number, y: number}, active: boolean }) => {
+const Node = React.memo(({ type, title, position, active }: { type: 'source' | 'logic' | 'action', title: string, position: {x: number, y: number}, active: boolean }) => {
   const colors = {
     source: '#3b82f6', // blue
     logic: '#f59e0b', // amber
@@ -37,9 +37,9 @@ const Node = ({ type, title, position, active }: { type: 'source' | 'logic' | 'a
       </div>
     </div>
   );
-};
+});
 
-const Connection = ({ start, end, active }: { start: {x: number, y: number}, end: {x: number, y: number}, active: boolean }) => {
+const Connection = React.memo(({ start, end, active }: { start: {x: number, y: number}, end: {x: number, y: number}, active: boolean }) => {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
 
@@ -65,7 +65,7 @@ const Connection = ({ start, end, active }: { start: {x: number, y: number}, end
       `}</style>
     </svg>
   );
-};
+});
 
 export default function AlgoGridArchitect() {
   const [activePath, setActivePath] = useState(false);

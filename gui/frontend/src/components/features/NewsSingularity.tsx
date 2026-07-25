@@ -5,7 +5,7 @@ import { OrbitControls, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import ForceGraph3D from 'react-force-graph-3d';
 
-const SentimentParticle = ({ position, sentiment }: { position: THREE.Vector3, sentiment: 'bullish' | 'bearish' | 'neutral' }) => {
+const SentimentParticle = React.memo(({ position, sentiment }: { position: THREE.Vector3, sentiment: 'bullish' | 'bearish' | 'neutral' }) => {
     const meshRef = useRef<THREE.Mesh>(null);
     const color = sentiment === 'bullish' ? '#10b981' : sentiment === 'bearish' ? '#ef4444' : '#6366f1';
 
@@ -23,7 +23,7 @@ const SentimentParticle = ({ position, sentiment }: { position: THREE.Vector3, s
             <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} wireframe />
         </mesh>
     );
-};
+});
 
 export default function NewsSingularity() {
     const [news, setNews] = useState<any[]>([]);

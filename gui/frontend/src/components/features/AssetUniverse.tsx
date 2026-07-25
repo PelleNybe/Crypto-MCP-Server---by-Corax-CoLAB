@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Stars, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
 
-const Planet = ({ asset, amount, value, index, totalValue }: { asset: string, amount: number, value: number, index: number, totalValue: number }) => {
+const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset: string, amount: number, value: number, index: number, totalValue: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const orbitRef = useRef<THREE.Group>(null);
 
@@ -66,7 +66,7 @@ const Planet = ({ asset, amount, value, index, totalValue }: { asset: string, am
       )}
     </group>
   );
-};
+});
 
 export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {
   // Sort portfolio by value descending so biggest is in the center

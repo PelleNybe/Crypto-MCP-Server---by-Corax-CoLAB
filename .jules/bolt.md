@@ -34,9 +34,6 @@
 **Learning:** High-frequency polling using `setInterval` without waiting for the previous request to finish can cause API requests to pile up, degrading frontend performance and causing backend DoS conditions if responses are delayed.
 **Action:** Replaced `setInterval` with a recursive `setTimeout` inside a `finally` block in `fetchGas` to ensure the next request is scheduled only after the previous one completes.
 
-## 2024-05-30 - Fix Missing `React.memo` in React Three Fiber Components
-**Learning:** High-frequency polling and state updates in parent components (like `VolatilityMatrix` and `HoloOrderFlow`) cause their child Three.js components (`Terrain`, `Wall`) to re-render unnecessarily, leading to GPU strain and UI lag.
-**Action:** Always wrap repeating or complex Three.js child components in `React.memo()` to prevent re-evaluation of the entire Three.js layout during frequent parent state updates.
 ## 2025-02-23 - Pre-calculating strings for Dictionary mapping
 **Learning:** In Python, manipulating strings like `.upper()` repeatedly on the same element within loops scaling with market assets is a bottleneck.
 **Action:** When a transformation (like `coin.upper()`) is needed multiple times (e.g., adding to a list and later matching in a dict), perform it once at the start, store the transformed values in intermediate data structures (like tuples or another mapping), and reuse them in subsequent operations.

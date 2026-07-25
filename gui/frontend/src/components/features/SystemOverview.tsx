@@ -54,7 +54,7 @@ export default function SystemOverview() {
     };
   }, []);
 
-  const StatusIndicator = ({ status }: { status: string }) => {
+  const StatusIndicator = React.memo(({ status }: { status: string }) => {
     const color = status === 'online' ? '#10b981' : status === 'offline' ? '#ef4444' : '#f59e0b';
     return (
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -69,7 +69,7 @@ export default function SystemOverview() {
         </span>
       </div>
     );
-  };
+  });
 
   return (
     <div className="card interactive-element" style={{ gridColumn: '1 / -1', border: '1px solid #334155', background: 'rgba(2, 2, 5, 0.8)', padding: '20px', borderRadius: '12px' }}>
