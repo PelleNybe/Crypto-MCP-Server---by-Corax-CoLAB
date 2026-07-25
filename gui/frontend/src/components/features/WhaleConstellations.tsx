@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { Anchor } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
 
-const Constellation = ({ nodes, links }: { nodes: any[], links: any[] }) => {
+const Constellation = React.memo(({ nodes, links }: { nodes: any[], links: any[] }) => {
   const groupRef = useRef<THREE.Group>(null);
 
   useFrame((state) => {
@@ -60,7 +60,7 @@ const Constellation = ({ nodes, links }: { nodes: any[], links: any[] }) => {
       })}
     </group>
   );
-};
+});
 
 export default function WhaleConstellations() {
   const [data, setData] = useState({ nodes: [], links: [] });

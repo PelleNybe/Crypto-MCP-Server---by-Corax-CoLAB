@@ -10,3 +10,4 @@ Removed API piling issues
 - Replaced remaining setInterval with recursive setTimeout/requestAnimationFrame.
 - Added aria-labels to icon/iconless buttons for accessibility.
 - Optimized dictionary lookups in portfolio_mcp.py loops.
+- Added React.memo to components rendering React Three Fiber <Canvas> elements to prevent unnecessary Three.js sub-tree updates when parent state changes.

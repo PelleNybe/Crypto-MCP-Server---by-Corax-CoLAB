@@ -1,3 +1,6 @@
-fix(backend): Convert arrow function to regular function for stmt.run callback
+⚡ Bolt: [performance improvement] Added React.memo and fixed CSS
 
-Fixed a minor consistency issue where one SQLite `stmt.run` callback used an arrow function instead of the standard `function (err)` convention, aligning it with other db/stmt.run callbacks in the codebase. Tests pass locally.
+💡 What: Wrapped React Three Fiber repeating components with React.memo and fixed CSS build failure.
+🎯 Why: In components rendering React Three Fiber `<Canvas>` elements, frequent parent state updates cause the entire Three.js sub-tree to be re-evaluated by React. This causes massive performance bottlenecks.
+📊 Impact: Prevents massive Three.js sub-tree updates when parent state changes. Reduces UI lag and GPU strain.
+🔬 Measurement: Verified there are no unnecessary re-renders. Ran lint, test and build.

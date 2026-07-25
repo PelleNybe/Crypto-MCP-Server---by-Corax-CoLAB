@@ -6,7 +6,7 @@ import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 import { Network } from 'lucide-react';
 
-const WormholeTunnel = () => {
+const WormholeTunnel = React.memo(() => {
   const meshRef = useRef<THREE.Mesh>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
 
@@ -64,9 +64,9 @@ const WormholeTunnel = () => {
       />
     </mesh>
   );
-};
+});
 
-const ExchangeHub = ({ position, name, price, isTarget }: { position: [number, number, number], name: string, price: number, isTarget?: boolean }) => {
+const ExchangeHub = React.memo(({ position, name, price, isTarget }: { position: [number, number, number], name: string, price: number, isTarget?: boolean }) => {
   const ref = useRef<THREE.Group>(null);
   useFrame((state) => {
     if (ref.current) {
@@ -105,9 +105,9 @@ const ExchangeHub = ({ position, name, price, isTarget }: { position: [number, n
       </Html>
     </group>
   );
-};
+});
 
-const ArbitrageParticle = ({ start, end, speed }: { start: THREE.Vector3, end: THREE.Vector3, speed: number }) => {
+const ArbitrageParticle = React.memo(({ start, end, speed }: { start: THREE.Vector3, end: THREE.Vector3, speed: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
   const [progress, setProgress] = useState(0);
 
@@ -130,7 +130,7 @@ const ArbitrageParticle = ({ start, end, speed }: { start: THREE.Vector3, end: T
       <pointLight color="#10b981" intensity={0.5} distance={2} />
     </mesh>
   );
-};
+});
 
 export default function ArbitrageWormhole() {
   const [opportunities, setOpportunities] = useState<any[]>([]);

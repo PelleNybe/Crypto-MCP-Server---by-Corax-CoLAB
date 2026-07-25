@@ -397,7 +397,6 @@ h1, h2, h3, h4, h5, h6, .orbitron {
 pre, code, .table, .mono, input, select, .small-muted {
   font-family: var(--font-mono);
 }
-\n
 /* Skeleton Loader */
 @keyframes shimmer {
   0% {
@@ -434,13 +433,11 @@ pre, code, .table, .mono, input, select, .small-muted {
   animation: shimmer 2s infinite;
   content: '';
 }
-\n
 /* Toast Progress Bar */
 @keyframes toast-progress {
   from { width: 100%; }
   to { width: 0%; }
 }
-\n
 /* Interactive Sentiment Background */
 .bg-sentiment {
   transition: background-image 2s ease, opacity 2s ease;
