@@ -51,13 +51,6 @@ const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
-  return (
-<CanvasScene matrixData={matrixData} />
-  );
-});
-
 export default function FlashCrashMatrix() {
   const [matrixData, setMatrixData] = useState<any[]>([]);
   const { targetSymbol: activeSymbolHook, targetExchange: activeExchange } = useActivePortfolioSymbol();

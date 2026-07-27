@@ -79,13 +79,6 @@ const CanvasScene = React.memo(({ stress }: { stress: number }) => {
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ stress }: { stress: number }) => {
-  return (
-<CanvasScene stress={stress} />
-  );
-});
-
 export default function QuantumRiskMap() {
   const [stress, setStress] = useState(0);
   const [loading, setLoading] = useState(true);

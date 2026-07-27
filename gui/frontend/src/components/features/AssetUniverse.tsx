@@ -105,13 +105,6 @@ const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfol
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
-  return (
-<CanvasScene sortedPortfolio={sortedPortfolio} totalValue={totalValue} />
-  );
-});
-
 export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {
   // Sort portfolio by value descending so biggest is in the center
   const sortedPortfolio = useMemo(() => {
