@@ -61,11 +61,6 @@
 **Learning:** Sending JSON arrays or objects for these fields caused unhandled exceptions and potentially SQL injection-like errors (due to array serialization mismatch in SQLite parameterized queries) when passed down to `db.prepare()`.
 **Prevention:** Always explicitly check the type of incoming request body fields (e.g., `typeof field === 'string'`) in Node.js/Express, and ensure SQL parameter counts perfectly match the schema to avoid exposing database structure on errors.
 
-## 2026-04-18 - [Denial of Service] Unhandled Exception DoS in SQLite Queries
-**Vulnerability:** Several `db.run()` queries in the `node-sqlite3` driver were invoked without an error callback (e.g., during database initialization and order updates).
-**Learning:** In `node-sqlite3`, if a query fails and no callback is provided, an error event is emitted on the Database object. If no error handler is attached or the caller didn't provide a callback, this bubbles up to an uncaught exception, leading to a server crash (Denial of Service).
-**Prevention:** Always provide an error callback `(err) => { ... }` when executing queries using `db.run()`, `db.exec()`, or `stmt.run()` to catch and handle database exceptions locally and fail securely without terminating the process.
-
 ## 2024-05-20 - [Injection] Parameter Injection in News API Call
 **Vulnerability:** The `search_news` function in `news_mcp.py` used f-string interpolation to construct the CryptoPanic API URL: `f"...&currencies={query}"`. This allowed an attacker to inject additional query parameters (e.g., `&public=false`) by including them in the `query` string.
 **Learning:** Manual string interpolation for URLs is prone to injection and encoding issues.
