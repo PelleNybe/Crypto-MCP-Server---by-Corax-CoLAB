@@ -1,8 +1,32 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { ShieldAlert, Activity, Wifi } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+
+// ⚡ Bolt: Wrapped ForceGraph3D in React.memo to prevent expensive re-renders on unrelated parent state changes (like logs or defcon)
+const MemoizedForceGraph3D = React.memo(({ data, width }: { data: any, width: number }) => {
+  const linkWidth = useCallback((link: any) => link.value > 80 ? 3 : 1, []);
+  const linkDirectionalParticles = useCallback((link: any) => link.value > 50 ? 2 : 0, []);
+  const linkDirectionalParticleSpeed = useCallback((link: any) => link.value * 0.0001, []);
+
+  return (
+    <ForceGraph3D
+      graphData={data}
+      nodeLabel="id"
+      nodeColor="color"
+      nodeRelSize={6}
+      linkColor="color"
+      linkWidth={linkWidth}
+      linkDirectionalParticles={linkDirectionalParticles}
+      linkDirectionalParticleSpeed={linkDirectionalParticleSpeed}
+      backgroundColor="#020205"
+      showNavInfo={false}
+      width={width}
+      height={350}
+    />
+  );
+});
 
 export default function RiskRadarPanel() {
   const [defcon, setDefcon] = useState<'GREEN' | 'YELLOW' | 'RED'>('GREEN');
@@ -36,7 +60,6 @@ export default function RiskRadarPanel() {
         const nodes: any[] = [{ id: 'Binance', group: 'exchange', size: 15, color: '#3b82f6' }];
         const links: any[] = [];
 
-        let i = 0;
         let totalRiskValue = 0;
 
         for (const [coin, amount] of Object.entries(result.total)) {
@@ -53,7 +76,6 @@ export default function RiskRadarPanel() {
                 // If it's a volatile asset, add to risk score (very basic proxy)
                 totalRiskValue += amount;
             }
-            i++;
           }
         }
 
@@ -150,20 +172,7 @@ export default function RiskRadarPanel() {
 
       <div style={{ position: 'relative', height: '350px', background: '#020205', borderRadius: '8px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
         {data.nodes.length > 0 ? (
-            <ForceGraph3D
-            graphData={data}
-            nodeLabel="id"
-            nodeColor="color"
-            nodeRelSize={6}
-            linkColor="color"
-            linkWidth={(link: any) => link.value > 80 ? 3 : 1}
-            linkDirectionalParticles={(link: any) => link.value > 50 ? 2 : 0}
-            linkDirectionalParticleSpeed={(link: any) => link.value * 0.0001}
-            backgroundColor="#020205"
-            showNavInfo={false}
-            width={width}
-            height={350}
-            />
+            <MemoizedForceGraph3D data={data} width={width} />
         ) : (
             <div style={{display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#666', fontFamily: 'monospace'}}>Scanning Nodes...</div>
         )}

@@ -1,6 +1,6 @@
 Dev, PelleNybe/Corax CoLAB: [performance improvement]
 
-💡 What: Removed redundant `React.memo` nesting from `CanvasScene` wrapper components across all React Three Fiber visualizations in the dashboard.
-🎯 Why: Automatically wrapping the inner Canvas container in `React.memo` alongside its outer parent component creates redundant reconciliation diffing overhead and complicates the React DOM tree without providing actual benefits, as documented in master_log.md (2026-05-15).
-📊 Impact: Reduces reconciliation depth and minor CPU overhead for features using `<Canvas>` elements, potentially smoothing interactions across the React Three Fiber stack by avoiding nested memoization.
-🔬 Measurement: Verify rendering performance in browser profiling tools during state updates, and ensure Playwright visual tests pass.
+💡 What: Wrapped `ForceGraph3D` in `RiskRadarPanel.tsx` in `React.memo()`.
+🎯 Why: Prevents expensive Three.js graph re-renders caused by frequent parent state updates (like logs or defcon).
+📊 Impact: Expected to reduce CPU usage and layout calculations on each log entry update.
+🔬 Measurement: Verify by checking that `ForceGraph3D` doesn't re-render when `addLog` is called.
