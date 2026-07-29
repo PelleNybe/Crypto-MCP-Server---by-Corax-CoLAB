@@ -80,7 +80,3 @@
 **Learning:** Automatically wrapping the `Canvas` component alongside its outer parent component definition with `React.memo` effectively causes redundant wrapping that complicates reconciliation.
 **Action:** Removed inner `CanvasScene = React.memo()` wrappers rendering another `<CanvasScene/>` in various 3D visualization components.
 
-## 2024-07-29 - [Denial of Service via Payload length in Order Endpoints]
-**Vulnerability:** The order endpoints (`/api/order/execute`, `/api/order/dry_run`, `/api/order/pending`) and strategy endpoints (`/api/strategies`) did not limit the length of incoming string parameters (like `exchange`, `symbol`, or `name`), allowing excessively long strings to be passed into SQLite and memory, causing Denial of Service or storage exhaustion.
-**Learning:** Checking for `typeof string` is not enough; length bounds are required on public-facing and authenticated API endpoints to prevent payload abuse.
-**Prevention:** Always implement strict string length limits (e.g., `exchange.length > 50`) on inputs before processing them in Node.js/Express.

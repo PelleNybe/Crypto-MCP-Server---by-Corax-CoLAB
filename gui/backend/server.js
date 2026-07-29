@@ -305,8 +305,9 @@ app.get('/api/portfolio', async (req, res) => {
 
 // GET /api/mcp
 app.post('/api/mcp', async (req, res) => {
-  const { mcp, method, params } = req.body;
-  if (!mcp || !method || typeof method !== 'string') return res.status(400).json({ ok: false, error: 'Missing or invalid mcp or method' });
+  const { mcp, method, params } = req.body || {};
+  if (!mcp || typeof mcp !== 'string' || !method || typeof method !== 'string') return res.status(400).json({ ok: false, error: 'Missing or invalid mcp or method' });
+  if (mcp.length > 50 || method.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
 
   if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
     return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
@@ -684,6 +685,8 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
 // Log AI reasoning for a specific order.
 app.post('/api/order/reasoning', (req, res) => {
   const { trade_id, explanation } = req.body || {};
+  if (typeof trade_id !== 'string' || typeof explanation !== 'string') return res.status(400).json({ ok: false, error: 'Invalid types for trade_id or explanation' });
+  if (trade_id.length > 50 || explanation.length > 10000) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   if (!trade_id || !explanation) return res.status(400).json({ ok: false, error: 'Missing trade_id or explanation' });
 
   db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [trade_id, explanation], function(err) {
@@ -721,3 +724,5 @@ app.get('/api/orders', (req, res) => {
     res.json({ ok:true, data: rows });
   });
 });
+
+module.exports = { app, server };
