@@ -10,7 +10,7 @@ import os
 import logging
 import time
 import hmac
-from functools import wraps
+from functools import wraps, lru_cache
 from typing import Optional, List, Any
 import ccxt
 import requests
@@ -63,6 +63,9 @@ def ttl_cache(seconds: int):
     return decorator
 
 
+# ⚡ Bolt: Cache exchange instances to prevent re-instantiation on every tool call.
+# This reuses the underlying connection pool and rate limiter state.
+@lru_cache(maxsize=None)
 def _make_exchange(exchange_id: str) -> ccxt.Exchange:
     exchange_id = exchange_id.lower()
     if exchange_id not in ccxt.exchanges:
