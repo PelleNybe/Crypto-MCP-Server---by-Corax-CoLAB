@@ -114,8 +114,8 @@ const Starfield = () => {
 };
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <ambientLight intensity={0.2} />
@@ -168,7 +168,7 @@ const CanvasScene = React.memo(({ portfolio, totalValue, onSelectAsset, activeSy
 
       </Canvas>
   );
-});
+};
 
 export default function OrbitalPortfolio() {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);

@@ -69,8 +69,8 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <color attach="background" args={['#020205']} />
@@ -102,7 +102,7 @@ const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfol
         />
       </Canvas>
   );
-});
+};
 
 
 export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {

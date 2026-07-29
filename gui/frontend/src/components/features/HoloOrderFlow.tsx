@@ -38,8 +38,8 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ bids, asks, maxVol }: { bids: any[], asks: any[], maxVol: number }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ bids, asks, maxVol }: { bids: any[], asks: any[], maxVol: number }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
         <color attach="background" args={['#020205']} />
@@ -80,7 +80,7 @@ const CanvasScene = React.memo(({ bids, asks, maxVol }: { bids: any[], asks: any
         />
       </Canvas>
   );
-});
+};
 
 export default function HoloOrderFlow({ price, symbol }: { price: number, symbol: string }) {
   const [bids, setBids] = useState<{price: number, volume: number}[]>([]);

@@ -133,8 +133,8 @@ const ArbitrageParticle = React.memo(({ start, end, speed }: { start: THREE.Vect
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ selectedExchanges, prices, arbitragePairs }: { selectedExchanges: string[], prices: any, arbitragePairs: any[] }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ selectedExchanges, prices, arbitragePairs }: { selectedExchanges: string[], prices: any, arbitragePairs: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 60 }}>
         <color attach="background" args={['#020205']} />
@@ -158,7 +158,7 @@ const CanvasScene = React.memo(({ selectedExchanges, prices, arbitragePairs }: {
         <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2} minDistance={5} maxDistance={20} />
       </Canvas>
   );
-});
+};
 
 export default function ArbitrageWormhole() {
   const [opportunities, setOpportunities] = useState<any[]>([]);

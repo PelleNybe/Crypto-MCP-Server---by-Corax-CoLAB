@@ -63,8 +63,8 @@ const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ stress }: { stress: number }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ stress }: { stress: number }) => {
   return (
 <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
         <color attach="background" args={['#020205']} />
@@ -76,7 +76,7 @@ const CanvasScene = React.memo(({ stress }: { stress: number }) => {
         <OrbitControls enablePan={false} maxPolarAngle={Math.PI / 2 - 0.1} autoRotate={stress < 0.2} autoRotateSpeed={0.5} />
       </Canvas>
   );
-});
+};
 
 
 export default function QuantumRiskMap() {
