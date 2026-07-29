@@ -78,8 +78,8 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCoins: any[], handleSelect: any, activeSymbolHook: string }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCoins: any[], handleSelect: any, activeSymbolHook: string }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
               <ambientLight intensity={0.2} />
@@ -109,7 +109,7 @@ const CanvasScene = React.memo(({ sortedCoins, handleSelect, activeSymbolHook }:
               <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={!selectedCoin} autoRotateSpeed={0.5} />
           </Canvas>
   );
-});
+};
 
 export default function GalaxyView() {
   const [coins, setCoins] = useState<any[]>([]);

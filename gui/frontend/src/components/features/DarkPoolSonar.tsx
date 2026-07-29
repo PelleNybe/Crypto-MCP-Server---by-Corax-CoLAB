@@ -37,8 +37,8 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
 });
 
 
-// ⚡ Bolt: Wrapped Canvas content in React.memo to prevent expensive Three.js recalculations on unrelated parent state changes
-const CanvasScene = React.memo(({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
+// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
   return (
 <Canvas camera={{ position: [0, 8, 8], fov: 60 }}>
               <ambientLight intensity={0.5} />
@@ -72,7 +72,7 @@ const CanvasScene = React.memo(({ activeSymbolHook, trades, pings, onPingComplet
               <OrbitControls enableZoom={true} enablePan={true} enableRotate={true} autoRotate={true} autoRotateSpeed={1.0} />
           </Canvas>
   );
-});
+};
 
 export default function DarkPoolSonar() {
   const [pings, setPings] = useState<any[]>([]);
