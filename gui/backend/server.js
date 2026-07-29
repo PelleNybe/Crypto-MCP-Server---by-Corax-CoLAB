@@ -8,6 +8,7 @@
 
 require('dotenv').config();
 const express = require('express');
+const helmet = require('helmet');
 const axios = require('axios');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -27,6 +28,7 @@ if (!DASHBOARD_PASSWORD) {
   process.exit(1);
 }
 const app = express();
+app.use(helmet());
 
 // Security: General API rate limiting
 const apiLimiter = rateLimit({
@@ -338,6 +340,9 @@ app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
   }
+  if (exchange.length > 50 || symbol.length > 50 || side.length > 10 || type.length > 20) {
+    return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
+  }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
     return res.status(400).json({ ok:false, error: 'Amount must be a positive number' });
@@ -390,6 +395,9 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, execute, params } = req.body || {};
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
+  }
+  if (exchange.length > 50 || symbol.length > 50 || side.length > 10 || type.length > 20) {
+    return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {
@@ -535,6 +543,9 @@ app.post("/api/strategies", (req, res) => {
   if (!name || !nodes || !connections) {
     return res.status(400).json({ ok: false, error: "Missing required fields" });
   }
+  if (typeof name !== 'string' || name.length > 100) {
+    return res.status(400).json({ ok: false, error: "Invalid name length" });
+  }
   const stmt = db.prepare("INSERT INTO strategies (name, nodes, connections, active) VALUES (?, ?, ?, ?)");
   stmt.run(name, JSON.stringify(nodes), JSON.stringify(connections), active ? 1 : 0, function(err) {
     if (err) {
@@ -569,6 +580,9 @@ app.post('/api/order/pending', sensitiveLimiter, (req, res) => {
   const { exchange, symbol, side, type, amount, price, params, estimated_usd } = req.body || {};
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok: false, error: 'Missing or invalid required fields' });
+  }
+  if (exchange.length > 50 || symbol.length > 50 || side.length > 10 || type.length > 20) {
+    return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   }
   const numericAmount = Number(amount);
   if (isNaN(numericAmount) || numericAmount <= 0) {

@@ -1,6 +1,7 @@
-Dev, PelleNybe/Corax CoLAB: [performance improvement]
+🛡️ Sentinel: [HIGH] Fix DoS vulnerability in endpoints
 
-💡 What: Optimized dictionary comprehensions in portfolio_mcp.py, list comprehensions with walrus operator in autonomous_orchestrator.py, and connection pooling for httpx in news_mcp.py. Merged scattered developer journals into master_log.md.
-🎯 Why: Address performance bottlenecks found during code review that degraded API query times and backend computational efficiency in tight loops.
-📊 Impact: Considerably faster portfolio asset mappings, lower latency for news fetch, and reduced computational overhead in decision-making engine.
-🔬 Measurement: Verify faster turnaround in portfolio queries and test logs.
+🚨 Severity: HIGH
+💡 Vulnerability: The `gui/backend/server.js` endpoints (`/api/order/dry_run`, `/api/order/execute`, `/api/order/pending`, and `/api/strategies`) were lacking input length limits.
+🎯 Impact: This allowed excessive payload sizes to consume excessive CPU or memory (DoS) and potentially crash the Node application or flood the SQLite database when passing inputs like `exchange`, `symbol`, or `name`.
+🔧 Fix: Added strict string length limits for fields such as `exchange`, `symbol`, `side`, `type`, and `name`. Additionally installed and enabled the `helmet` package as a security enhancement for header protection.
+✅ Verification: Ran unit tests via `node test_mcp_api.js`, checked for syntax errors, and validated no SSRF or rate-limiting regressions occur.
