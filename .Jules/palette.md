@@ -12,3 +12,6 @@
 ## 2024-07-28 - Fixing non-standard input placeholder attributes
 **Learning:** React inputs in this codebase were incorrectly using `Enter="placeholder text"` instead of standard HTML `placeholder="placeholder text"`. This caused the hint text to not render for the user, worsening form UX.
 **Action:** Always use standard HTML attributes like `placeholder` for text input hints to ensure they are parsed and rendered correctly by the browser.
+## 2025-02-12 - Fixing duplicate title attributes and missing placeholders
+**Learning:** Duplicate HTML attributes like `title` in React inputs (e.g. `title="A" title="B"`) are invalid HTML, and the second one gets ignored. Here, the second title was seemingly intended as placeholder text. This leaves users without inline visual hints for empty fields.
+**Action:** Always replace the intended placeholder string (previously a duplicate `title`) with the standard HTML `placeholder` attribute to improve visual form clarity while retaining the valid `title` for tooltips.
