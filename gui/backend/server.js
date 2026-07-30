@@ -447,7 +447,7 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
         console.error('DB error:', err);
         return res.status(500).json({ ok: false, error: 'Database operation failed' });
       }
-      io.emit('order_placed', { exchange, symbol, side, amount, price, response: orderResp });
+      io.emit('order_placed', { id: this.lastID, exchange, symbol, side, type, amount, price, response: orderResp });
       res.json({ ok: true, data: orderResp });
     });
     stmt.finalize();
