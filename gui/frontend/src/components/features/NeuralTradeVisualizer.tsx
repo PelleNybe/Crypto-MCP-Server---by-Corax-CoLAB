@@ -1,5 +1,10 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
+
+const MemoizedForceGraph3D = React.memo(({ data, ...props }: any) => {
+  return <ForceGraph3D graphData={data} {...props} />;
+});
+
 import { callMcpEndpoint } from '../../api_mcp';
 
 export default function NeuralTradeVisualizer({ active, exchange, symbol }: { active: boolean, exchange: string, symbol: string }) {
@@ -66,7 +71,7 @@ export default function NeuralTradeVisualizer({ active, exchange, symbol }: { ac
         <div style={{ position: 'absolute', top: 5, left: 5, fontSize: '10px', color: active ? '#3b82f6' : '#888', zIndex: 10, fontFamily: 'monospace' }}>
             {active ? `EXECUTING NEURAL ROUTING (${symbol})...` : 'ROUTING MAP IDLE'}
         </div>
-        <ForceGraph3D
+        <MemoizedForceGraph3D
             graphData={data}
             nodeLabel="id"
             nodeAutoColorBy="group"

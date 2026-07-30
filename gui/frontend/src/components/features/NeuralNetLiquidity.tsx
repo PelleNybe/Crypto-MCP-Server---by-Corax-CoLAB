@@ -1,5 +1,10 @@
 import React, { useRef, useState, useEffect } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
+
+const MemoizedForceGraph3D = React.memo(({ data, ...props }: any) => {
+  return <ForceGraph3D graphData={data} {...props} />;
+});
+
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
@@ -110,7 +115,7 @@ export default function NeuralNetLiquidity() {
         Cross-Exchange 3D Force-Directed Map
       </div>
       <div style={{ width: '100%', height: '100%' }}>
-        <ForceGraph3D
+        <MemoizedForceGraph3D
           ref={fgRef}
           graphData={graphData}
           nodeLabel="id"
