@@ -524,7 +524,7 @@ function startPolling(mcpUrl, toolName, args, eventName, intervalMs) {
 }
 
 // Polling intervals
-startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 30000);
+startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 60000);
 startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker', 5000);
 
 // GET /api/strategies
