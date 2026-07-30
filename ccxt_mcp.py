@@ -71,8 +71,9 @@ def _make_exchange(exchange_id: str) -> ccxt.Exchange:
     if exchange_id not in ccxt.exchanges:
         raise ValueError(f"Unsupported exchange: {exchange_id}")
     cls = getattr(ccxt, exchange_id)
-    api_key = os.getenv(f"{exchange_id.upper()}_API_KEY")
-    api_secret = os.getenv(f"{exchange_id.upper()}_API_SECRET")
+    exchange_upper = exchange_id.upper()
+    api_key = os.getenv(f"{exchange_upper}_API_KEY")
+    api_secret = os.getenv(f"{exchange_upper}_API_SECRET")
     opts = {"enableRateLimit": True}
     if api_key and api_secret:
         opts.update({"apiKey": api_key, "secret": api_secret})

@@ -80,3 +80,6 @@
 **Learning:** Automatically wrapping the `Canvas` component alongside its outer parent component definition with `React.memo` effectively causes redundant wrapping that complicates reconciliation.
 **Action:** Removed inner `CanvasScene = React.memo()` wrappers rendering another `<CanvasScene/>` in various 3D visualization components.
 
+## 2026-05-16 - Pre-calculating string transformations
+**Learning:** Found more redundant `.upper()` calls when constructing `api_key` and `api_secret` variables.
+**Action:** Pre-calculate `upper()` for the exchange id and reuse it to avoid redundant operations in `ccxt_mcp.py` and `portfolio_mcp.py`.

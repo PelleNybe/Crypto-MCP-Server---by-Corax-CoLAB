@@ -97,8 +97,9 @@ async def fetch_exchange_balance(exch_low: str):
 
     cls = getattr(ccxt_async, exch_low)
     opts = {"enableRateLimit": True}
-    api_key = os.getenv(f"{exch_low.upper()}_API_KEY")
-    api_secret = os.getenv(f"{exch_low.upper()}_API_SECRET")
+    exch_upper = exch_low.upper()
+    api_key = os.getenv(f"{exch_upper}_API_KEY")
+    api_secret = os.getenv(f"{exch_upper}_API_SECRET")
     if api_key and api_secret:
         opts.update({"apiKey": api_key, "secret": api_secret})
 
