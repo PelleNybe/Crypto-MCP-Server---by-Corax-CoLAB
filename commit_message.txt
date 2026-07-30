@@ -1,6 +1,6 @@
-Dev, PelleNybe/Corax CoLAB: [performance improvement]
+Dev, PelleNybe/Corax CoLAB: [security improvement]
 
-💡 What: Wrapped `ForceGraph3D` in `RiskRadarPanel.tsx` in `React.memo()`.
-🎯 Why: Prevents expensive Three.js graph re-renders caused by frequent parent state updates (like logs or defcon).
-📊 Impact: Expected to reduce CPU usage and layout calculations on each log entry update.
-🔬 Measurement: Verify by checking that `ForceGraph3D` doesn't re-render when `addLog` is called.
+💡 What: Removed potential parameters leakage via explicit object creation rather than spreading arguments into order_placed socket emission.
+🎯 Why: Prevents leaking sensitive authentication tokens (e.g., DASHBOARD_PASSWORD) if they were previously included in params during order submission.
+📊 Impact: Expected to completely prevent leakage in the order execution logic.
+🔬 Measurement: Verify order placed emissions in the UI WebSocket traffic for the absence of `params` containing `approval_token`.
