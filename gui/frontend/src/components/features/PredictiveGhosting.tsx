@@ -201,7 +201,7 @@ export default function PredictiveGhosting() {
                 <span>Future</span>
             </div>
             <input
-                type="range"
+                type="range" aria-label="Scrub forward in time"
                 min="0"
                 max="20"
                 value={scrubberValue}

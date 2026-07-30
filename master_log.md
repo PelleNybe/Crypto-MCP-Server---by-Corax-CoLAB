@@ -76,7 +76,7 @@
 **Learning:** Custom notification systems (like NeonToasts) often fail to announce critical information to screen reader users if they lack proper ARIA live regions, leaving disabled users unaware of asynchronous actions like order placements.
 **Action:** When creating or fixing custom toast notification systems, ensure the container uses `aria-live="polite"` and `aria-atomic="true"`, and individual toasts use `role="alert"` to guarantee dynamic updates are announced.
 
-## 2026-05-15 - Redundant React.memo Nesting
+
 **Learning:** Automatically wrapping the `Canvas` component alongside its outer parent component definition with `React.memo` effectively causes redundant wrapping that complicates reconciliation.
 **Action:** Removed inner `CanvasScene = React.memo()` wrappers rendering another `<CanvasScene/>` in various 3D visualization components.
 
