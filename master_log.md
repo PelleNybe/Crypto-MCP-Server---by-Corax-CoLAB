@@ -83,3 +83,7 @@
 ## 2026-05-16 - Pre-calculating string transformations
 **Learning:** Found more redundant `.upper()` calls when constructing `api_key` and `api_secret` variables.
 **Action:** Pre-calculate `upper()` for the exchange id and reuse it to avoid redundant operations in `ccxt_mcp.py` and `portfolio_mcp.py`.
+
+## 2026-05-18 - Missing React.memo for ForceGraph3D components
+**Learning:** `ForceGraph3D` is a heavy WebGL component that causes severe frame drops if its parent component updates its state frequently (e.g. updating connection strings or timer ticks).
+**Action:** Always wrap `<ForceGraph3D>` inside a `React.memo` container when placed in a component with unrelated state updates, similar to how React Three Fiber `<Canvas>` elements are optimized.
