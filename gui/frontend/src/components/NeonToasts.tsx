@@ -31,6 +31,8 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       <div
         aria-live="polite"
         aria-atomic="true"
+        role="region"
+        aria-label="Notifications"
         style={{
           position: 'fixed',
           bottom: '20px',

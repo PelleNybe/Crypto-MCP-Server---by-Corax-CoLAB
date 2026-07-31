@@ -1,7 +1,40 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import socket from '../socket';
 import { authenticatedFetch } from '../auth';
 import TypewriterText from './TypewriterText';
+
+// Memoized table row component for performance
+const OrderRow = React.memo(({ o, idx, approveOrder }: { o: any, idx: number, approveOrder: (id: number) => void }) => {
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'placed': return { color: '#10b981', textShadow: '0 0 5px #10b981' };
+      case 'pending': return { color: '#f59e0b', textShadow: '0 0 5px #f59e0b' };
+      case 'error': return { color: '#ef4444', textShadow: '0 0 5px #ef4444' };
+      default: return { color: '#94a3b8' };
+    }
+  };
+
+  return (
+    <tr style={{ borderBottom: '1px solid #1e293b', transition: 'background 0.3s' }} className="table-row-hover">
+      <td style={{ padding: '10px', fontSize: '12px' }}>{new Date(o.created_at || Date.now()).toLocaleString()}</td>
+      <td style={{ padding: '10px', fontWeight: 'bold' }}>{o.symbol}</td>
+      <td style={{ padding: '10px', textTransform: 'uppercase' }}>
+        <span style={{ color: o.side === 'buy' ? '#10b981' : '#ef4444' }}>{o.side}</span> / {o.type}
+      </td>
+      <td style={{ padding: '10px' }}>{o.amount} @ {o.price || 'Market'}</td>
+      <td style={{ padding: '10px', textTransform: 'uppercase', ...getStatusColor(o.status) }}>
+        {o.status}
+      </td>
+      <td style={{ padding: '10px' }}>
+        {o.status === 'pending' && (
+          <button onClick={() => approveOrder(o.id)} aria-label={`Approve order ${o.id || idx}`} className="btn-primary" style={{ padding: '4px 8px', fontSize: '10px' }}>
+            APPROVE
+          </button>
+        )}
+      </td>
+    </tr>
+  );
+});
 
 export default function OrdersLogPanel() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -21,24 +54,27 @@ export default function OrdersLogPanel() {
     };
     fetchOrders();
 
-    socket.on('order_placed', (o) => {
+    const handleOrderPlaced = (o: any) => {
       setOrders(prev => [o, ...prev]);
-    });
-    socket.on('order_pending', (o) => {
+    };
+    const handleOrderPending = (o: any) => {
       setOrders(prev => [o, ...prev]);
-    });
+    };
+
+    socket.on('order_placed', handleOrderPlaced);
+    socket.on('order_pending', handleOrderPending);
 
     return () => {
       active = false;
-      socket.off('order_placed');
-      socket.off('order_pending');
+      socket.off('order_placed', handleOrderPlaced);
+      socket.off('order_pending', handleOrderPending);
     };
   }, []);
 
   const totalPages = Math.ceil(orders.length / rowsPerPage) || 1;
   const currentOrders = orders.slice((page - 1) * rowsPerPage, page * rowsPerPage);
 
-  const approveOrder = async (orderId: number) => {
+  const approveOrder = useCallback(async (orderId: number) => {
     try {
       const res = await authenticatedFetch('/api/order/approve', {
         method: 'POST',
@@ -54,16 +90,7 @@ export default function OrdersLogPanel() {
     } catch (err: any) {
       alert('Approve Error: ' + err.message);
     }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'placed': return { color: '#10b981', textShadow: '0 0 5px #10b981' };
-      case 'pending': return { color: '#f59e0b', textShadow: '0 0 5px #f59e0b' };
-      case 'error': return { color: '#ef4444', textShadow: '0 0 5px #ef4444' };
-      default: return { color: '#94a3b8' };
-    }
-  };
+  }, []);
 
   return (
     <div className="card interactive-element" style={{ overflowX: 'auto' }}>
@@ -83,24 +110,7 @@ export default function OrdersLogPanel() {
         </thead>
         <tbody>
           {currentOrders.map((o: any, idx) => (
-            <tr key={o.id || idx} style={{ borderBottom: '1px solid #1e293b', transition: 'background 0.3s' }} className="table-row-hover">
-              <td style={{ padding: '10px', fontSize: '12px' }}>{new Date(o.created_at || Date.now()).toLocaleString()}</td>
-              <td style={{ padding: '10px', fontWeight: 'bold' }}>{o.symbol}</td>
-              <td style={{ padding: '10px', textTransform: 'uppercase' }}>
-                <span style={{ color: o.side === 'buy' ? '#10b981' : '#ef4444' }}>{o.side}</span> / {o.type}
-              </td>
-              <td style={{ padding: '10px' }}>{o.amount} @ {o.price || 'Market'}</td>
-              <td style={{ padding: '10px', textTransform: 'uppercase', ...getStatusColor(o.status) }}>
-                {o.status}
-              </td>
-              <td style={{ padding: '10px' }}>
-                {o.status === 'pending' && (
-                  <button onClick={() => approveOrder(o.id)} aria-label={`Approve order ${o.id || idx}`} className="btn-primary" style={{ padding: '4px 8px', fontSize: '10px' }}>
-                    APPROVE
-                  </button>
-                )}
-              </td>
-            </tr>
+            <OrderRow key={o.id || idx} o={o} idx={idx} approveOrder={approveOrder} />
           ))}
           {currentOrders.length === 0 && (
             <tr>
