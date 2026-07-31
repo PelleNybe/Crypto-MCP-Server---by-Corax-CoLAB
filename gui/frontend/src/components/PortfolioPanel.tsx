@@ -1,9 +1,19 @@
 import { authenticatedFetch } from "../auth"
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import OrbitalPortfolio from './features/OrbitalPortfolio'
 import socket from '../socket'
 import AssetUniverse from './features/AssetUniverse'
 import CyberpunkLoader from './CyberpunkLoader'
+
+// Memoized table row component for list rendering performance
+const PortfolioRow = React.memo(({ d, total }: { d: any, total: number }) => (
+  <tr style={{borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+    <td style={{padding: '8px', fontWeight: 'bold'}}>{d.asset}</td>
+    <td style={{padding: '8px', fontFamily: 'monospace'}}>{Number(d.amount).toFixed(6)}</td>
+    <td style={{padding: '8px', color: '#10b981'}}>${d.value_usd ? d.value_usd.toFixed(2) : '—'}</td>
+    <td style={{padding: '8px', opacity: 0.7}}>{total ? ((d.value_usd / total) * 100).toFixed(1) : 0}%</td>
+  </tr>
+));
 
 export default function PortfolioPanel() {
   const [glitchKey, setGlitchKey] = useState(0);
@@ -13,22 +23,28 @@ export default function PortfolioPanel() {
   const [dataLoaded, setDataLoaded] = useState(false);
 
   useEffect(() => {
+    let active = true;
     authenticatedFetch('/api/portfolio?exchanges=binance').then(r=>r.json()).then(j=>{
-      if (j.ok && j.data) {
+      if (j.ok && j.data && active) {
         setDetails(j.data.details || [])
         setTotal(j.data.total_usd || 0)
         setDataLoaded(true);
       }
     }).catch(console.error)
 
-    socket.on('portfolio', (data:any) => {
+    const handlePortfolio = (data:any) => {
       if (data) {
         setTotal(data.total_usd || 0)
         setDetails(data.details || [])
         setDataLoaded(true);
       }
-    })
-    return ()=>{ socket.disconnect() }
+    };
+
+    socket.on('portfolio', handlePortfolio)
+    return () => {
+      active = false;
+      socket.off('portfolio', handlePortfolio);
+    }
   }, [])
 
   return (
@@ -81,12 +97,7 @@ export default function PortfolioPanel() {
             </thead>
             <tbody>
               {details.sort((a,b)=>(b.value_usd||0)-(a.value_usd||0)).map((d,i)=>(
-                <tr key={i} style={{borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
-                  <td style={{padding: '8px', fontWeight: 'bold'}}>{d.asset}</td>
-                  <td style={{padding: '8px', fontFamily: 'monospace'}}>{Number(d.amount).toFixed(6)}</td>
-                  <td style={{padding: '8px', color: '#10b981'}}>${d.value_usd ? d.value_usd.toFixed(2) : '—'}</td>
-                  <td style={{padding: '8px', opacity: 0.7}}>{total ? ((d.value_usd / total) * 100).toFixed(1) : 0}%</td>
-                </tr>
+                <PortfolioRow key={i} d={d} total={total} />
               ))}
             </tbody>
           </table>

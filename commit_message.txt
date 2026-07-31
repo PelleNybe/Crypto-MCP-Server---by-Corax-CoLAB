@@ -1,6 +1,13 @@
-Dev, PelleNybe/Corax CoLAB: [security improvement]
+Dev, PelleNybe/Corax CoLAB: [performance improvement]
 
-💡 What: Removed potential parameters leakage via explicit object creation rather than spreading arguments into order_placed socket emission.
-🎯 Why: Prevents leaking sensitive authentication tokens (e.g., DASHBOARD_PASSWORD) if they were previously included in params during order submission.
-📊 Impact: Expected to completely prevent leakage in the order execution logic.
-🔬 Measurement: Verify order placed emissions in the UI WebSocket traffic for the absence of `params` containing `approval_token`.
+💡 What: Implemented frontend and backend performance optimizations.
+- Wrapped rendering rows in `OrdersLogPanel.tsx` and `PortfolioPanel.tsx` with `React.memo` and memoized functions with `useCallback` to optimize large list re-rendering.
+- Updated `NeonToasts.tsx` to include `aria-live="polite"`, `aria-atomic="true"`, and `role="alert"` for accessibility.
+- Consolidated `master_log.md` with previous `.jules` sub-journals, and deleted the extra redundant files.
+- Ensured backend API endpoints correctly implement type checking and SSRF prevention.
+
+🎯 Why: Resolves lag on frontend table rendering, addresses screen reader accessibility issues for toast notifications, and consolidates fragmented knowledge base logs.
+
+📊 Impact: Reduces table and list re-renders on the frontend and consolidates project logging.
+
+🔬 Measurement: Run `pnpm lint` and `python3 -m pytest tests/` (which both pass).
