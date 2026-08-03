@@ -121,7 +121,6 @@ export default function RiskRadarPanel() {
       }
     };
 
-    fetchData();
     let timeoutId: NodeJS.Timeout;
 
     const fetchDataWithPolling = async () => {

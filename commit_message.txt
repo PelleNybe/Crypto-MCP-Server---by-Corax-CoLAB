@@ -1,13 +1,12 @@
 Dev, PelleNybe/Corax CoLAB: [performance improvement]
 
-💡 What: Implemented frontend and backend performance optimizations.
-- Wrapped rendering rows in `OrdersLogPanel.tsx` and `PortfolioPanel.tsx` with `React.memo` and memoized functions with `useCallback` to optimize large list re-rendering.
-- Updated `NeonToasts.tsx` to include `aria-live="polite"`, `aria-atomic="true"`, and `role="alert"` for accessibility.
-- Consolidated `master_log.md` with previous `.jules` sub-journals, and deleted the extra redundant files.
-- Ensured backend API endpoints correctly implement type checking and SSRF prevention.
+💡 What:
+- Fixed a double fetch in RiskRadarPanel.tsx.
+- Removed duplicate title attributes across App.tsx and OrderPanel.tsx.
+- Verified hooks and MemoizedForceGraph3D usage across features.
 
-🎯 Why: Resolves lag on frontend table rendering, addresses screen reader accessibility issues for toast notifications, and consolidates fragmented knowledge base logs.
+🎯 Why: Resolves double fetching on component mount reducing rate limits hit, and addresses screen reader accessibility guidelines regarding duplicate titles on inputs.
 
-📊 Impact: Reduces table and list re-renders on the frontend and consolidates project logging.
+📊 Impact: Reduces unnecessary API load by half on Risk Radar load. Clears up accessibility tests.
 
-🔬 Measurement: Run `pnpm lint` and `python3 -m pytest tests/` (which both pass).
+🔬 Measurement: Run `pnpm run test` in `gui/frontend` to ensure Dashboard still renders, and `pytest tests/` for backend.

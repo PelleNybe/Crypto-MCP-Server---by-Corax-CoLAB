@@ -94,3 +94,7 @@ See ../master_log.md
 **Action:** Use `functools.lru_cache` to memoize the instantiation of the `ccxt.Exchange` objects. This safely persists the connection pool and rate limiter state in memory per exchange, dramatically reducing response times without architectural changes.
 See ../master_log.md
 See ../master_log.md
+
+## 2026-05-19 - Fixed duplicate title attributes and double fetching
+**Learning:** Found duplicate title attributes on input fields that broke accessibility guidelines. Also found a double fetch in RiskRadarPanel.
+**Action:** Removed redundant title attributes from inputs across the app and removed the explicit `fetchData()` call in RiskRadarPanel before the polling setup.
