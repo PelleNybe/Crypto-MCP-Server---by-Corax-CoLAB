@@ -9,6 +9,7 @@
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
+const compression = require('compression');
 const axios = require('axios');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -29,6 +30,7 @@ if (!DASHBOARD_PASSWORD) {
 }
 const app = express();
 app.use(helmet());
+app.use(compression());
 
 // Security: General API rate limiting
 const apiLimiter = rateLimit({
@@ -205,6 +207,12 @@ db.serialize(() => {
       console.error('Error creating strategies table:', err);
       process.exit(1);
     }
+    db.run('CREATE INDEX IF NOT EXISTS idx_strategies_created_at ON strategies(created_at)', (err) => {
+      if (err) {
+        console.error('Error creating idx_strategies_created_at:', err);
+        process.exit(1);
+      }
+    });
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS orders (
@@ -248,6 +256,12 @@ db.serialize(() => {
       console.error('Error creating reasoning table:', err);
       process.exit(1);
     }
+    db.run('CREATE INDEX IF NOT EXISTS idx_reasoning_trade_id ON reasoning(trade_id)', (err) => {
+      if (err) {
+        console.error('Error creating idx_reasoning_trade_id:', err);
+        process.exit(1);
+      }
+    });
   });
 });
 
