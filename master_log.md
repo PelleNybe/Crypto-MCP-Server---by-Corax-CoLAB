@@ -115,3 +115,7 @@ See ../master_log.md
 ## 2025-02-12 - Fixing duplicate title attributes and missing placeholders
 **Learning:** Duplicate HTML attributes like `title` in React inputs (e.g. `title="A" title="B"`) are invalid HTML, and the second one gets ignored. Here, the second title was seemingly intended as placeholder text. This leaves users without inline visual hints for empty fields.
 **Action:** Always replace the intended placeholder string (previously a duplicate `title`) with the standard HTML `placeholder` attribute to improve visual form clarity while retaining the valid `title` for tooltips.
+
+## 2026-05-19 - Added missing backend indexes
+**Learning:** Found multiple SQL SELECT statements ordering by created_at or joining by trade_id, causing missing indexes to slow down response time as database grows.
+**Action:** Always create indexes when designing tables that will be ordered or searched by specific columns.
