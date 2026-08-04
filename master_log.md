@@ -98,3 +98,40 @@ See ../master_log.md
 ## 2026-05-19 - Fixed duplicate title attributes and double fetching
 **Learning:** Found duplicate title attributes on input fields that broke accessibility guidelines. Also found a double fetch in RiskRadarPanel.
 **Action:** Removed redundant title attributes from inputs across the app and removed the explicit `fetchData()` call in RiskRadarPanel before the polling setup.
+
+## 2024-05-01 - [Loading State Accessibility]
+**Learning:** Reusable loading components (like CyberpunkLoader) often lack proper ARIA attributes, causing screen readers to remain silent during async operations.
+**Action:** Always include `role="status"`, `aria-live="polite"`, and `aria-busy="true"` on global loading indicators to ensure state changes are announced seamlessly.
+
+## 2025-02-09 - [Disabled Pagination Tooltips and Semantic Nav]
+**Learning:** Custom pagination components often leave disabled "Prev/Next" buttons without context, confusing users (especially screen reader users) about why an interaction isn't possible. Additionally, numeric ratios (e.g., "1 / 5") aren't read well by screen readers.
+**Action:** Always wrap pagination in `<nav aria-label="pagination">`. Add explanatory `title` attributes (e.g., "Already on the first page") to disabled buttons, spell out "Page X of Y", and add `aria-live="polite"` to the page counter to ensure dynamic updates are announced.
+## 2024-05-18 - Missing ARIA Labels and Loading States on Login Form
+**Learning:** The authentication form (the first thing a user sees) lacked critical accessibility attributes (`aria-label`, `aria-busy`) and provided no visual feedback when a login attempt was processing, making it unresponsive and screen-reader unfriendly. Additionally, deeply nested ternary operations mimicking component routing in React were causing rendering inconsistencies and excessive bundle sizes when using `pnpm build`.
+**Action:** Always wrap async form submissions with loading state flags (`isLoggingIn`), implement `aria-busy` on submission buttons to signal state changes to screen readers, and refactor deeply nested conditional rendering into cleaner JSX logic.
+## 2024-07-28 - Fixing non-standard input placeholder attributes
+**Learning:** React inputs in this codebase were incorrectly using `Enter="placeholder text"` instead of standard HTML `placeholder="placeholder text"`. This caused the hint text to not render for the user, worsening form UX.
+**Action:** Always use standard HTML attributes like `placeholder` for text input hints to ensure they are parsed and rendered correctly by the browser.
+## 2025-02-12 - Fixing duplicate title attributes and missing placeholders
+**Learning:** Duplicate HTML attributes like `title` in React inputs (e.g. `title="A" title="B"`) are invalid HTML, and the second one gets ignored. Here, the second title was seemingly intended as placeholder text. This leaves users without inline visual hints for empty fields.
+**Action:** Always replace the intended placeholder string (previously a duplicate `title`) with the standard HTML `placeholder` attribute to improve visual form clarity while retaining the valid `title` for tooltips.
+
+## 2026-05-19 - Added missing backend indexes
+**Learning:** Found multiple SQL SELECT statements ordering by created_at or joining by trade_id, causing missing indexes to slow down response time as database grows.
+**Action:** Always create indexes when designing tables that will be ordered or searched by specific columns.
+
+## 2026-05-19 - Added response compression
+**Learning:** Returning large uncompressed JSON payloads over API reduces throughput and blocks UI renders on slow networks.
+**Action:** Implemented the `compression` middleware in the express server to automatically GZIP payloads.
+
+## 2026-05-19 - Added resize debouncing
+**Learning:** Attaching heavy UI calculations directly to window `resize` event handlers without debouncing causes layout thrashing and blocks the main thread.
+**Action:** Implemented debounced `setTimeout` (200ms) within window resize handlers for `RiskRadarPanel` and `MatrixRain` to ensure performance remains smooth.
+
+## 2026-05-19 - Fixed React Hook dependencies
+**Learning:** Missing hook dependencies can lead to stale closures where async callbacks use old component state variables.
+**Action:** Used `useCallback` to memoize `previewOrderDebounced` and added it to the corresponding `useEffect` dependency array.
+
+## 2026-05-19 - XSS Vulnerability Check
+**Learning:** React applications are vulnerable to XSS if `dangerouslySetInnerHTML` or direct `element.innerHTML` assignments are used with untrusted data.
+**Action:** Audited frontend source code (`gui/frontend/src`) for `innerHTML` and `dangerouslySetInnerHTML`. Found zero occurrences, verifying the frontend is fundamentally safe from these common injection vectors.

@@ -23,19 +23,19 @@ export default function OrderPanel(){
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedPrice = useDebounce(price, 500);
 
-  useEffect(() => {
-    if (debouncedExchange && debouncedSymbol && debouncedAmount > 0) {
-      previewOrderDebounced();
-    }
-  }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice]);
-
-  async function previewOrderDebounced(){
+  const previewOrderDebounced = useCallback(async () => {
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange: debouncedExchange,symbol: debouncedSymbol,side: debouncedSide,type: debouncedType,amount: debouncedAmount,price: debouncedPrice})})
     const j = await resp.json()
     if (j.ok) setPreview(j.data); // Suppress errors for auto-preview
     setTimeout(() => setRoutingActive(false), 500)
-  }
+  }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice]);
+
+  useEffect(() => {
+    if (debouncedExchange && debouncedSymbol && debouncedAmount > 0) {
+      previewOrderDebounced();
+    }
+  }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice, previewOrderDebounced]);
 
   async function previewOrder(){
     setRoutingActive(true)
