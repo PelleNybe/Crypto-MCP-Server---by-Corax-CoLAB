@@ -127,3 +127,7 @@ See ../master_log.md
 ## 2026-05-19 - Added resize debouncing
 **Learning:** Attaching heavy UI calculations directly to window `resize` event handlers without debouncing causes layout thrashing and blocks the main thread.
 **Action:** Implemented debounced `setTimeout` (200ms) within window resize handlers for `RiskRadarPanel` and `MatrixRain` to ensure performance remains smooth.
+
+## 2026-05-19 - Fixed React Hook dependencies
+**Learning:** Missing hook dependencies can lead to stale closures where async callbacks use old component state variables.
+**Action:** Used `useCallback` to memoize `previewOrderDebounced` and added it to the corresponding `useEffect` dependency array.
