@@ -9,6 +9,7 @@
 require('dotenv').config();
 const express = require('express');
 const helmet = require('helmet');
+const compression = require('compression');
 const axios = require('axios');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -29,6 +30,7 @@ if (!DASHBOARD_PASSWORD) {
 }
 const app = express();
 app.use(helmet());
+app.use(compression());
 
 // Security: General API rate limiting
 const apiLimiter = rateLimit({

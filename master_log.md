@@ -119,3 +119,7 @@ See ../master_log.md
 ## 2026-05-19 - Added missing backend indexes
 **Learning:** Found multiple SQL SELECT statements ordering by created_at or joining by trade_id, causing missing indexes to slow down response time as database grows.
 **Action:** Always create indexes when designing tables that will be ordered or searched by specific columns.
+
+## 2026-05-19 - Added response compression
+**Learning:** Returning large uncompressed JSON payloads over API reduces throughput and blocks UI renders on slow networks.
+**Action:** Implemented the `compression` middleware in the express server to automatically GZIP payloads.
