@@ -48,9 +48,13 @@ const MatrixRain = () => {
         };
         animationFrameId = requestAnimationFrame(loop);
 
+        let resizeTimeout: NodeJS.Timeout;
         const handleResize = () => {
-            canvas.width = window.innerWidth;
-            canvas.height = window.innerHeight;
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }, 200);
         };
         window.addEventListener('resize', handleResize);
 
