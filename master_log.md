@@ -123,3 +123,7 @@ See ../master_log.md
 ## 2026-05-19 - Added response compression
 **Learning:** Returning large uncompressed JSON payloads over API reduces throughput and blocks UI renders on slow networks.
 **Action:** Implemented the `compression` middleware in the express server to automatically GZIP payloads.
+
+## 2026-05-19 - Added resize debouncing
+**Learning:** Attaching heavy UI calculations directly to window `resize` event handlers without debouncing causes layout thrashing and blocks the main thread.
+**Action:** Implemented debounced `setTimeout` (200ms) within window resize handlers for `RiskRadarPanel` and `MatrixRain` to ensure performance remains smooth.

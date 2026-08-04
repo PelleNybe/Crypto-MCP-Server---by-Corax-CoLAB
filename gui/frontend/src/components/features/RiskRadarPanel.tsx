@@ -36,13 +36,20 @@ export default function RiskRadarPanel() {
   const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
 
   useEffect(() => {
+    let resizeTimeout: NodeJS.Timeout;
     const handleResize = () => {
-      const el = document.getElementById('radar-container');
-      if (el) setWidth(el.clientWidth);
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        const el = document.getElementById('radar-container');
+        if (el) setWidth(el.clientWidth);
+      }, 200);
     };
     window.addEventListener('resize', handleResize);
     setTimeout(handleResize, 100);
-    return () => window.removeEventListener('resize', handleResize);
+    return () => {
+      clearTimeout(resizeTimeout);
+      window.removeEventListener('resize', handleResize);
+    };
   }, []);
 
   const addLog = (msg: string) => {
