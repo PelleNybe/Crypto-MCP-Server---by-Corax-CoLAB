@@ -131,3 +131,7 @@ See ../master_log.md
 ## 2026-05-19 - Fixed React Hook dependencies
 **Learning:** Missing hook dependencies can lead to stale closures where async callbacks use old component state variables.
 **Action:** Used `useCallback` to memoize `previewOrderDebounced` and added it to the corresponding `useEffect` dependency array.
+
+## 2026-05-19 - XSS Vulnerability Check
+**Learning:** React applications are vulnerable to XSS if `dangerouslySetInnerHTML` or direct `element.innerHTML` assignments are used with untrusted data.
+**Action:** Audited frontend source code (`gui/frontend/src`) for `innerHTML` and `dangerouslySetInnerHTML`. Found zero occurrences, verifying the frontend is fundamentally safe from these common injection vectors.
