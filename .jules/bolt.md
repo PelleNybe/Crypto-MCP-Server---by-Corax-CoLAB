@@ -1,0 +1,3 @@
+## 2024-08-11 - React Array Mutation on Render
+**Learning:** Found that `PortfolioPanel.tsx` was sorting `details` inline via `details.sort(...)` on every render. Because `Array.prototype.sort()` mutates the original array in JavaScript, this was actually modifying the React state array in-place, which is a significant anti-pattern that can cause unexpected behavior, dropped renders, and unnecessary performance overhead (O(N log N) on every component update).
+**Action:** Always verify that arrays mapped in render functions are not being mutated (e.g., using `sort`, `reverse`, `splice`). Instead, copy and memoize them (`[...arr].sort()`) inside a `useMemo` block.
