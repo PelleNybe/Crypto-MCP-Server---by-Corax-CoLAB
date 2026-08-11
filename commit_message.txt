@@ -1,12 +1,9 @@
-Dev, PelleNybe/Corax CoLAB: [performance improvement]
+🎨 Palette: [Accessibility] Added aria-live to Node Status Indicators
 
-💡 What:
-- Fixed a double fetch in RiskRadarPanel.tsx.
-- Removed duplicate title attributes across App.tsx and OrderPanel.tsx.
-- Verified hooks and MemoizedForceGraph3D usage across features.
+💡 What: Wrapped the node status indicators in `SystemOverview.tsx` with `role="status"`, `aria-live="polite"`, and `aria-atomic="true"`. Also added descriptive `aria-label`s.
 
-🎯 Why: Resolves double fetching on component mount reducing rate limits hit, and addresses screen reader accessibility guidelines regarding duplicate titles on inputs.
+🎯 Why: To improve accessibility. These statuses update dynamically in the background via polling. Without `aria-live`, screen readers are unaware when a node drops offline or comes back online.
 
-📊 Impact: Reduces unnecessary API load by half on Risk Radar load. Clears up accessibility tests.
+📸 Before/After: (Not a visual change, purely DOM/semantic enhancements)
 
-🔬 Measurement: Run `pnpm run test` in `gui/frontend` to ensure Dashboard still renders, and `pytest tests/` for backend.
+♿ Accessibility: Ensures that dynamic system status changes are announced gracefully to screen reader users without interrupting their current tasks.
