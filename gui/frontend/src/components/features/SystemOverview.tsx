@@ -57,7 +57,14 @@ export default function SystemOverview() {
   const StatusIndicator = React.memo(({ status }: { status: string }) => {
     const color = status === 'online' ? '#10b981' : status === 'offline' ? '#ef4444' : '#f59e0b';
     return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label={`Node status is ${status}`}
+        title={`Node status is ${status}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
         <div style={{
           width: '10px', height: '10px', borderRadius: '50%',
           backgroundColor: color,
