@@ -1,5 +1,5 @@
 import { authenticatedFetch } from "../auth"
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import OrbitalPortfolio from './features/OrbitalPortfolio'
 import socket from '../socket'
 import AssetUniverse from './features/AssetUniverse'
@@ -21,6 +21,12 @@ export default function PortfolioPanel() {
   const [total, setTotal] = useState<number>(0)
   const [viewMode, setViewMode] = useState<'3d' | 'list'>('3d')
   const [dataLoaded, setDataLoaded] = useState(false);
+
+  // ⚡ Bolt: Memoize the sorted details to prevent O(N log N) sorting on every render
+  // and prevent in-place mutation of the details state array.
+  const sortedDetails = useMemo(() => {
+    return [...details].sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0));
+  }, [details]);
 
   useEffect(() => {
     let active = true;
@@ -96,7 +102,7 @@ export default function PortfolioPanel() {
               </tr>
             </thead>
             <tbody>
-              {details.sort((a,b)=>(b.value_usd||0)-(a.value_usd||0)).map((d,i)=>(
+              {sortedDetails.map((d,i)=>(
                 <PortfolioRow key={i} d={d} total={total} />
               ))}
             </tbody>
