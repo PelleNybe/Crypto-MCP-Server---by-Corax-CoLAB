@@ -53,7 +53,7 @@ export default function NewsSingularity() {
                         // Sentiment based on 24h price change
                         // In a real scenario, this would come from a sentiment analysis MCP
                         const priceChange = coin.sentiment === 'bullish' ? 6 : coin.sentiment === 'bearish' ? -6 : 0;
-                        let sentiment = 'neutral';
+                        let sentiment = 'neutral'; // eslint-disable-line no-useless-assignment
                         if (priceChange > 5) sentiment = 'bullish';
                         else if (priceChange < -5) sentiment = 'bearish';
                         else sentiment = priceChange > 0 ? 'bullish' : 'bearish';

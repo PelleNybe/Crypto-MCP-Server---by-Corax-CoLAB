@@ -1,9 +1,0 @@
-🎨 Palette: [Accessibility] Added aria-live to Node Status Indicators
-
-💡 What: Wrapped the node status indicators in `SystemOverview.tsx` with `role="status"`, `aria-live="polite"`, and `aria-atomic="true"`. Also added descriptive `aria-label`s.
-
-🎯 Why: To improve accessibility. These statuses update dynamically in the background via polling. Without `aria-live`, screen readers are unaware when a node drops offline or comes back online.
-
-📸 Before/After: (Not a visual change, purely DOM/semantic enhancements)
-
-♿ Accessibility: Ensures that dynamic system status changes are announced gracefully to screen reader users without interrupting their current tasks.

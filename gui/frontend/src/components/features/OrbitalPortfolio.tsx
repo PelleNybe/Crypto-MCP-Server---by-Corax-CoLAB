@@ -86,15 +86,15 @@ const Starfield = () => {
   const meshRef = useRef<THREE.Points>(null);
   const count = 500;
 
-  const particles = useMemo(() => {
+  const [particles] = useState(() => {
     const temp = new Float32Array(count * 3);
     for (let i = 0; i < count; i++) {
-      temp[i * 3] = ((Math.sin(Date.now()) * 0.5 + 0.5) - 0.5) * 50;
-      temp[i * 3 + 1] = ((Math.sin(Date.now()) * 0.5 + 0.5) - 0.5) * 50;
-      temp[i * 3 + 2] = ((Math.sin(Date.now()) * 0.5 + 0.5) - 0.5) * 50;
+      temp[i * 3] = ((Math.random()) - 0.5) * 50;
+      temp[i * 3 + 1] = ((Math.random()) - 0.5) * 50;
+      temp[i * 3 + 2] = ((Math.random()) - 0.5) * 50;
     }
     return temp;
-  }, [count]);
+  });
 
   useFrame((state) => {
     if (meshRef.current) {
