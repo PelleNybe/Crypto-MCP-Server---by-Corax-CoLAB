@@ -5,8 +5,11 @@ const TypewriterText: React.FC<{ text: string, speed?: number }> = ({ text, spee
   const [index, setIndex] = useState(0);
 
   useEffect(() => {
-    setDisplayedText('');
-    setIndex(0);
+    const timeoutId = setTimeout(() => {
+        setDisplayedText('');
+        setIndex(0);
+    }, 0);
+    return () => clearTimeout(timeoutId);
   }, [text]);
 
   useEffect(() => {

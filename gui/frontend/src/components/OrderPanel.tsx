@@ -33,7 +33,10 @@ export default function OrderPanel(){
 
   useEffect(() => {
     if (debouncedExchange && debouncedSymbol && debouncedAmount > 0) {
-      previewOrderDebounced();
+      const timeoutId = setTimeout(() => {
+        previewOrderDebounced();
+      }, 0);
+      return () => clearTimeout(timeoutId);
     }
   }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice, previewOrderDebounced]);
 

@@ -2,6 +2,30 @@ import React, { useState, useEffect } from 'react';
 import { callMcpEndpoint } from '../../api_mcp';
 import { Activity, Server, Database, ShieldCheck, Zap } from 'lucide-react';
 
+const StatusIndicator = React.memo(({ status }: { status: string }) => {
+    const color = status === 'online' ? '#10b981' : status === 'offline' ? '#ef4444' : '#f59e0b';
+    return (
+      <div
+        role="status"
+        aria-live="polite"
+        aria-atomic="true"
+        aria-label={`Node status is ${status}`}
+        title={`Node status is ${status}`}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
+        <div style={{
+          width: '10px', height: '10px', borderRadius: '50%',
+          backgroundColor: color,
+          boxShadow: `0 0 10px ${color}`,
+          animation: status === 'checking' ? 'pulse 1s infinite' : 'none'
+        }} />
+        <span style={{ color: color, textTransform: 'uppercase', fontSize: '12px', fontFamily: 'monospace' }}>
+          {status}
+        </span>
+      </div>
+    );
+  });
+
 export default function SystemOverview() {
   const [statuses, setStatuses] = useState<Record<string, 'online' | 'offline' | 'checking'>>({
     MCP_CCXT: 'checking',
@@ -54,29 +78,6 @@ export default function SystemOverview() {
     };
   }, []);
 
-  const StatusIndicator = React.memo(({ status }: { status: string }) => {
-    const color = status === 'online' ? '#10b981' : status === 'offline' ? '#ef4444' : '#f59e0b';
-    return (
-      <div
-        role="status"
-        aria-live="polite"
-        aria-atomic="true"
-        aria-label={`Node status is ${status}`}
-        title={`Node status is ${status}`}
-        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
-      >
-        <div style={{
-          width: '10px', height: '10px', borderRadius: '50%',
-          backgroundColor: color,
-          boxShadow: `0 0 10px ${color}`,
-          animation: status === 'checking' ? 'pulse 1s infinite' : 'none'
-        }} />
-        <span style={{ color: color, textTransform: 'uppercase', fontSize: '12px', fontFamily: 'monospace' }}>
-          {status}
-        </span>
-      </div>
-    );
-  });
 
   return (
     <div className="card interactive-element" style={{ gridColumn: '1 / -1', border: '1px solid #334155', background: 'rgba(2, 2, 5, 0.8)', padding: '20px', borderRadius: '12px' }}>

@@ -135,3 +135,9 @@ See ../master_log.md
 ## 2026-05-19 - XSS Vulnerability Check
 **Learning:** React applications are vulnerable to XSS if `dangerouslySetInnerHTML` or direct `element.innerHTML` assignments are used with untrusted data.
 **Action:** Audited frontend source code (`gui/frontend/src`) for `innerHTML` and `dangerouslySetInnerHTML`. Found zero occurrences, verifying the frontend is fundamentally safe from these common injection vectors.
+## 2024-08-11 - React Array Mutation on Render
+**Learning:** Found that `PortfolioPanel.tsx` was sorting `details` inline via `details.sort(...)` on every render. Because `Array.prototype.sort()` mutates the original array in JavaScript, this was actually modifying the React state array in-place, which is a significant anti-pattern that can cause unexpected behavior, dropped renders, and unnecessary performance overhead (O(N log N) on every component update).
+**Action:** Always verify that arrays mapped in render functions are not being mutated (e.g., using `sort`, `reverse`, `splice`). Instead, copy and memoize them (`[...arr].sort()`) inside a `useMemo` block.
+## 2024-08-11 - [Node Status ARIA Live Missing]
+**Learning:** The `SystemOverview.tsx` used simple DOM elements for visual node status updates but lacked semantic roles or `aria-live` attributes, preventing screen readers from picking up state changes in real time when the background status checks happened.
+**Action:** Always wrap background check indicators with `role="status"` and `aria-live="polite"` so screen readers are correctly updated on status changes without breaking user flow.

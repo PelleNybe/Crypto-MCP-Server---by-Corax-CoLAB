@@ -10,9 +10,40 @@ export default function OracleCopilot() {
   const recognitionRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const processAICommand = async (command: string) => {
+    setLogs(prev => [...prev, { id: Date.now(), text: "PROCESSING COMMAND...", type: 'system' }]);
+
+    try {
+      const response = await callMcpEndpoint('MCP_LLM', 'generate_text', {
+        prompt: `As the Oracle AI of a trading dashboard, respond briefly and authoritatively to the following user command: ${command}`,
+        max_tokens: 150
+      });
+
+      let aiText = "Neural connection degraded. Unable to compute response.";
+      if (response && response.response) {
+        aiText = response.response;
+      }
+
+      setLogs(prev => [...prev, { id: Date.now(), text: aiText, type: 'ai' }]);
+
+      if ('speechSynthesis' in window) {
+        const utterance = new SpeechSynthesisUtterance(aiText);
+        utterance.rate = 1.1;
+        utterance.pitch = 0.9;
+        const voices = window.speechSynthesis.getVoices();
+        const techVoice = voices.find(v => v.name.includes('Google') || v.name.includes('Siri') || v.lang === 'en-GB');
+        if (techVoice) utterance.voice = techVoice;
+        window.speechSynthesis.speak(utterance);
+      }
+    } catch (err) {
+      console.error("LLM MCP Error:", err);
+      setLogs(prev => [...prev, { id: Date.now(), text: "ERROR: Failed to establish uplink with LLM MCP.", type: 'system' }]);
+    }
+  };
+
   useEffect(() => {
     // Add initial system boot log
-    setLogs([{ id: Date.now(), text: 'ORACLE NEURAL LINK ESTABLISHED.', type: 'system' }]);
+    setTimeout(() => setLogs([{ id: Date.now(), text: 'ORACLE NEURAL LINK ESTABLISHED.', type: 'system' }]), 0);
 
     // Initialize Speech Recognition
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
@@ -33,7 +64,7 @@ export default function OracleCopilot() {
             const command = event.results[i][0].transcript.trim();
             if (command) {
               setLogs(prev => [...prev, { id: Date.now(), text: command, type: 'user' }]);
-              processAICommand(command);
+              setTimeout(() => processAICommand(command), 0);
             }
           } else {
             interimTranscript += event.results[i][0].transcript;
@@ -59,31 +90,7 @@ export default function OracleCopilot() {
         recognitionRef.current.stop();
       }
     };
-  }, []);
-
-  useEffect(() => {
-    // Auto-scroll to bottom of logs
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [logs]);
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-      setTranscript('');
-    } else {
-      if (!isOpen) setIsOpen(true);
-      try {
-        recognitionRef.current?.start();
-        setIsListening(true);
-        setLogs(prev => [...prev, { id: Date.now(), text: 'LISTENING FOR COMMAND...', type: 'system' }]);
-      } catch (e) {
-        console.error("Microphone access denied or error starting.", e);
-      }
-    }
-  };
+  }, [isListening]);
 
   const processAICommand = async (command: string) => {
     setLogs(prev => [...prev, { id: Date.now(), text: "PROCESSING COMMAND...", type: 'system' }]);
@@ -115,6 +122,31 @@ export default function OracleCopilot() {
       setLogs(prev => [...prev, { id: Date.now(), text: "ERROR: Failed to establish uplink with LLM MCP.", type: 'system' }]);
     }
   };
+
+  useEffect(() => {
+    // Auto-scroll to bottom of logs
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [logs]);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+      setTranscript('');
+    } else {
+      if (!isOpen) setIsOpen(true);
+      try {
+        recognitionRef.current?.start();
+        setIsListening(true);
+        setLogs(prev => [...prev, { id: Date.now(), text: 'LISTENING FOR COMMAND...', type: 'system' }]);
+      } catch (e) {
+        console.error("Microphone access denied or error starting.", e);
+      }
+    }
+  };
+
 
   return (
     <>

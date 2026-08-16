@@ -13,7 +13,7 @@ export const callMcpEndpoint = async (mcp: string, method: string, params: any =
       return data.data;
     } catch (err: any) {
       if (i === retries - 1) {
-        throw new Error(`Failed after ${retries} retries: ${err.message}`);
+        throw new Error(`Failed after ${retries} retries: ${err.message}`, { cause: err });
       }
       // Wait before retrying (exponential backoff)
       await new Promise(resolve => setTimeout(resolve, 1000 * Math.pow(2, i)));

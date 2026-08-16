@@ -16,7 +16,7 @@ const OrderRow = React.memo(({ o, idx, approveOrder }: { o: any, idx: number, ap
 
   return (
     <tr style={{ borderBottom: '1px solid #1e293b', transition: 'background 0.3s' }} className="table-row-hover">
-      <td style={{ padding: '10px', fontSize: '12px' }}>{new Date(o.created_at || Date.now()).toLocaleString()}</td>
+      <td style={{ padding: '10px', fontSize: '12px' }}>{new Date(o.created_at || new Date()).toLocaleString()}</td>
       <td style={{ padding: '10px', fontWeight: 'bold' }}>{o.symbol}</td>
       <td style={{ padding: '10px', textTransform: 'uppercase' }}>
         <span style={{ color: o.side === 'buy' ? '#10b981' : '#ef4444' }}>{o.side}</span> / {o.type}

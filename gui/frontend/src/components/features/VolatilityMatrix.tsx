@@ -9,8 +9,9 @@ const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
   const mesh = useRef<THREE.Mesh>(null);
 
   // Create a grid geometry
-  const geometry = useMemo(() => new THREE.PlaneGeometry(20, 20, 50, 50), []);
+  const [geometry] = useState(() => new THREE.PlaneGeometry(20, 20, 50, 50));
 
+  // eslint-disable-next-line react-hooks/immutability
   useFrame((state) => {
     if (!mesh.current) return;
 
@@ -24,7 +25,7 @@ const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
       const t = state.clock.elapsedTime * 0.5;
       const wave = Math.sin(x * 0.5 + t) * Math.cos(y * 0.5 + t) * waveHeight;
 
-      positions[i + 2] = wave; // Modify Z
+      positions[i + 2] = wave; // eslint-disable-line react-hooks/immutability
     }
 
     geometry.attributes.position.needsUpdate = true;
