@@ -141,3 +141,13 @@ See ../master_log.md
 ## 2024-08-11 - [Node Status ARIA Live Missing]
 **Learning:** The `SystemOverview.tsx` used simple DOM elements for visual node status updates but lacked semantic roles or `aria-live` attributes, preventing screen readers from picking up state changes in real time when the background status checks happened.
 **Action:** Always wrap background check indicators with `role="status"` and `aria-live="polite"` so screen readers are correctly updated on status changes without breaking user flow.
+
+## 2026-08-21 - Performance and Accessibility Improvements
+**Learning:**
+- Instantiating CCXT objects in `ccxt_mcp.py` on every endpoint call causes a ~1 second overhead due to initialization, and prevents reusing connection pools and rate limit states.
+- The `fetchGlobalSentimentWithPolling` hook in `App.tsx` used recursive `setTimeout` without an unmount cancellation flag, causing state updates on unmounted components and memory leaks.
+- The login button in `App.tsx` had `aria-busy` but was missing `aria-live="polite"`, failing to alert screen readers when the loading state text updated to "INITIALIZING...".
+**Action:**
+- Applied `@lru_cache(maxsize=16)` to `_make_exchange` in `ccxt_mcp.py` to persist CCXT exchange objects in memory.
+- Added an `isCancelled` flag to `fetchGlobalSentimentWithPolling` and cleared it in the cleanup function in `App.tsx`.
+- Added `aria-live="polite"` to the authentication form submit button in `App.tsx`.

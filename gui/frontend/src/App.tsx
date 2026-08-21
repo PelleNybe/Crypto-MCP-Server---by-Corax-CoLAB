@@ -61,18 +61,25 @@ export default function App() {
     };
 
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
+    let isCancelled = false;
 
     const fetchGlobalSentimentWithPolling = async () => {
+      if (isCancelled) return;
       try {
         await fetchGlobalSentiment();
       } finally {
-        timeoutId = setTimeout(fetchGlobalSentimentWithPolling, 120000);
+        if (!isCancelled) {
+          timeoutId = setTimeout(fetchGlobalSentimentWithPolling, 120000);
+        }
       }
     };
 
     fetchGlobalSentimentWithPolling();
-    return () => clearTimeout(timeoutId);
+    return () => {
+      isCancelled = true;
+      clearTimeout(timeoutId);
+    };
   }, [isAuthenticated, activeSymbol]);
 
   const handleLogin = (e: React.FormEvent) => {
@@ -114,6 +121,7 @@ export default function App() {
             style={{fontFamily: 'monospace', letterSpacing: '2px', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px'}}
             disabled={isLoggingIn}
             aria-busy={isLoggingIn}
+            aria-live="polite"
           >
             {isLoggingIn ? <><Loader size={16} className="lucide-spin" style={{ animation: 'spin 2s linear infinite' }} /> INITIALIZING...</> : "INITIALIZE LINK"}
           </button>
