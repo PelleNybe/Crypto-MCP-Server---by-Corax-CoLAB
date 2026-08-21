@@ -65,7 +65,7 @@ def ttl_cache(seconds: int):
 
 # ⚡ Bolt: Cache exchange instances to prevent re-instantiation on every tool call.
 # This reuses the underlying connection pool and rate limiter state.
-@lru_cache(maxsize=None)
+@lru_cache(maxsize=16)
 def _make_exchange(exchange_id: str) -> ccxt.Exchange:
     exchange_id = exchange_id.lower()
     if exchange_id not in ccxt.exchanges:
