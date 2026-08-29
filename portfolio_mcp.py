@@ -91,9 +91,9 @@ async def _get_price_ccxt(exchange, symbol):
         return None
 
 
-async def fetch_exchange_balance(exch_low: str):
+async def fetch_exchange_balance(exch_low: str) -> Dict[str, Any]:
     if exch_low not in ccxt_async.exchanges:
-        return []
+        return {"exchange": exch_low, "details": [], "error": f"Unsupported exchange: {exch_low}"}
 
     cls = getattr(ccxt_async, exch_low)
     opts = {"enableRateLimit": True}
@@ -102,18 +102,16 @@ async def fetch_exchange_balance(exch_low: str):
     api_secret = os.getenv(f"{exch_upper}_API_SECRET")
     if api_key and api_secret:
         opts.update({"apiKey": api_key, "secret": api_secret})
+    else:
+        return {"exchange": exch_low, "details": [], "error": "API keys missing"}
 
     ex = cls(opts)
     details = []
+    error_msg = None
 
     try:
         bal = await ex.fetch_balance()
 
-        # Collect non-zero balances and pre-calculate upper symbols
-        # ⚡ Bolt: Store the pre-calculated upper_coin in the balances dictionary
-        # to avoid redundant .upper() calls in the subsequent loop.
-        # ⚡ Bolt: Use dictionary comprehensions and walrus operator (:=) for inline
-        # assignments to optimize dictionary lookups and string operations within tight loops.
         balances = {
             coin: (amount, (upper_coin := coin.upper()))
             for coin, amount in bal.get("total", {}).items()
@@ -121,14 +119,12 @@ async def fetch_exchange_balance(exch_low: str):
         }
         upper_coins = [u for _, u in balances.values()]
 
-        # Batch fetch prices from Coingecko using pre-calculated upper symbols
         cg_prices = (
             await asyncio.to_thread(_get_prices_coingecko, upper_coins)
             if upper_coins
             else {}
         )
 
-        # For missing prices, prepare CCXT fallback tasks
         async def _get_asset_price_ccxt_fallback(coin, upper_coin, amount):
             price = cg_prices.get(upper_coin)
             if price is None:
@@ -144,7 +140,6 @@ async def fetch_exchange_balance(exch_low: str):
 
         tasks = []
         for coin, (amount, upper_coin) in balances.items():
-            # ⚡ Bolt: Use the pre-calculated upper_coin instead of calling coin.upper() again
             tasks.append(_get_asset_price_ccxt_fallback(coin, upper_coin, amount))
 
         if tasks:
@@ -152,10 +147,11 @@ async def fetch_exchange_balance(exch_low: str):
 
     except Exception as e:
         logger.warning("fetch_balance failed for %s: %s", exch_low, e)
+        error_msg = str(e)
     finally:
         await ex.close()
 
-    return details
+    return {"exchange": exch_low, "details": details, "error": error_msg}
 
 
 @mcp.tool()
@@ -169,15 +165,19 @@ async def portfolio_value(exchanges: List[str]) -> Dict[str, Any]:
 
     total_usd = 0.0
     details = []
+    errors = {}
 
-    for exch_details in results:
-        for detail in exch_details:
+    for res in results:
+        if res.get("error"):
+            errors[res["exchange"]] = res["error"]
+        for detail in res.get("details", []):
             total_usd += detail["value_usd"]
             details.append(detail)
 
     return {
         "total_usd": total_usd,
         "details": details,
+        "errors": errors,
         "cache_ttl": CACHE_TTL,
         "cached_at": _CACHE["timestamp"],
     }

@@ -596,3 +596,27 @@ body[data-sentiment='bear'] .scanline-effect {
   20% { left: 200%; }
   100% { left: 200%; }
 }
+
+/* Subtle pulsing animation for status indicators */
+@keyframes soft-pulse {
+  0% { opacity: 0.8; box-shadow: 0 0 5px currentColor; }
+  50% { opacity: 1; box-shadow: 0 0 15px currentColor; }
+  100% { opacity: 0.8; box-shadow: 0 0 5px currentColor; }
+}
+
+.status-indicator-live {
+  animation: soft-pulse 2s infinite ease-in-out;
+}
+
+/* Glassmorphism improvements */
+.glass-panel {
+  background: rgba(2, 2, 5, 0.6);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.interactive-element:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
+}

@@ -46,16 +46,19 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
 
         portfolio_mcp.ccxt_async.exchanges = ["binance"]
         portfolio_mcp.ccxt_async.binance = MagicMock(return_value=mock_ex)
+        import os
+        os.environ["BINANCE_API_KEY"] = "test"
+        os.environ["BINANCE_API_SECRET"] = "test"
 
         # Action
         results = await portfolio_mcp.fetch_exchange_balance("binance")
 
         # Assertions
-        self.assertEqual(len(results), 2)
-        assets = {r["asset"] for r in results}
+        self.assertEqual(len(results.get('details', [])), 2)
+        assets = {r["asset"] for r in results.get("details", [])}
         self.assertIn("BTC", assets)
         self.assertIn("ETH", assets)
-        for r in results:
+        for r in results.get("details", []):
             self.assertEqual(r["price_usd"], 100.0)
             if r["asset"] == "BTC":
                 self.assertEqual(r["value_usd"], 100.0)
@@ -70,7 +73,7 @@ class TestPortfolioMCP(unittest.IsolatedAsyncioTestCase):
         results = await portfolio_mcp.fetch_exchange_balance("non_existent_exchange")
 
         # Assertions
-        self.assertEqual(results, [])
+        self.assertEqual(results.get('error'), 'Unsupported exchange: non_existent_exchange')
 
 
 if __name__ == "__main__":

@@ -25,8 +25,8 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
   return (
     <group position={position}>
       <mesh ref={meshRef}>
-        <torusGeometry args={[1, 0.05, 16, 100]} />
-        <meshBasicMaterial color={color} transparent opacity={opacity} />
+        <torusGeometry args={[1, 0.1, 16, 100]} />
+        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={opacity * 2} transparent opacity={opacity} />
       </mesh>
       <mesh scale={[scale * 0.8, scale * 0.8, scale * 0.8]}>
         <circleGeometry args={[1, 32]} />

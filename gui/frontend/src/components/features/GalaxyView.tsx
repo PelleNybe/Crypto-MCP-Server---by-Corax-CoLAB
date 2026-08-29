@@ -83,6 +83,18 @@ const CanvasScene = ({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCo
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
               <ambientLight intensity={0.2} />
+        {/* Central Sun / Gravity Well Center */}
+        <mesh>
+            <sphereGeometry args={[1, 32, 32]} />
+            <meshStandardMaterial color="#f59e0b" emissive="#f59e0b" emissiveIntensity={2} />
+        </mesh>
+
+        {/* Accretion Disk */}
+        <mesh rotation={[-Math.PI/2, 0, 0]}>
+            <ringGeometry args={[1.5, 3, 64]} />
+            <meshStandardMaterial color="#f59e0b" transparent opacity={0.1} side={THREE.DoubleSide} />
+        </mesh>
+
               <pointLight position={[0, 0, 0]} intensity={2} color="#f59e0b" distance={50} />
 
               <Stars radius={50} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
