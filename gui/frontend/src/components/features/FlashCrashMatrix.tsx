@@ -21,7 +21,7 @@ const MatrixBar = React.memo(({ position, height, color, opacity, label }: { pos
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>

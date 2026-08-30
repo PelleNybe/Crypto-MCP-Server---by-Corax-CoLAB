@@ -41,7 +41,7 @@ const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ waveHeight }: { waveHeight: number }) => {
   return (
 <Canvas camera={{ position: [0, 8, 15], fov: 45 }}>

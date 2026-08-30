@@ -114,7 +114,7 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ gasPriceGwei, particles }: { gasPriceGwei: number, particles: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
@@ -149,7 +149,7 @@ export default function GasHologram() {
             // No fallback allowed
         } finally {
             if (active) {
-                // ⚡ Bolt: Replaced setInterval with recursive setTimeout to prevent API piling
+                // Optimization: Replaced setInterval with recursive setTimeout to prevent API piling
                 timeoutId = setTimeout(fetchGas, 15000); // 15 sec
             }
         }

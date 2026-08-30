@@ -37,7 +37,7 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
   return (
 <Canvas camera={{ position: [0, 8, 8], fov: 60 }}>

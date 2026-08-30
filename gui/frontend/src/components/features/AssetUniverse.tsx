@@ -69,7 +69,7 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>

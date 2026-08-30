@@ -4,7 +4,7 @@ import { ShieldAlert, Activity, Wifi } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-// ⚡ Bolt: Wrapped ForceGraph3D in React.memo to prevent expensive re-renders on unrelated parent state changes (like logs or defcon)
+// Optimization: Wrapped ForceGraph3D in React.memo to prevent expensive re-renders on unrelated parent state changes (like logs or defcon)
 const MemoizedForceGraph3D = React.memo(({ data, width }: { data: any, width: number }) => {
   const linkWidth = useCallback((link: any) => link.value > 80 ? 3 : 1, []);
   const linkDirectionalParticles = useCallback((link: any) => link.value > 50 ? 2 : 0, []);
