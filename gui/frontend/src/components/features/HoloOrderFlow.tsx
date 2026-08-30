@@ -38,7 +38,7 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ bids, asks, maxVol }: { bids: any[], asks: any[], maxVol: number }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>

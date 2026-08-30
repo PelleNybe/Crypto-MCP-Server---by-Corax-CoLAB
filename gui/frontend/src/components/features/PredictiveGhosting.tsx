@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Plotly from 'plotly.js-basic-dist';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 export default function PredictiveGhosting() {
   const [scrubberValue, setScrubberValue] = useState(0);

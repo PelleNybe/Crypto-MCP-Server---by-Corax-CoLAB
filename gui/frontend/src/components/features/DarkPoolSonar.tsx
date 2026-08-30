@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 const SonarPing = React.memo(({ position, color, size, onComplete }: { position: [number, number, number], color: string, size: number, onComplete: () => void }) => {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -37,7 +37,7 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
   return (
 <Canvas camera={{ position: [0, 8, 8], fov: 60 }}>

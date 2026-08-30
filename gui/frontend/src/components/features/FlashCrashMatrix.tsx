@@ -3,7 +3,7 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 const MatrixBar = React.memo(({ position, height, color, opacity, label }: { position: [number, number, number], height: number, color: string, label: string }) => {
     return (
@@ -21,7 +21,7 @@ const MatrixBar = React.memo(({ position, height, color, opacity, label }: { pos
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
