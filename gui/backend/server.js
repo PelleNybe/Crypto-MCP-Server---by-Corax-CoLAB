@@ -144,6 +144,7 @@ function backupDatabase() {
   const backupFile = path.join(backupDir, `orders_backup_${timestamp}.db`);
 
   db.serialize(() => {
+  db.run('PRAGMA foreign_keys = ON;');
       db.run('BEGIN EXCLUSIVE', [], (err) => { if (err) { console.error('Error on BEGIN EXCLUSIVE', err); return; }
         if (!err) {
             try {
@@ -182,9 +183,10 @@ function scheduleBackup() {
     }
   }, 6 * 60 * 60 * 1000);
 }
-scheduleBackup();
-
-setTimeout(backupDatabase, 10000);
+if (process.env.NODE_ENV !== 'test') {
+  scheduleBackup();
+  setTimeout(backupDatabase, 10000);
+}
 
 const db = new sqlite3.Database(DB_PATH, (err) => {
   if (err) {
@@ -195,6 +197,7 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
 
 // Create tables (safe)
 db.serialize(() => {
+  db.run('PRAGMA foreign_keys = ON;');
   db.run(`CREATE TABLE IF NOT EXISTS strategies (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT,
@@ -218,14 +221,14 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS orders (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    exchange TEXT,
-    symbol TEXT,
-    side TEXT,
-    type TEXT,
-    amount REAL,
+    exchange TEXT NOT NULL,
+    symbol TEXT NOT NULL,
+    side TEXT NOT NULL,
+    type TEXT NOT NULL,
+    amount REAL NOT NULL,
     price REAL,
-    dry_run INTEGER,
-    status TEXT,
+    dry_run INTEGER NOT NULL,
+    status TEXT NOT NULL,
     response TEXT
   )`, (err) => {
     if (err) {
@@ -248,9 +251,10 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE IF NOT EXISTS reasoning (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    trade_id INTEGER,
-    explanation TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    trade_id INTEGER NOT NULL,
+    explanation TEXT NOT NULL,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY(trade_id) REFERENCES orders(id) ON DELETE CASCADE
   )`, (err) => {
     if (err) {
       console.error('Error creating reasoning table:', err);
@@ -538,8 +542,8 @@ function startPolling(mcpUrl, toolName, args, eventName, intervalMs) {
 }
 
 // Polling intervals
-startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 60000);
-startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker', 5000);
+if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 60000); }
+if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker', 5000); }
 
 // GET /api/strategies
 app.get("/api/strategies", (req, res) => {
@@ -572,7 +576,7 @@ app.post("/api/strategies", (req, res) => {
   stmt.finalize();
 });
 // Start server and handle errors (EADDRINUSE will be surfaced)
-server.listen(PORT);
+if (process.env.NODE_ENV !== 'test') { server.listen(PORT); }
 
 server.on('error', (err) => {
   console.error('Server error:', err);
@@ -739,4 +743,4 @@ app.get('/api/orders', (req, res) => {
   });
 });
 
-module.exports = { app, server };
+module.exports = { app, server, db };

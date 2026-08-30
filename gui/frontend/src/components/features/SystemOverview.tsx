@@ -17,7 +17,7 @@ const StatusIndicator = React.memo(({ status }: { status: string }) => {
           width: '10px', height: '10px', borderRadius: '50%',
           backgroundColor: color,
           boxShadow: `0 0 10px ${color}`,
-          animation: status === 'checking' ? 'pulse 1s infinite' : 'none'
+          animation: status === 'checking' ? 'pulse 1s infinite' : (status === 'online' ? 'soft-pulse 2s infinite ease-in-out' : 'none')
         }} />
         <span style={{ color: color, textTransform: 'uppercase', fontSize: '12px', fontFamily: 'monospace' }}>
           {status}

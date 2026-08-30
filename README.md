@@ -90,11 +90,12 @@ Receive real-time alerts and command your trading agent via Telegram.
 
 ### 🌌 100% Real Data Integration & Visualizer Dynamics
 The Crypto MCP Server uses **real data** across all visualizers. The entire system operates without a single mockup!
-* 🎯 **Dark Pool Sonar:** Real-time 3D sonar pings for large volume "whale" trades on central exchanges using `@react-three/fiber`.
-* 🔥 **Flash-Crash Prediction Matrix:** Glowing heatmap grid of bids to asks, tracking liquidity drains.
-* 🚀 **Galaxy View (Gravity Well):** 3D mapping of the top 50 cryptocurrencies.
+* 🎯 **Dark Pool Sonar:** Real-time 3D sonar pings for large volume "whale" trades on central exchanges using `@react-three/fiber` and dynamic emissive materials.
+* 🔥 **Flash-Crash Prediction Matrix:** Glowing heatmap grid of bids to asks, tracking liquidity drains in real time via CCXT orderbooks.
+* 🚀 **Galaxy View (Gravity Well):** Cinematic 3D mapping of the top 50 cryptocurrencies with a glowing central sun and accretion disk.
 * 🧠 **AI Sentiment Word-Cloud Sphere:** Extracts trending keywords and sentiment from real-time news to form an interactive 3D floating sphere.
 * ⚡ **Gas & Network Congestion Hologram:** Visualizes Ethereum network congestion as a glowing, pulsating reactor core.
+* 🔬 **Time-Machine Backtest Arena:** Fully functional OHLCV visualizer to playback and simulate trading strategies (e.g. SMA Crossovers).
 
 ---
 
