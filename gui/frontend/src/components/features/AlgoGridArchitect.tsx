@@ -68,6 +68,7 @@ const Connection = React.memo(({ start, end, active }: { start: {x: number, y: n
 });
 
 export default function AlgoGridArchitect() {
+  const { addToast } = useToast();
   const [activePath, setActivePath] = useState(false);
   const [nodes, setNodes] = useState<{id: number, type: 'source'|'logic'|'action', title: string, pos: {x: number, y: number}}[]>([]);
   const [connections, setConnections] = useState<{start: {x: number, y: number}, end: {x: number, y: number}}[]>([]);
@@ -158,9 +159,10 @@ export default function AlgoGridArchitect() {
           });
           const data = await res.json();
           if (data.ok) {
-              console.log("Saved strategy", data.id);
+              addToast(`Strategy ${data.id} saved & deployed successfully`, "success");
           }
       } catch (err) {
+          addToast(`Strategy save failed`, "error");
           console.error("Save failed", err);
       } finally {
           setLoading(false);
