@@ -63,7 +63,7 @@ def ttl_cache(seconds: int):
     return decorator
 
 
-# ⚡ Bolt: Cache exchange instances to prevent re-instantiation on every tool call.
+# Optimization: Cache exchange instances to prevent re-instantiation on every tool call.
 # This reuses the underlying connection pool and rate limiter state.
 @lru_cache(maxsize=16)
 def _make_exchange(exchange_id: str) -> ccxt.Exchange:

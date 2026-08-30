@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 
-// ⚡ Bolt: Wrapped Particles component in React.memo to prevent expensive
+// Optimization: Wrapped Particles component in React.memo to prevent expensive
 // recalculation and re-rendering of the 2000-particle InstancedMesh when the parent
 // GlobalWeatherSystem triggers frequent unrelated state updates (e.g. lightning).
 const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neutral' }) => {
@@ -93,7 +93,7 @@ const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neu
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ marketSentiment }: { marketSentiment: string }) => {
   return (
 <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>

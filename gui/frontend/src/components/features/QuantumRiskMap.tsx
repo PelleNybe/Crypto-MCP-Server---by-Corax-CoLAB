@@ -63,7 +63,7 @@ const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ stress }: { stress: number }) => {
   return (
 <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>

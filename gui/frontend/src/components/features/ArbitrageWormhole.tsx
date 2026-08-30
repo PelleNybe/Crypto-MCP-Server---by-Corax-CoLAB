@@ -133,7 +133,7 @@ const ArbitrageParticle = React.memo(({ start, end, speed }: { start: THREE.Vect
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ selectedExchanges, prices, arbitragePairs }: { selectedExchanges: string[], prices: any, arbitragePairs: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 60 }}>

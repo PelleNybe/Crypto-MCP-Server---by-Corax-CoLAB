@@ -22,7 +22,7 @@ export default function PortfolioPanel() {
   const [viewMode, setViewMode] = useState<'3d' | 'list'>('3d')
   const [dataLoaded, setDataLoaded] = useState(false);
 
-  // ⚡ Bolt: Memoize the sorted details to prevent O(N log N) sorting on every render
+  // Optimization: Memoize the sorted details to prevent O(N log N) sorting on every render
   // and prevent in-place mutation of the details state array.
   const sortedDetails = useMemo(() => {
     return [...details].sort((a, b) => (b.value_usd || 0) - (a.value_usd || 0));

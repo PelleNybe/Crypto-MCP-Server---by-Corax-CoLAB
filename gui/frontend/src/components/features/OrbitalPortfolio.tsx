@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
 // Feature 4: Orbital Portfolio Control Deck
-// ⚡ Bolt: Wrapped Planet component in React.memo to prevent expensive Three.js
+// Optimization: Wrapped Planet component in React.memo to prevent expensive Three.js
 // sub-tree re-renders when parent state (like totalValue or other selections) changes.
 const Planet = React.memo(({ asset, onSelect, selected }: { asset: any, onSelect: any, selected: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -114,7 +114,7 @@ const Starfield = () => {
 };
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
@@ -175,7 +175,7 @@ export default function OrbitalPortfolio() {
   const [assets, setAssets] = useState<any[]>([]);
   const [totalValue, setTotalValue] = useState<number>(0);
 
-  // ⚡ Bolt: Memoize the onSelect event handler to prevent breaking Planet's React.memo
+  // Optimization: Memoize the onSelect event handler to prevent breaking Planet's React.memo
   const handleSelectAsset = React.useCallback((a: any) => {
       setSelectedAsset(a.id);
   }, []);
