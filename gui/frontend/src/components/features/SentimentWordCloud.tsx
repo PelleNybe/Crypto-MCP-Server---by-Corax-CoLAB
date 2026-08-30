@@ -38,7 +38,7 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ words, targetSymbol }: { words: any[], targetSymbol: string }) => {
   return (
 <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>

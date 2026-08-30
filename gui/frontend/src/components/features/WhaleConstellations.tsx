@@ -63,7 +63,7 @@ const Constellation = React.memo(({ nodes, links }: { nodes: any[], links: any[]
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ nodes, links }: { nodes: any[], links: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>

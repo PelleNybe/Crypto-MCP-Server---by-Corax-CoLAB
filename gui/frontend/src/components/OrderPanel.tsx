@@ -1,3 +1,4 @@
+import { useCallback } from "react"
 import NeuralTradeVisualizer from './features/NeuralTradeVisualizer'
 import { authenticatedFetch } from "../auth"
 import React, { useState, useEffect } from 'react'

@@ -171,7 +171,7 @@ def calculate_consensus(votes):
     Evaluates the results from all active providers.
     Implements Majority Rule. If tie or no consensus, default is HOLD.
     """
-    # ⚡ Bolt: Use a list comprehension to pre-calculate and normalize votes
+    # Optimization: Use a list comprehension to pre-calculate and normalize votes
     # to avoid repeated appends and type checking in a multi-line loop.
     decisions = [
         (

@@ -4,7 +4,7 @@ import { OrbitControls, Text, Html, Stars } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 
-// ⚡ Bolt: Wrapped Star component in React.memo to prevent 48 out of 50 Three.js
+// Optimization: Wrapped Star component in React.memo to prevent 48 out of 50 Three.js
 // instances from recalculating layout and re-rendering when a single star is selected.
 const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSelect: any, selected: boolean }) => {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -78,7 +78,7 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCoins: any[], handleSelect: any, activeSymbolHook: string }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
@@ -156,7 +156,7 @@ export default function GalaxyView() {
     return () => { active = false; clearTimeout(timeoutId); };
   }, []);
 
-  // ⚡ Bolt: Wrapped onSelect in useCallback to prevent child React.memo invalidation.
+  // Optimization: Wrapped onSelect in useCallback to prevent child React.memo invalidation.
   const handleSelect = useCallback((coin: any) => {
       setSelectedCoin(coin);
   }, []);
