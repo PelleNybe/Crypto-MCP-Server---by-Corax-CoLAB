@@ -1,11 +1,11 @@
 import React, { useRef, useMemo, useState, useEffect } from 'react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 
-// ⚡ Bolt: Wrapped Wall component in React.memo to prevent expensive Three.js
+// Optimization: Wrapped Wall component in React.memo to prevent expensive Three.js
 // sub-tree re-renders for unchanged order book levels during high-frequency polling.
 const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid' | 'ask', price: number, volume: number, maxVolume: number, index: number }) => {
   const height = maxVolume > 0 ? (volume / maxVolume) * 5 : 0.1;
@@ -41,7 +41,7 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
@@ -118,7 +118,7 @@ export default function HoloTopographicOrderBook() {
       } catch (err) {
         console.error("Failed to fetch order book data", err);
       } finally {
-        // ⚡ Bolt: Replaced setInterval with recursive setTimeout to prevent API piling
+        // Optimization: Replaced setInterval with recursive setTimeout to prevent API piling
         // if the MCP backend is slow to respond.
         if (active) {
           timerId = setTimeout(fetchOrderBook, 10000);

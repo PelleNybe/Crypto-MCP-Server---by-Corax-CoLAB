@@ -18,7 +18,7 @@ mcp = FastMCP(
     name="news", stateless_http=True, json_response=True, host="0.0.0.0", port=7017
 )
 
-# ⚡ Bolt: Maintain a module-level httpx.AsyncClient to reuse connection pools
+# Optimization: Maintain a module-level httpx.AsyncClient to reuse connection pools
 # across multiple concurrent MCP tool calls. This significantly reduces latency
 # compared to instantiating a new client per request.
 _client = httpx.AsyncClient(timeout=10.0)

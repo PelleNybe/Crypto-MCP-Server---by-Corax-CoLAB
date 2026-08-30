@@ -4,7 +4,7 @@ import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShieldAlert, TrendingDown } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);
@@ -63,7 +63,7 @@ const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
 });
 
 
-// ⚡ Bolt: Canvas component wrapper. (Removed redundant React.memo nesting)
+// Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ stress }: { stress: number }) => {
   return (
 <Canvas camera={{ position: [0, 10, 20], fov: 45 }}>
