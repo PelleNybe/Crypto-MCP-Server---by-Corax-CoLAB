@@ -343,7 +343,11 @@ app.post('/api/mcp', async (req, res) => {
 });
 
 app.get('/api/ticker', async (req, res) => {
-  const { exchange = 'binance', symbol = 'BTC/USDT' } = req.query;
+  let { exchange = 'binance', symbol = 'BTC/USDT' } = req.query;
+  if (Array.isArray(exchange)) exchange = exchange[0];
+  if (Array.isArray(symbol)) symbol = symbol[0];
+  if (typeof exchange !== 'string') exchange = String(exchange);
+  if (typeof symbol !== 'string') symbol = String(symbol);
   try {
     const result = await callMCP(mcpUrls.MCP_CCXT, 'get_ticker', { exchange, symbol });
     res.json({ ok: true, data: result });

@@ -112,12 +112,11 @@ async def fetch_exchange_balance(exch_low: str) -> Dict[str, Any]:
     try:
         bal = await ex.fetch_balance()
 
-        balances = {
-            coin: (amount, (upper_coin := coin.upper()))
-            for coin, amount in bal.get("total", {}).items()
-            if amount and amount > 0
-        }
-        upper_coins = [u for _, u in balances.values()]
+        # Optimization: Pre-calculate upper_coins separately to avoid repeated string creation inside comprehensions
+        total_bals = {c: a for c, a in bal.get("total", {}).items() if a and a > 0}
+        coins_list = list(total_bals.keys())
+        upper_coins = [c.upper() for c in coins_list]
+        balances = {c: (total_bals[c], uc) for c, uc in zip(coins_list, upper_coins)}
 
         cg_prices = (
             await asyncio.to_thread(_get_prices_coingecko, upper_coins)
