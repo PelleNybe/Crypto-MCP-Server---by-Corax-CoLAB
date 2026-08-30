@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import ForceGraph3D from 'react-force-graph-3d';
 import { ShieldAlert, Activity, Wifi } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 // Optimization: Wrapped ForceGraph3D in React.memo to prevent expensive re-renders on unrelated parent state changes (like logs or defcon)
 const MemoizedForceGraph3D = React.memo(({ data, width }: { data: any, width: number }) => {
