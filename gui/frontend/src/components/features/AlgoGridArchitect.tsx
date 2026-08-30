@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Network, Activity, Settings, Cpu, Save, Plus } from 'lucide-react';
 import { authenticatedFetch } from '../../auth';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useToast } from '../NeonToasts';
-import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
 
 const Node = React.memo(({ type, title, position, active }: { type: 'source' | 'logic' | 'action', title: string, position: {x: number, y: number}, active: boolean }) => {
   const colors = {
