@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Network, Activity, Settings, Cpu, Save, Plus } from 'lucide-react';
 import { authenticatedFetch } from '../../auth';
 import { callMcpEndpoint } from '../../api_mcp';
+import { useToast } from '../NeonToasts';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
 const Node = React.memo(({ type, title, position, active }: { type: 'source' | 'logic' | 'action', title: string, position: {x: number, y: number}, active: boolean }) => {
@@ -68,6 +69,7 @@ const Connection = React.memo(({ start, end, active }: { start: {x: number, y: n
 });
 
 export default function AlgoGridArchitect() {
+  const { addToast } = useToast();
   const [activePath, setActivePath] = useState(false);
   const [nodes, setNodes] = useState<{id: number, type: 'source'|'logic'|'action', title: string, pos: {x: number, y: number}}[]>([]);
   const [connections, setConnections] = useState<{start: {x: number, y: number}, end: {x: number, y: number}}[]>([]);
@@ -158,9 +160,10 @@ export default function AlgoGridArchitect() {
           });
           const data = await res.json();
           if (data.ok) {
-              console.log("Saved strategy", data.id);
+              addToast(`Strategy ${data.id} saved & deployed successfully`, "success");
           }
       } catch (err) {
+          addToast(`Strategy save failed`, "error");
           console.error("Save failed", err);
       } finally {
           setLoading(false);
@@ -178,7 +181,7 @@ export default function AlgoGridArchitect() {
         <button onClick={addNode} aria-label="Add Node" className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
             <Plus size={12} /> ADD NODE
         </button>
-        <button onClick={saveStrategy} aria-label={loading ? "Saving Strategy..." : "Save and Deploy Strategy"} disabled={loading} className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', borderColor: '#10b981', color: '#10b981' }}>
+        <button onClick={saveStrategy} aria-label={loading ? "Saving Strategy..." : "Save and Deploy Strategy"} disabled={loading} aria-busy={loading} aria-live="polite" className="btn-outline" style={{ fontSize: '10px', padding: '4px 8px', display: 'flex', alignItems: 'center', gap: '4px', borderColor: '#10b981', color: '#10b981' }}>
             <Save size={12} /> {loading ? 'SAVING...' : 'SAVE & DEPLOY'}
         </button>
       </div>

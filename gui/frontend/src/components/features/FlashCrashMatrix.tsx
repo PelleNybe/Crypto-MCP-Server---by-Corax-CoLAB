@@ -5,12 +5,13 @@ import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-const MatrixBar = React.memo(({ position, height, color, label }: { position: [number, number, number], height: number, color: string, label: string }) => {
+const MatrixBar = React.memo(({ position, height, color, opacity, label }: { position: [number, number, number], height: number, color: string, label: string }) => {
     return (
         <group position={position}>
             <mesh position={[0, height / 2, 0]}>
                 <boxGeometry args={[0.8, height, 0.8]} />
-                <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} transparent opacity={0.8} />
+                <meshStandardMaterial color={color}
+                              opacity={opacity} emissive={color} emissiveIntensity={opacity * 2} transparent opacity={opacity} />
             </mesh>
             <Text position={[0, -0.5, 0]} fontSize={0.3} color="#cbd5e1" anchorX="center" anchorY="middle" rotation={[-Math.PI / 2, 0, 0]}>
                 {label}
@@ -30,7 +31,8 @@ const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
 
               <group position={[-4.5, 0, 0]}>
                   {matrixData.map((bucket, i) => {
-                      const color = bucket.imbalance > 0 ? '#10b981' : '#ef4444'; // Green if more bids, Red if more asks
+                      const color = bucket.imbalance > 0 ? '#10b981' : (bucket.imbalance < 0 ? '#ef4444' : '#60a5fa');
+                      const opacity = Math.min(0.9, Math.max(0.4, (Math.abs(bucket.imbalance) / (bucket.totalVol || 1)))); // Green if more bids, Red if more asks
                       const height = Math.max(0.1, bucket.normalizedHeight);
 
                       return (
@@ -39,6 +41,7 @@ const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
                               position={[i, 0, 0]}
                               height={height}
                               color={color}
+                              opacity={opacity}
                               label={`$${bucket.price.toFixed(0)}`}
                           />
                       );
