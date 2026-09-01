@@ -29,7 +29,20 @@ if (!DASHBOARD_PASSWORD) {
   process.exit(1);
 }
 const app = express();
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:", "https:"],
+      connectSrc: ["'self'", "http:", "https:", "ws:", "wss:"],
+      fontSrc: ["'self'", "data:", "https:"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
+    },
+  },
+}));
 app.use(compression());
 
 // Security: General API rate limiting
@@ -194,6 +207,12 @@ const db = new sqlite3.Database(DB_PATH, (err) => {
     process.exit(1);
   }
 });
+
+// Optimization: Enable Write-Ahead Logging (WAL) for better concurrency and non-blocking reads
+db.run('PRAGMA journal_mode = WAL;', (err) => {
+  if (err) console.error('Failed to set WAL mode:', err);
+});
+db.run('PRAGMA synchronous = NORMAL;');
 
 // Create tables (safe)
 db.serialize(() => {

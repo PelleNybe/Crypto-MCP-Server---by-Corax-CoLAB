@@ -103,7 +103,9 @@ export default function App() {
             <h3 className="glitch" data-text="SYSTEM AUTHENTICATION" style={{ margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#fff" }}>SYSTEM AUTHENTICATION</h3>
           </div>
           <p className="small-muted" style={{textAlign: 'center', fontFamily: 'monospace'}}><a href="https://coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Corax CoLAB</a> | <a href="https://pellenybe.github.io" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Pelle Nyberg</a> (<a href="https://github.com/PelleNybe" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>GitHub</a>) | <a href="https://cryptop.coraxcolab.com" target="_blank" style={{color: 'inherit', textDecoration: 'none'}}>Crypto P's Crypto Circus</a></p>
+          <label htmlFor="accessKeyInput" className="sr-only" style={{ display: 'none' }}>Enter Access Key</label>
           <input
+            id="accessKeyInput"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

@@ -620,3 +620,14 @@ body[data-sentiment='bear'] .scanline-effect {
   transform: translateY(-2px);
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.15);
 }
+
+/* Global visual polish for disabled states */
+button:disabled,
+input:disabled,
+select:disabled,
+.btn-primary:disabled,
+.btn-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.8);
+}

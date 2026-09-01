@@ -29,7 +29,7 @@ def test_fetch_ohlcv_success(mock_make_exchange):
     mock_exchange.fetch_ohlcv.return_value = expected_ohlcv
     mock_make_exchange.return_value = mock_exchange
 
-    res = fetch_ohlcv("binance", "BTC/USDT")
+    res = fetch_ohlcv("binance", "ETH/USDT")
     assert res == expected_ohlcv
     mock_exchange.fetch_ohlcv.assert_called_once()
 
@@ -40,7 +40,7 @@ def test_fetch_ohlcv_empty(mock_make_exchange):
     mock_exchange.fetch_ohlcv.return_value = []
     mock_make_exchange.return_value = mock_exchange
 
-    res = fetch_ohlcv("binance", "BTC/USDT")
+    res = fetch_ohlcv("binance", "SOL/USDT")
     assert res == []
     mock_exchange.fetch_ohlcv.assert_called_once()
 

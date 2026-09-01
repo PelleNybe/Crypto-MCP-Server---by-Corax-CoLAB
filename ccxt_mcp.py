@@ -94,6 +94,7 @@ def get_ticker(exchange: str, symbol: str) -> dict:
 
 
 @mcp.tool()
+@ttl_cache(seconds=15)
 def fetch_ohlcv(
     exchange: str, symbol: str, timeframe: str = "1h", limit: int = 200
 ) -> List[List[Any]]:
@@ -249,6 +250,7 @@ if __name__ == "__main__":
 
 
 @mcp.tool()
+@ttl_cache(seconds=15)
 def fetch_order_book(exchange: str, symbol: str, limit: int = 20) -> dict:
     """
     Fetch the order book (L2) for a given symbol.
@@ -261,6 +263,7 @@ def fetch_order_book(exchange: str, symbol: str, limit: int = 20) -> dict:
 
 
 @mcp.tool()
+@ttl_cache(seconds=15)
 def fetch_trades(exchange: str, symbol: str, limit: int = 50) -> list:
     """
     Fetch the list of recent trades for a given symbol.
