@@ -151,3 +151,12 @@ See ../master_log.md
 - Applied `@lru_cache(maxsize=16)` to `_make_exchange` in `ccxt_mcp.py` to persist CCXT exchange objects in memory.
 - Added an `isCancelled` flag to `fetchGlobalSentimentWithPolling` and cleared it in the cleanup function in `App.tsx`.
 - Added `aria-live="polite"` to the authentication form submit button in `App.tsx`.
+
+## 2026-09-01 - Security and Performance Improvements
+**Learning:** Found multiple security and performance issues including SSRF/Prototype Pollution in MCP URL routing, Denial of Service via query arrays, missing SQLite table indexes, and minor accessibility issues in the OrderPanel. Also verified XSS token safety.
+**Action:**
+- Secured `gui/backend/server.js` against Prototype Pollution by ensuring Object properties are properly verified using `hasOwnProperty`.
+- Protected string methods against arrays in `req.query` for DoS protection.
+- Created `idx_orders_created_at` and `idx_reasoning_trade_id` indexes to prevent N+1 and linear scan problems on data growth.
+- Corrected input `title` and `placeholder` attributes in `OrderPanel.tsx` to match accessibility requirements.
+- Confirmed `auth_token` uses `sessionStorage` in `gui/frontend/src/auth.ts`.

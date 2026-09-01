@@ -325,7 +325,7 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
 // GET /api/portfolio
 app.get('/api/portfolio', async (req, res) => {
-  let exchangesParam = req.query.exchanges || 'binance';
+  let exchangesParam = Array.isArray(req.query.exchanges) ? req.query.exchanges[0] : (req.query.exchanges || 'binance');
   if (Array.isArray(exchangesParam)) exchangesParam = exchangesParam.join(',');
   else if (typeof exchangesParam !== 'string') exchangesParam = String(exchangesParam);
   const exchanges = exchangesParam.split(',').map(s => s.trim());
@@ -349,6 +349,7 @@ app.post('/api/mcp', async (req, res) => {
   if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
     return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
   }
+  if (!Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) { return res.status(400).json({ ok: false, error: 'Unknown MCP service' }); }
   const mcpUrl = mcpUrls[mcp];
   if (typeof mcpUrl !== 'string') return res.status(400).json({ ok: false, error: 'Invalid MCP endpoint' });
 
@@ -362,7 +363,10 @@ app.post('/api/mcp', async (req, res) => {
 });
 
 app.get('/api/ticker', async (req, res) => {
-  let { exchange = 'binance', symbol = 'BTC/USDT' } = req.query;
+  let rawExchange = req.query.exchange;
+  let rawSymbol = req.query.symbol;
+  let exchange = Array.isArray(rawExchange) ? rawExchange[0] : (rawExchange || 'binance');
+  let symbol = Array.isArray(rawSymbol) ? rawSymbol[0] : (rawSymbol || 'BTC/USDT');
   if (Array.isArray(exchange)) exchange = exchange[0];
   if (Array.isArray(symbol)) symbol = symbol[0];
   if (typeof exchange !== 'string') exchange = String(exchange);

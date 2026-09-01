@@ -3,7 +3,7 @@ import NeuralTradeVisualizer from './features/NeuralTradeVisualizer'
 import { authenticatedFetch } from "../auth"
 import React, { useState, useEffect } from 'react'
 import { useDebounce } from '../hooks/useDebounce'
-import { useToast } from './NeonToasts'
+import { useToast } from '../hooks/useToast'
 
 export default function OrderPanel(){
   const [exchange,setExchange]=useState('binance')
@@ -68,13 +68,13 @@ export default function OrderPanel(){
         <input id="symbolInput" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
         <div style={{display:'flex',gap:8}}>
           <label htmlFor="sideSelect" style={{display:'none'}}>Order Side</label>
-          <select id="sideSelect" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
+          <select id="sideSelect" aria-label="Order Side" title="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
           <label htmlFor="typeSelect" style={{display:'none'}}>Order Type</label>
-          <select id="typeSelect" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)}><option>market</option><option>limit</option></select>
+          <select id="typeSelect" aria-label="Order Type" title="Order Type" value={type} onChange={e=>setType(e.target.value)}><option>market</option><option>limit</option></select>
         </div>
         <label htmlFor="amountInput" style={{display:'none'}}>Amount</label>
-        <input id="amountInput" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
-        {type==='limit' && <><label htmlFor="priceInput" style={{display:'none'}}>Limit Price</label><input id="priceInput" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} /></>}
+        <input id="amountInput" aria-label="Enter Trade Amount" placeholder="Amount" title="Trade Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
+        {type==='limit' && <><label htmlFor="priceInput" style={{display:'none'}}>Limit Price</label><input id="priceInput" aria-label="Enter Limit Price" placeholder="Price" title="Limit Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} /></>}
         <div style={{display:'flex',gap:8}}>
           <button className="btn-primary" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive} aria-busy={routingActive} aria-live="polite">{routingActive ? "Routing..." : "Force Preview"}</button>
           <button onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite">{routingActive ? "Placing..." : "Place"}</button>
