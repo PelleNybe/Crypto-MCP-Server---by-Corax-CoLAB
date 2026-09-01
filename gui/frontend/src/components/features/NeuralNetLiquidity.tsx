@@ -25,10 +25,14 @@ export default function NeuralNetLiquidity() {
              if (portfolio && portfolio.portfolio) {
                  const coins = Object.keys(portfolio.portfolio);
                  if (coins.length >= 3) {
+                     // Optimization: Pre-calculate toUpperCase to prevent redundant operations in array initialization
+                     const c0Upper = coins[0].toUpperCase();
+                     const c1Upper = coins[1].toUpperCase();
+                     const c2Upper = coins[2].toUpperCase();
                      pairs = [
-                         `${coins[0].toUpperCase()}/USDT`,
-                         `${coins[1].toUpperCase()}/USDT`,
-                         `${coins[2].toUpperCase()}/USDT`
+                         `${c0Upper}/USDT`,
+                         `${c1Upper}/USDT`,
+                         `${c2Upper}/USDT`
                      ];
                  }
              }

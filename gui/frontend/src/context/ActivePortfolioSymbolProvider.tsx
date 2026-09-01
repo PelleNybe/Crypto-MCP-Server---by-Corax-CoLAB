@@ -28,9 +28,13 @@ export const ActivePortfolioSymbolProvider: React.FC<{ children: React.ReactNode
 
                 if (portfolio && portfolio.portfolio) {
                     const coins = Object.keys(portfolio.portfolio);
-                    if (coins.length > 0 && coins[0].toUpperCase() !== 'USDT') {
-                        setTargetSymbol(`${coins[0].toUpperCase()}/USDT`);
-                        setTargetExchange(defaultExchange);
+                    if (coins.length > 0) {
+                        // Optimization: Pre-calculate toUpperCase to prevent redundant string manipulation
+                        const firstCoinUpper = coins[0].toUpperCase();
+                        if (firstCoinUpper !== 'USDT') {
+                            setTargetSymbol(`${firstCoinUpper}/USDT`);
+                            setTargetExchange(defaultExchange);
+                        }
                     }
                 }
                 setError(null);

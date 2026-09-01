@@ -254,7 +254,8 @@ db.serialize(() => {
       console.error('Error creating orders table:', err);
       process.exit(1);
     }
-    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at)', (err) => {
+    // Optimization: Added DESC to index to speed up ORDER BY created_at DESC queries
+    db.run('CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC)', (err) => {
       if (err) {
         console.error('Error creating idx_orders_created_at:', err);
         process.exit(1);

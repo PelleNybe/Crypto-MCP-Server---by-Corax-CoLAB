@@ -62,7 +62,7 @@ const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { acti
                     />
                     <Html position={[ping.position[0], 0.5, ping.position[2]]} center>
                         <div style={{ color: ping.color, fontSize: '10px', fontFamily: 'monospace', pointerEvents: 'none', background: 'rgba(0,0,0,0.7)', padding: '4px 6px', borderRadius: '4px', border: `1px solid ${ping.color}`, textShadow: `0 0 5px ${ping.color}` }}>
-                            {ping.trade.side.toUpperCase()}<br/>
+                            {ping.trade.sideUpper || ping.trade.side}<br/>
                             ${(ping.trade.amount * ping.trade.price).toLocaleString(undefined, {maximumFractionDigits:0})}
                         </div>
                     </Html>
@@ -109,7 +109,7 @@ export default function DarkPoolSonar() {
                             position: [x, 0, z],
                             color,
                             size,
-                            trade
+                            trade: { ...trade, sideUpper: trade.side.toUpperCase() }
                         });
                     }
                 });
@@ -137,6 +137,9 @@ export default function DarkPoolSonar() {
       setPings(prev => prev.filter(p => p.id !== id));
   }, []);
 
+  // Optimization: Pre-calculate toUpperCase
+  const activeExchangeUpper = activeExchange.toUpperCase();
+
   return (
     <div className="card glass-panel interactive-element" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '4px solid #8b5cf6', height: '400px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -152,7 +155,7 @@ export default function DarkPoolSonar() {
           <CanvasScene activeSymbolHook={activeSymbolHook} trades={trades} pings={pings} onPingComplete={onPingComplete} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
-              SCANNING {activeExchange.toUpperCase()} {activeSymbolHook}
+              SCANNING {activeExchangeUpper} {activeSymbolHook}
           </div>
       </div>
     </div>
