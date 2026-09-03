@@ -39,7 +39,7 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ words, targetSymbol }: { words: any[], targetSymbol: string }) => {
+const CanvasScene = ({ words }: { words: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
               <ambientLight intensity={1} />
@@ -144,7 +144,7 @@ export default function SentimentWordCloud() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: '#020205', borderRadius: '8px', overflow: 'hidden' }}>
-          <CanvasScene words={words} targetSymbol={targetSymbol} />
+          <CanvasScene words={words} />
 
           <div style={{ position: 'absolute', bottom: 10, right: 10, display: 'flex', gap: '10px', background: 'rgba(0,0,0,0.5)', padding: '4px 8px', borderRadius: '4px' }}>
               <span style={{ color: '#10b981', fontSize: '10px', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
