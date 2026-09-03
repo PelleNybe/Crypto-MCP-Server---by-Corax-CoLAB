@@ -5,6 +5,7 @@ export const CyberpunkLoader = ({ message = "Decrypting Data Stream..." }) => (
   <div
     role="status"
     aria-live="polite"
+    aria-atomic="true"
     aria-busy="true"
     aria-label="Loading"
     style={{

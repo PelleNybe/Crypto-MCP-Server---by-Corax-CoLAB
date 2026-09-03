@@ -124,6 +124,7 @@ export default function App() {
             disabled={isLoggingIn}
             aria-busy={isLoggingIn}
             aria-live="polite"
+            aria-atomic="true"
           >
             {isLoggingIn ? <><Loader size={16} className="lucide-spin" style={{ animation: 'spin 2s linear infinite' }} /> INITIALIZING...</> : "INITIALIZE LINK"}
           </button>
