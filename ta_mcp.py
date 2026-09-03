@@ -7,6 +7,7 @@ Exposes: compute_indicators (RSI, MACD, SMA50, BB)
 
 import logging
 from typing import Dict, Any
+from functools import lru_cache
 import pandas as pd
 import pandas_ta as ta
 import ccxt
@@ -21,13 +22,17 @@ mcp = FastMCP(
     name="ta", stateless_http=True, json_response=True, host="0.0.0.0", port=7003
 )
 
-
-def _fetch_ohlcv(exchange_id: str, symbol: str, timeframe: str, limit: int = 200):
+@lru_cache(maxsize=16)
+def _make_exchange(exchange_id: str) -> ccxt.Exchange:
     exchange_id = exchange_id.lower()
     if exchange_id not in ccxt.exchanges:
         raise ValueError(f"Unsupported exchange: {exchange_id}")
     cls = getattr(ccxt, exchange_id)
-    ex = cls({"enableRateLimit": True})
+    return cls({"enableRateLimit": True})
+
+
+def _fetch_ohlcv(exchange_id: str, symbol: str, timeframe: str, limit: int = 200):
+    ex = _make_exchange(exchange_id)
     data = ex.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
     df = pd.DataFrame(data, columns=["ts", "open", "high", "low", "close", "volume"])
     df["ts"] = pd.to_datetime(df["ts"], unit="ms")

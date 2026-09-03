@@ -160,3 +160,4 @@ See ../master_log.md
 - Created `idx_orders_created_at` and `idx_reasoning_trade_id` indexes to prevent N+1 and linear scan problems on data growth.
 - Corrected input `title` and `placeholder` attributes in `OrderPanel.tsx` to match accessibility requirements.
 - Confirmed `auth_token` uses `sessionStorage` in `gui/frontend/src/auth.ts`.
+- Added LIMIT to SQL queries to prevent N+1 issues and memory growth\n- Added lru_cache for CCXT instantiation in ta_mcp.py\n- Added aria-atomic=true to App.tsx and CyberpunkLoader.tsx

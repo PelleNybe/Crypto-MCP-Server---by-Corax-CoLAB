@@ -575,7 +575,7 @@ if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_CCXT, 'get_ticke
 
 // GET /api/strategies
 app.get("/api/strategies", (req, res) => {
-  db.all("SELECT * FROM strategies ORDER BY created_at DESC", [], (err, rows) => {
+  db.all("SELECT * FROM strategies ORDER BY created_at DESC LIMIT 100", [], (err, rows) => {
     if (err) {
       console.error('Database query failed:', err);
       return res.status(500).json({ ok: false, error: 'Database query failed' });
@@ -750,11 +750,11 @@ app.get('/api/orders', (req, res) => {
     FROM orders o
     LEFT JOIN reasoning r ON o.id = r.trade_id
     ORDER BY o.created_at DESC
-    LIMIT 200
+    LIMIT 100
   `, [], (err, rows) => {
     // Graceful fallback if reasoning table doesn't exist yet
     if (err && err.message.includes('no such table: reasoning')) {
-      db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 200', [], (err2, rows2) => {
+      db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 100', [], (err2, rows2) => {
         if (err2) {
           console.error('Database query failed:', err2);
           return res.status(500).json({ ok:false, error: 'Database query failed' });
