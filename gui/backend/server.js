@@ -512,7 +512,7 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
 
 // GET /api/orders
 app.get('/api/orders_old', (req, res) => {
-  db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 200', [], (err, rows) => {
+  db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 100', [], (err, rows) => {
     if (err) {
       console.error('Database query failed:', err);
       return res.status(500).json({ ok:false, error: 'Database query failed' });

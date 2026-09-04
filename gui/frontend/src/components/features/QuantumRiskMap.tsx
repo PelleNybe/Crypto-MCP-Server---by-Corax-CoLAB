@@ -4,7 +4,7 @@ import { OrbitControls, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { ShieldAlert, TrendingDown } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
 const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
   const meshRef = useRef<THREE.Mesh>(null);

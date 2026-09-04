@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrainCircuit, Activity, AlertTriangle, TrendingUp, TrendingDown, Minus } from 'lucide-react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
 export default function MarketSentimentAnalyzer() {
   const [sentiment, setSentiment] = useState<'neutral' | 'bullish' | 'bearish' | 'loading'>('loading');
