@@ -84,7 +84,7 @@ const corsOptions = {
 
 // Explicitly pass corsOptions to the cors middleware
 app.use(cors(corsOptions));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '100kb' }));
 
 // Basic auth middleware for all /api routes
 app.use('/api', (req, res, next) => {
@@ -289,8 +289,23 @@ db.serialize(() => {
   });
 });
 
+// Simple in-memory cache for GET-like operations to prevent redundant MCP traffic
+const mcpCache = new Map();
+const CACHE_TTL_MS = 5000;
+
 // Helper: call MCP tools via JSON-RPC tools/call
 async function callMCP(mcpUrl, toolName, args = {}) {
+  // Check cache for specific read-only tools
+  const cacheableTools = ['get_ticker', 'portfolio_value', 'fetch_balance', 'compute_indicators'];
+  const cacheKey = `${mcpUrl}:${toolName}:${JSON.stringify(args)}`;
+
+  if (cacheableTools.includes(toolName)) {
+    const cached = mcpCache.get(cacheKey);
+    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
+      return cached.data;
+    }
+  }
+
   const payload = {
     jsonrpc: "2.0",
     id: Date.now(),
@@ -303,12 +318,28 @@ async function callMCP(mcpUrl, toolName, args = {}) {
   const res = await axios.post(mcpUrl, payload, {
     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json,text/event-stream' },
     timeout: parseInt(process.env.MCP_TIMEOUT) || 8000,
-    signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000),
-    signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000),
     signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000)
   });
   if (res.data && res.data.result) {
     const r = res.data.result;
+
+    // Save to cache before returning
+    if (cacheableTools.includes(toolName)) {
+      let dataToCache = null;
+      if (r.structuredContent) {
+        dataToCache = r.structuredContent;
+      } else if (r.content && Array.isArray(r.content) && r.content.length > 0 && r.content[0].text) {
+        try {
+          dataToCache = JSON.parse(r.content[0].text);
+        } catch (e) {
+          dataToCache = r.content[0].text;
+        }
+      }
+      if (dataToCache !== null) {
+        mcpCache.set(cacheKey, { timestamp: Date.now(), data: dataToCache });
+      }
+    }
+
     if (r.structuredContent) return r.structuredContent;
     if (r.content && Array.isArray(r.content) && r.content.length > 0 && r.content[0].text) {
       try {

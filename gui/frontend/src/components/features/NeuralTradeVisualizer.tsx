@@ -67,7 +67,7 @@ export default function NeuralTradeVisualizer({ active, exchange, symbol }: { ac
   }, [active, exchange, symbol]);
 
   return (
-    <div style={{ height: '150px', background: '#020205', borderRadius: '4px', overflow: 'hidden', position: 'relative', border: `1px solid ${active ? '#3b82f6' : '#334155'}` }}>
+    <div title="AI is calculating optimal execution paths across DEX aggregators" style={{ height: '150px', background: '#020205', borderRadius: '4px', overflow: 'hidden', position: 'relative', border: `1px solid ${active ? '#3b82f6' : '#334155'}` }}>
         <div style={{ position: 'absolute', top: 5, left: 5, fontSize: '10px', color: active ? '#3b82f6' : '#888', zIndex: 10, fontFamily: 'monospace' }}>
             {active ? `EXECUTING NEURAL ROUTING (${symbol})...` : 'ROUTING MAP IDLE'}
         </div>
