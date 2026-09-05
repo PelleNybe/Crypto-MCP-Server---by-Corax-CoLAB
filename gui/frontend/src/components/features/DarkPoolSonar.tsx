@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
 const SonarPing = React.memo(({ position, color, size, onComplete }: { position: [number, number, number], color: string, size: number, onComplete: () => void }) => {
   const meshRef = useRef<THREE.Mesh>(null);

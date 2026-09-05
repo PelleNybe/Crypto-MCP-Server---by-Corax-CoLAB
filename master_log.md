@@ -161,3 +161,7 @@ See ../master_log.md
 - Corrected input `title` and `placeholder` attributes in `OrderPanel.tsx` to match accessibility requirements.
 - Confirmed `auth_token` uses `sessionStorage` in `gui/frontend/src/auth.ts`.
 - Added LIMIT to SQL queries to prevent N+1 issues and memory growth\n- Added lru_cache for CCXT instantiation in ta_mcp.py\n- Added aria-atomic=true to App.tsx and CyberpunkLoader.tsx
+
+## 2026-09-04 - Import fix and Query Limits
+**Learning:** React context hook imports can crash Vite when component paths are improperly resolved relative to their folder structure (e.g., using `../hooks` instead of `../../hooks`). Also, unbound SQL queries can cause slow performance and memory leaks.
+**Action:** Always verify relative paths of custom hooks against the directory depth, and limit SQL endpoints via `LIMIT`. Fixed `useActivePortfolioSymbol` pathing across 11 components and limited `/api/orders` down to 100 rows.

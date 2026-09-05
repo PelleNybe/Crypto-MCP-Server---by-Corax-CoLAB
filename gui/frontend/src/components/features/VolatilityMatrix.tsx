@@ -3,7 +3,7 @@ import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
-import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol';
+import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
 const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
   const mesh = useRef<THREE.Mesh>(null);

@@ -8,7 +8,7 @@ const OrbitalPortfolio = React.lazy(() => import('./components/features/OrbitalP
 const DarkPoolSonar = React.lazy(() => import('./components/features/DarkPoolSonar'));const FlashCrashMatrix = React.lazy(() => import('./components/features/FlashCrashMatrix'));const GalaxyView = React.lazy(() => import('./components/features/GalaxyView'));const SentimentWordCloud = React.lazy(() => import('./components/features/SentimentWordCloud'));const GasHologram = React.lazy(() => import('./components/features/GasHologram'));import { getAuthToken, setAuthToken } from './auth'
 import socket from './socket'
 import { callMcpEndpoint } from './api_mcp'
-import { useActivePortfolioSymbol } from '../hooks/useActivePortfolioSymbol'
+import { useActivePortfolioSymbol } from './hooks/useActivePortfolioSymbol'
 import { Loader } from 'lucide-react';
 import TiltWrapper from './components/TiltWrapper';
 
