@@ -40,9 +40,9 @@ export default function SystemOverview() {
     const checkStatus = async (mcp: string, method: string, params: any = {}) => {
       try {
         await callMcpEndpoint(mcp, method, params);
-        if (active) setStatuses(prev => ({ ...prev, [mcp]: 'online' }));
+        return { mcp, status: 'online' };
       } catch (err) {
-        if (active) setStatuses(prev => ({ ...prev, [mcp]: 'offline' }));
+        return { mcp, status: 'offline' };
       }
     };
 
@@ -57,12 +57,25 @@ export default function SystemOverview() {
       });
       // Try to call a benign method on each
       try {
-        await Promise.allSettled([
+        const results = await Promise.allSettled([
           checkStatus('MCP_CCXT', 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }),
           checkStatus('MCP_PORTFOLIO', 'portfolio_value', { exchanges: ['binance'] }),
           checkStatus('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: 'BTC/USDT', timeframe: '1h' }),
           checkStatus('MCP_LLM', 'generate_text', { prompt: 'ping', max_tokens: 5 })
         ]);
+
+        if (active) {
+          // Optimization: Batch state updates from all node checks into a single update
+          // to prevent unnecessary React re-renders for each individual promise resolution.
+          const newStatuses: Record<string, 'online' | 'offline' | 'checking'> = {};
+          results.forEach(result => {
+             if (result.status === 'fulfilled' && result.value) {
+                newStatuses[result.value.mcp] = result.value.status as 'online' | 'offline';
+             }
+          });
+          setStatuses(prev => ({ ...prev, ...newStatuses }));
+        }
+
       } finally {
         if (active) {
           timeoutId = setTimeout(pingAll, 60000); // Check every minute
