@@ -94,13 +94,13 @@ const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neu
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ marketSentiment }: { marketSentiment: string }) => {
+const CanvasScene = React.memo(({ marketSentiment }: { marketSentiment: string }) => {
   return (
 <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
         <Particles sentiment={sentiment} />
       </Canvas>
   );
-};
+});
 
 export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentiment?: 'bull' | 'bear' | 'neutral' }) {
   const [lightning, setLightning] = useState(false);

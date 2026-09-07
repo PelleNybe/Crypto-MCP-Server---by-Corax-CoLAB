@@ -70,7 +70,7 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
+const CanvasScene = React.memo(({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <color attach="background" args={['#020205']} />
@@ -102,8 +102,7 @@ const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], 
         />
       </Canvas>
   );
-};
-
+});
 
 export default function AssetUniverse({ portfolio, totalValue }: { portfolio: any[], totalValue: number }) {
   // Sort portfolio by value descending so biggest is in the center

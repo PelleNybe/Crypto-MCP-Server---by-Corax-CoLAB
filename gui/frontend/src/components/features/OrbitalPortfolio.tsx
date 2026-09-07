@@ -115,7 +115,7 @@ const Starfield = () => {
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
+const CanvasScene = React.memo(({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <ambientLight intensity={0.2} />
@@ -168,7 +168,7 @@ const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }:
 
       </Canvas>
   );
-};
+});
 
 export default function OrbitalPortfolio() {
   const [selectedAsset, setSelectedAsset] = useState<string | null>(null);

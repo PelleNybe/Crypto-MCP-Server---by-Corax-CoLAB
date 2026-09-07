@@ -39,7 +39,7 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ words }: { words: any[] }) => {
+const CanvasScene = React.memo(({ words }: { words: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
               <ambientLight intensity={1} />
@@ -60,7 +60,7 @@ const CanvasScene = ({ words }: { words: any[] }) => {
               <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={1.2} />
           </Canvas>
   );
-};
+});
 
 export default function SentimentWordCloud() {
   const [words, setWords] = useState<any[]>([]);

@@ -42,7 +42,7 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
+const CanvasScene = React.memo(({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
           <color attach="background" args={['#020205']} />
@@ -83,7 +83,7 @@ const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) 
           />
         </Canvas>
   );
-};
+});
 
 export default function HoloTopographicOrderBook() {
   const [orderBook, setOrderBook] = useState({ bids: [], asks: [], maxVolume: 1 });

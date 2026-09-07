@@ -36,6 +36,7 @@ def _update_mapping_if_needed(now: float) -> bool:
         return True
     try:
         coins = cg.get_coins_list()
+        # Optimization: Using dictionary comprehensions for efficient mapping generation
         _CACHE["mapping"] = {c["symbol"].upper(): c["id"] for c in coins}
         _CACHE["mapping_timestamp"] = now
         return True

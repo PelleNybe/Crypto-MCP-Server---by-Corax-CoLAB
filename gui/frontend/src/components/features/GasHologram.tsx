@@ -115,7 +115,7 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ gasPriceGwei, particles }: { gasPriceGwei: number, particles: any[] }) => {
+const CanvasScene = React.memo(({ gasPriceGwei, particles }: { gasPriceGwei: number, particles: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
               <ambientLight intensity={0.5} />
@@ -128,7 +128,7 @@ const CanvasScene = ({ gasPriceGwei, particles }: { gasPriceGwei: number, partic
               <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
           </Canvas>
   );
-};
+});
 
 export default function GasHologram() {
   const [gasPrice, setGasPrice] = useState<number>(0);
