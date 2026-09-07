@@ -229,7 +229,7 @@ db.serialize(() => {
       console.error('Error creating strategies table:', err);
       process.exit(1);
     }
-    db.run('CREATE INDEX IF NOT EXISTS idx_strategies_created_at ON strategies(created_at)', (err) => {
+    db.run('CREATE INDEX IF NOT EXISTS idx_strategies_created_at ON strategies(created_at DESC)', (err) => {
       if (err) {
         console.error('Error creating idx_strategies_created_at:', err);
         process.exit(1);
@@ -357,7 +357,7 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
 // GET /api/portfolio
 app.get('/api/portfolio', async (req, res) => {
-  let exchangesParam = Array.isArray(req.query.exchanges) ? req.query.exchanges[0] : (req.query.exchanges || 'binance');
+  let exchangesParam = req.query.exchanges || 'binance';
   if (Array.isArray(exchangesParam)) exchangesParam = exchangesParam.join(',');
   else if (typeof exchangesParam !== 'string') exchangesParam = String(exchangesParam);
   const exchanges = exchangesParam.split(',').map(s => s.trim());
@@ -399,8 +399,6 @@ app.get('/api/ticker', async (req, res) => {
   let rawSymbol = req.query.symbol;
   let exchange = Array.isArray(rawExchange) ? rawExchange[0] : (rawExchange || 'binance');
   let symbol = Array.isArray(rawSymbol) ? rawSymbol[0] : (rawSymbol || 'BTC/USDT');
-  if (Array.isArray(exchange)) exchange = exchange[0];
-  if (Array.isArray(symbol)) symbol = symbol[0];
   if (typeof exchange !== 'string') exchange = String(exchange);
   if (typeof symbol !== 'string') symbol = String(symbol);
   try {

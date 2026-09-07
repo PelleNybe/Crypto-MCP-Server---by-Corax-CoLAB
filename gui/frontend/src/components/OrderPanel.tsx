@@ -63,9 +63,9 @@ export default function OrderPanel(){
       <h3>Order / Trade</h3>
       <div style={{display:'grid',gap:8}}>
         <label htmlFor="exchangeInput" style={{display:'none'}}>Exchange</label>
-        <input id="exchangeInput" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
+        <input id="exchangeInput" aria-label="Enter Exchange Name" title="Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
         <label htmlFor="symbolInput" style={{display:'none'}}>Symbol</label>
-        <input id="symbolInput" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
+        <input id="symbolInput" aria-label="Enter Trading Symbol" title="Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
         <div style={{display:'flex',gap:8}}>
           <label htmlFor="sideSelect" style={{display:'none'}}>Order Side</label>
           <select id="sideSelect" aria-label="Order Side" title="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
