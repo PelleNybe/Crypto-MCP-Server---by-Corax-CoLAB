@@ -32,6 +32,9 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
     }
   });
 
+  // Optimization: Pre-calculate toUpperCase to prevent redundant string operations during render
+  const symbolUpper = coin.symbol.toUpperCase();
+
   return (
     <group ref={orbitRef}>
         <group position={[Math.cos(angle) * distance, yOffset, Math.sin(angle) * distance]}>
@@ -56,7 +59,7 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
             {selected && (
                 <Html position={[size + 0.5, 0, 0]} center>
                     <div className="card glass-panel" style={{ padding: '10px', width: '160px', borderLeft: `3px solid ${color}`, pointerEvents: 'none' }}>
-                        <h4 style={{ margin: 0, color, textShadow: `0 0 5px ${color}` }}>{coin.symbol.toUpperCase()}</h4>
+                        <h4 style={{ margin: 0, color, textShadow: `0 0 5px ${color}` }}>{symbolUpper}</h4>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', marginTop: '5px' }}>
                             <span style={{ color: '#94a3b8' }}>Rank</span>
                             <span style={{ color: '#fff' }}>#{coin.market_cap_rank}</span>

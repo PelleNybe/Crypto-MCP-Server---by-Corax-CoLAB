@@ -34,7 +34,7 @@ export default function TickerPanel(){
 
         <div style={{textAlign: 'right'}}>
           <div style={{fontSize: '0.8rem', color: '#888', textTransform: 'uppercase'}}>Last Price</div>
-          <div style={{fontSize: 28, fontWeight: 'bold', color: ticker.last > ticker.open ? '#10b981' : '#ef4444', textShadow: `0 0 10px ${ticker.last > ticker.open ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`}}>
+          <div aria-live="polite" aria-atomic="true" style={{fontSize: 28, fontWeight: 'bold', color: ticker.last > ticker.open ? '#10b981' : '#ef4444', textShadow: `0 0 10px ${ticker.last > ticker.open ? 'rgba(16, 185, 129, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`}}>
             ${ticker.last ?? ticker.close ?? '—'}
           </div>
         </div>

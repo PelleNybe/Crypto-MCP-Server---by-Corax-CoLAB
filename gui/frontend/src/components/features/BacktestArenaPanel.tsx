@@ -267,7 +267,7 @@ export default function BacktestArenaPanel() {
       <div id="backtest-chart" style={{ width: '100%', height: '250px' }}></div>
 
       {/* Playback Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <nav aria-label="Playback controls" style={{ display: 'flex', alignItems: 'center', gap: '15px', background: 'rgba(0,0,0,0.3)', padding: '10px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
         <button
           aria-label="Rewind to start"
           onClick={() => setProgress(0)}
@@ -323,7 +323,7 @@ export default function BacktestArenaPanel() {
         <div style={{ fontSize: '12px', fontFamily: 'monospace', color: '#888', width: '40px', textAlign: 'right' }}>
           {Math.floor(progress)}%
         </div>
-      </div>
+      </nav>
     </div>
   );
 }
