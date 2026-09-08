@@ -9,7 +9,9 @@ export default function MarketSentimentAnalyzer() {
   const [confidence, setConfidence] = useState<number>(0);
   const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
 
+
   useEffect(() => {
+    let active = true;
     const fetchSentiment = async () => {
       setSentiment('loading');
       setAnalysis('Querying LLM MCP for latest market data synthesis...');
@@ -83,7 +85,7 @@ export default function MarketSentimentAnalyzer() {
     };
 
     fetchSentimentWithPolling();
-    return () => clearTimeout(timeoutId);
+    return () => { active = false; clearTimeout(timeoutId); };
   }, [activeSymbol]);
 
   const getStyleColor = () => {
