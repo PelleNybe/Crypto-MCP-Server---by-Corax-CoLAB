@@ -117,7 +117,6 @@ export default function SentimentWordCloud() {
         }
     };
 
-    fetchNews();
     let timeoutId: NodeJS.Timeout;
 
     const fetchNewsWithPolling = async () => {
