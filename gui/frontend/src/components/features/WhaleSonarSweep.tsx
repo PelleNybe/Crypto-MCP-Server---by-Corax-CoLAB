@@ -40,12 +40,15 @@ export default function WhaleSonarSweep() {
             if (rank <= 10) severity = 'red'; // High impact
             else if (rank <= 50) severity = 'yellow'; // Medium impact
 
+            // Optimization: Pre-calculate toUpperCase to avoid redundant operations
+            const symbolUpper = coin.symbol.toUpperCase();
+
             return {
               id: coin.id,
               angle: blipAngle,
               distance: distance,
               size: size,
-              label: `${coin.symbol.toUpperCase()} #${rank}`,
+              label: `${symbolUpper} #${rank}`,
               age: 0,
               severity: severity
             };
