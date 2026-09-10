@@ -307,7 +307,7 @@ export default function BacktestArenaPanel() {
         {/* Timeline Slider */}
         <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
-            type="range"
+            type="range" aria-label="Playback progress"
             aria-label="Playback progress"
             min="0"
             max="100"

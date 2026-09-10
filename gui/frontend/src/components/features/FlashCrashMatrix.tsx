@@ -22,7 +22,7 @@ const MatrixBar = React.memo(({ position, height, color, opacity, label }: { pos
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
+const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
               <ambientLight intensity={0.5} />
@@ -51,7 +51,7 @@ const CanvasScene = React.memo(({ matrixData }: { matrixData: any[] }) => {
               <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={0.5} />
           </Canvas>
   );
-});
+};
 
 export default function FlashCrashMatrix() {
   const [matrixData, setMatrixData] = useState<any[]>([]);
