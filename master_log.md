@@ -165,3 +165,17 @@ See ../master_log.md
 ## 2026-09-04 - Import fix and Query Limits
 **Learning:** React context hook imports can crash Vite when component paths are improperly resolved relative to their folder structure (e.g., using `../hooks` instead of `../../hooks`). Also, unbound SQL queries can cause slow performance and memory leaks.
 **Action:** Always verify relative paths of custom hooks against the directory depth, and limit SQL endpoints via `LIMIT`. Fixed `useActivePortfolioSymbol` pathing across 11 components and limited `/api/orders` down to 100 rows.
+
+## 2026-09-10 - 5+ Core Optimizations and Security Improvements
+**Learning:** Found multiple opportunities to enhance rendering performance, algorithmic complexity, UI accessibility, and backend payload security.
+- **Frontend Optimization**: Rendering heavy arrays in High-Frequency `useEffect` ticks (e.g. `BacktestArenaPanel`) causes O(N) array transformations (like `.map()`) every tick (e.g. 100ms).
+- **Algorithmic Optimization**: Running moving averages via `.slice(index - period, index).reduce(...)` inside a `.map` loop creates O(N * M) complexity.
+- **Security limits**: Unbounded array length limits in JSON backend bodies (`POST /api/strategies`) can crash the server when `JSON.stringify()` runs on 10M+ array nodes.
+- **Accessibility**: Using `style={{display: 'none'}}` on `label` elements hides them from visual view, but crucially also hides them from screen readers rendering `htmlFor` useless.
+- **React.memo Violations**: Wrapping the return value of a map with `useMemo` inline inside JSX `<group>{useMemo(...)}</group>` is a violation of the Rules of Hooks.
+**Action:**
+- Extracted `BacktestArenaPanel` Plotly array mappings into a `useMemo` block that executes once, and then simply `.slice()`s the pre-mapped result on playback ticks.
+- Replaced the nested `.reduce()` loop with `O(N)` running sums.
+- Enforced strict length limits on `nodes` and `connections` arrays in Express payload handling.
+- Converted `display: 'none'` labels to visually hidden (sr-only) `clip: rect(...)` CSS in `OrderPanel.tsx`.
+- Moved `useMemo` hook to the component top-level to render `<Planet>` components in `AssetUniverse.tsx` cleanly.

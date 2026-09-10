@@ -28,17 +28,32 @@ export default function BacktestArenaPanel() {
         let position = 0; // 0 = flat, 1 = long
         let entryPrice = 0;
 
+        // Optimization: Use running sums to calculate moving averages in O(N) instead of O(N*M)
+        let shortSum = 0;
+        let longSum = 0;
+
         const data = result.map((c: any, index: number, arr: any[]) => {
           const close = c[4];
 
+          shortSum += close;
+          longSum += close;
+
+          const prevShort = shortSMA;
+          const prevLong = longSMA;
+
           // Calculate SMAs
+          if (index >= shortPeriod) {
+              shortSum -= arr[index - shortPeriod][4];
+          }
           if (index >= shortPeriod - 1) {
-              const slice = arr.slice(index - shortPeriod + 1, index + 1);
-              shortSMA = slice.reduce((sum, val) => sum + val[4], 0) / shortPeriod;
+              shortSMA = shortSum / shortPeriod;
+          }
+
+          if (index >= longPeriod) {
+              longSum -= arr[index - longPeriod][4];
           }
           if (index >= longPeriod - 1) {
-              const slice = arr.slice(index - longPeriod + 1, index + 1);
-              longSMA = slice.reduce((sum, val) => sum + val[4], 0) / longPeriod;
+              longSMA = longSum / longPeriod;
           }
 
           let tradeType = null;
@@ -46,9 +61,6 @@ export default function BacktestArenaPanel() {
 
           // Simple Crossover Logic
           if (index >= longPeriod) {
-              const prevShort = arr.slice(index - shortPeriod, index).reduce((sum, val) => sum + val[4], 0) / shortPeriod;
-              const prevLong = arr.slice(index - longPeriod, index).reduce((sum, val) => sum + val[4], 0) / longPeriod;
-
               // Golden Cross (Buy)
               if (prevShort <= prevLong && shortSMA > longSMA && position === 0) {
                   tradeType = 'BUY';
@@ -143,19 +155,35 @@ export default function BacktestArenaPanel() {
     return () => clearTimeout(timeoutId);
   }, [isPlaying, speed]);
 
+  // Optimization: Pre-calculate the mapped arrays once per historical dataset to avoid
+  // heavy O(N) array transformations on every 100ms playback tick.
+  const mappedData = useMemo(() => {
+    return {
+      date: historicalData.map(d => d.date),
+      close: historicalData.map(d => d.close),
+      high: historicalData.map(d => d.high),
+      low: historicalData.map(d => d.low),
+      open: historicalData.map(d => d.open),
+      shortSMA: historicalData.map(d => d.shortSMA),
+      longSMA: historicalData.map(d => d.longSMA),
+      buys: historicalData.map(d => d.trade === 'BUY' ? d : null),
+      sells: historicalData.map(d => d.trade === 'SELL' ? d : null)
+    };
+  }, [historicalData]);
+
   // Render Chart
   useEffect(() => {
     if (historicalData.length === 0) return;
 
     const visibleIndex = Math.max(1, Math.floor((progress / 100) * historicalData.length));
-    const visibleData = historicalData.slice(0, visibleIndex);
 
+    // Slice the pre-mapped arrays instead of mapping the sliced object array
     const traceCandles = {
-      x: visibleData.map(d => d.date),
-      close: visibleData.map(d => d.close),
-      high: visibleData.map(d => d.high),
-      low: visibleData.map(d => d.low),
-      open: visibleData.map(d => d.open),
+      x: mappedData.date.slice(0, visibleIndex),
+      close: mappedData.close.slice(0, visibleIndex),
+      high: mappedData.high.slice(0, visibleIndex),
+      low: mappedData.low.slice(0, visibleIndex),
+      open: mappedData.open.slice(0, visibleIndex),
       type: 'candlestick',
       xaxis: 'x',
       yaxis: 'y',
@@ -165,8 +193,8 @@ export default function BacktestArenaPanel() {
     };
 
     const traceSMA5 = {
-      x: visibleData.map(d => d.date),
-      y: visibleData.map(d => d.shortSMA),
+      x: mappedData.date.slice(0, visibleIndex),
+      y: mappedData.shortSMA.slice(0, visibleIndex),
       type: 'scatter',
       mode: 'lines',
       line: {color: '#3b82f6', width: 1},
@@ -174,20 +202,20 @@ export default function BacktestArenaPanel() {
     };
 
     const traceSMA20 = {
-      x: visibleData.map(d => d.date),
-      y: visibleData.map(d => d.longSMA),
+      x: mappedData.date.slice(0, visibleIndex),
+      y: mappedData.longSMA.slice(0, visibleIndex),
       type: 'scatter',
       mode: 'lines',
       line: {color: '#f59e0b', width: 1},
       name: 'SMA(20)'
     };
 
-    const buyMarkers = visibleData.filter(d => d.trade === 'BUY');
-    const sellMarkers = visibleData.filter(d => d.trade === 'SELL');
+    const visibleBuys = mappedData.buys.slice(0, visibleIndex).filter(d => d !== null) as any[];
+    const visibleSells = mappedData.sells.slice(0, visibleIndex).filter(d => d !== null) as any[];
 
     const traceBuys = {
-      x: buyMarkers.map(d => d.date),
-      y: buyMarkers.map(d => d.low - (d.close * 0.02)), // Offset below low
+      x: visibleBuys.map(d => d.date),
+      y: visibleBuys.map(d => d.low - (d.close * 0.02)), // Offset below low
       mode: 'markers',
       type: 'scatter',
       marker: { symbol: 'triangle-up', size: 10, color: '#10b981', line: {width: 2, color: '#fff'} },
@@ -195,8 +223,8 @@ export default function BacktestArenaPanel() {
     };
 
     const traceSells = {
-      x: sellMarkers.map(d => d.date),
-      y: sellMarkers.map(d => d.high + (d.close * 0.02)), // Offset above high
+      x: visibleSells.map(d => d.date),
+      y: visibleSells.map(d => d.high + (d.close * 0.02)), // Offset above high
       mode: 'markers',
       type: 'scatter',
       marker: { symbol: 'triangle-down', size: 10, color: '#ef4444', line: {width: 2, color: '#fff'} },
@@ -214,7 +242,7 @@ export default function BacktestArenaPanel() {
     };
 
     Plotly.react('backtest-chart', [traceCandles, traceSMA5, traceSMA20, traceBuys, traceSells] as any, layout as any, {displayModeBar: false});
-  }, [progress, historicalData]);
+  }, [progress, historicalData, mappedData]);
 
   return (
     <div className="card interactive-element" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '4px solid #8b5cf6' }}>
