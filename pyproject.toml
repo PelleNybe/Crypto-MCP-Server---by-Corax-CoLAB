@@ -27,3 +27,7 @@ dev = [
     "pytest>=7.0.0",
     "black>=23.0.0",
 ]
+
+
+[tool.setuptools.packages.find]
+exclude = ["gui*", "wiki*", "systemd*", "trading_diary*", "tests*"]
