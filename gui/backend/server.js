@@ -622,6 +622,12 @@ app.post("/api/strategies", (req, res) => {
   if (typeof name !== 'string' || name.length > 100) {
     return res.status(400).json({ ok: false, error: "Invalid name length" });
   }
+  if (!Array.isArray(nodes) || nodes.length > 5000) {
+    return res.status(400).json({ ok: false, error: "Invalid nodes array or too large" });
+  }
+  if (!Array.isArray(connections) || connections.length > 5000) {
+    return res.status(400).json({ ok: false, error: "Invalid connections array or too large" });
+  }
   const stmt = db.prepare("INSERT INTO strategies (name, nodes, connections, active) VALUES (?, ?, ?, ?)");
   stmt.run(name, JSON.stringify(nodes), JSON.stringify(connections), active ? 1 : 0, function(err) {
     if (err) {

@@ -71,6 +71,20 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], totalValue: number }) => {
+  // Optimization: Memoize the Planet components map to prevent rendering arrays of 3D objects repeatedly
+  const planetComponents = useMemo(() => {
+    return sortedPortfolio.map((asset, index) => (
+      <Planet
+        key={asset.asset}
+        asset={asset.asset}
+        amount={asset.amount}
+        value={asset.value_usd || 0}
+        index={index}
+        totalValue={totalValue}
+      />
+    ));
+  }, [sortedPortfolio, totalValue]);
+
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <color attach="background" args={['#020205']} />
@@ -81,16 +95,7 @@ const CanvasScene = ({ sortedPortfolio, totalValue }: { sortedPortfolio: any[], 
         <Stars radius={100} depth={50} count={5000} factor={4} saturation={0} fade speed={1} />
 
         <group>
-          {sortedPortfolio.map((asset, index) => (
-            <Planet
-              key={asset.asset}
-              asset={asset.asset}
-              amount={asset.amount}
-              value={asset.value_usd || 0}
-              index={index}
-              totalValue={totalValue}
-            />
-          ))}
+          {planetComponents}
         </group>
 
         <OrbitControls
