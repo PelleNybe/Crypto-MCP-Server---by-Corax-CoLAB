@@ -64,7 +64,7 @@ const Constellation = React.memo(({ nodes, links }: { nodes: any[], links: any[]
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = React.memo(({ nodes, links }: { nodes: any[], links: any[] }) => {
+const CanvasScene = ({ nodes, links }: { nodes: any[], links: any[] }) => {
   return (
 <Canvas camera={{ position: [0, 0, 15], fov: 60 }}>
         <color attach="background" args={['#020205']} />
@@ -80,7 +80,7 @@ const CanvasScene = React.memo(({ nodes, links }: { nodes: any[], links: any[] }
         <OrbitControls autoRotate autoRotateSpeed={0.5} minDistance={5} maxDistance={30} />
       </Canvas>
   );
-});
+};
 
 export default function WhaleConstellations() {
   const [data, setData] = useState({ nodes: [], links: [] });
