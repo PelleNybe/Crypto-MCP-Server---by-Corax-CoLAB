@@ -28,5 +28,6 @@ dev = [
     "black>=23.0.0",
 ]
 
-[tool.vercel]
-entrypoint = "app.py"
+
+[tool.setuptools.packages.find]
+exclude = ["gui*", "wiki*", "systemd*", "trading_diary*", "tests*"]
