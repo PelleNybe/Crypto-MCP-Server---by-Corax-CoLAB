@@ -241,7 +241,10 @@ export default function BacktestArenaPanel() {
       showlegend: false
     };
 
-    Plotly.react('backtest-chart', [traceCandles, traceSMA5, traceSMA20, traceBuys, traceSells] as any, layout as any, {displayModeBar: false});
+    const rafId: number = requestAnimationFrame(() => {
+        Plotly.react('backtest-chart', [traceCandles, traceSMA5, traceSMA20, traceBuys, traceSells] as any, layout as any, {displayModeBar: false});
+    });
+    return () => cancelAnimationFrame(rafId);
   }, [progress, historicalData, mappedData]);
 
   return (

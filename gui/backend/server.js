@@ -401,6 +401,7 @@ app.get('/api/ticker', async (req, res) => {
   let symbol = Array.isArray(rawSymbol) ? rawSymbol[0] : (rawSymbol || 'BTC/USDT');
   if (typeof exchange !== 'string') exchange = String(exchange);
   if (typeof symbol !== 'string') symbol = String(symbol);
+  if (exchange.length > 50 || symbol.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   try {
     const result = await callMCP(mcpUrls.MCP_CCXT, 'get_ticker', { exchange, symbol });
     res.json({ ok: true, data: result });

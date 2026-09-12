@@ -203,7 +203,7 @@ export default function RiskRadarPanel() {
         }} />
       </div>
 
-      <div style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '11px', color: '#a3a3a3', height: '80px', overflowY: 'hidden', borderLeft: `3px solid ${defcon === 'RED' ? '#ef4444' : '#334155'}` }}>
+      <div role="log" aria-live="polite" style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '11px', color: '#a3a3a3', height: '80px', overflowY: 'hidden', borderLeft: `3px solid ${defcon === 'RED' ? '#ef4444' : '#334155'}` }}>
         {logs.map((log, i) => (
           <div key={i} style={{
             marginBottom: '4px',
