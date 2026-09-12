@@ -103,9 +103,9 @@ export default function App() {
             <h3 className="glitch" data-text="SYSTEM AUTHENTICATION" style={{ margin: 0, textTransform: "uppercase", letterSpacing: "2px", color: "#fff" }}>SYSTEM AUTHENTICATION</h3>
           </div>
           <p className="small-muted" style={{textAlign: 'center', fontFamily: 'monospace'}}><a href="https://coraxcolab.com" target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'none'}}>Corax CoLAB</a> | <a href="https://pellenybe.github.io" target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'none'}}>Pelle Nyberg</a> (<a href="https://github.com/PelleNybe" target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'none'}}>GitHub</a>) | <a href="https://cryptop.coraxcolab.com" target="_blank" rel="noopener noreferrer" style={{color: 'inherit', textDecoration: 'none'}}>Crypto P's Crypto Circus</a></p>
-          <label htmlFor="accessKeyInput" className="sr-only" style={{ display: 'none' }}>Enter Access Key</label>
+          <label htmlFor="accessKeyInput" className="sr-only" style={{ position: 'absolute', width: '1px', height: '1px', padding: 0, margin: '-1px', overflow: 'hidden', clip: 'rect(0, 0, 0, 0)', whiteSpace: 'nowrap', borderWidth: 0 }}>Enter Access Key</label>
           <input
-            id="accessKeyInput" placeholder="Enter Access Key"
+            id="accessKeyInput"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}

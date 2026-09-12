@@ -7,7 +7,7 @@ For Crypto MCP Server – Produced by Corax CoLAB - The Future of Edge AI & Bloc
 
 import os
 import logging
-import requests
+import httpx
 from typing import Any, Dict, Optional
 from mcp.server.fastmcp import FastMCP
 from dotenv import load_dotenv
@@ -23,14 +23,17 @@ mcp = FastMCP(
 OCTOBOT_REST_URL = os.getenv("OCTOBOT_REST_URL", "http://127.0.0.1:5001")
 OCTOBOT_API_KEY = os.getenv("OCTOBOT_API_KEY", None)
 
+# Optimization: Using httpx.AsyncClient for non-blocking I/O and connection pooling across endpoints
+# Performance Impact: Improves concurrent request handling and reduces latency under load.
+_client = httpx.AsyncClient(timeout=15.0)
 
-def _req(path: str, method: str = "get", json: Optional[dict] = None) -> Dict[str, Any]:
+async def _req(path: str, method: str = "get", json: Optional[dict] = None) -> Dict[str, Any]:
     url = OCTOBOT_REST_URL.rstrip("/") + "/" + path.lstrip("/")
     headers = {}
     if OCTOBOT_API_KEY:
         headers["Authorization"] = f"Bearer {OCTOBOT_API_KEY}"
     try:
-        r = requests.request(method, url, json=json, headers=headers, timeout=15)
+        r = await _client.request(method, url, json=json, headers=headers)
         return {"status_code": r.status_code, "json": r.json()}
     except Exception as e:
         # Fallback if request fails entirely, or if r.json() fails and r isn't defined yet
@@ -40,33 +43,33 @@ def _req(path: str, method: str = "get", json: Optional[dict] = None) -> Dict[st
 
 
 @mcp.tool()
-def ping() -> str:
+async def ping() -> str:
     return f"octobot_mcp alive (rest={OCTOBOT_REST_URL}) — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
 
 
 @mcp.tool()
-def status() -> Dict[str, Any]:
-    return _req("api/bot/status")
+async def status() -> Dict[str, Any]:
+    return await _req("api/bot/status")
 
 
 @mcp.tool()
-def portfolio() -> Dict[str, Any]:
-    return _req("api/portfolio/get_portfolio")
+async def portfolio() -> Dict[str, Any]:
+    return await _req("api/portfolio/get_portfolio")
 
 
 @mcp.tool()
-def start_bot() -> Dict[str, Any]:
-    return _req("api/bot/start", method="post")
+async def start_bot() -> Dict[str, Any]:
+    return await _req("api/bot/start", method="post")
 
 
 @mcp.tool()
-def stop_bot() -> Dict[str, Any]:
-    return _req("api/bot/stop", method="post")
+async def stop_bot() -> Dict[str, Any]:
+    return await _req("api/bot/stop", method="post")
 
 
 @mcp.tool()
-def history() -> Dict[str, Any]:
-    return _req("api/trading/history")
+async def history() -> Dict[str, Any]:
+    return await _req("api/trading/history")
 
 
 if __name__ == "__main__":

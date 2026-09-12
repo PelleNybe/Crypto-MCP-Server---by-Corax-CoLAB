@@ -13,8 +13,11 @@ export default function TickerPanel(){
       if (j.ok) setTicker(j.data)
     }).catch(console.error)
 
-    socket.on('ticker', (data:any) => setTicker(data))
-    return ()=>{ socket.disconnect() }
+    const handleTicker = (data:any) => setTicker(data)
+    socket.on('ticker', handleTicker)
+    // Optimization: Use socket.off() instead of socket.disconnect() to avoid breaking shared WS connection
+    // Impact: Prevents global websocket disconnects for other components when TickerPanel unmounts
+    return ()=>{ socket.off('ticker', handleTicker) }
   }, [])
 
   return (
