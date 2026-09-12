@@ -1,5 +1,6 @@
+import pytest
 import sys
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock, patch, AsyncMock
 
 # Mock dependencies thoroughly before importing
 mock_mcp = MagicMock()
@@ -16,33 +17,34 @@ sys.modules["dotenv"] = MagicMock()
 import octobot_mcp
 
 
-def test_req_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_req_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"success": True}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp._req("api/test")
+        result = await octobot_mcp._req("api/test")
 
         assert result["status_code"] == 200
         assert result["json"] == {"success": True}
         mock_request.assert_called_once()
         args, kwargs = mock_request.call_args
-        assert kwargs["timeout"] == 15
         assert args[0] == "get"
         assert args[1].endswith("api/test")
 
 
-def test_req_exception():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_req_exception():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 500
         mock_response.json.side_effect = Exception("No JSON")
         mock_response.text = "Internal Server Error"
         mock_request.return_value = mock_response
 
-        result = octobot_mcp._req("api/test")
+        result = await octobot_mcp._req("api/test")
 
         assert result["status_code"] == 500
         assert "text" in result
@@ -50,8 +52,9 @@ def test_req_exception():
         assert "json" not in result
 
 
-def test_req_headers_with_api_key():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_req_headers_with_api_key():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {}
@@ -61,7 +64,7 @@ def test_req_headers_with_api_key():
         octobot_mcp.OCTOBOT_API_KEY = "test_key_123"
 
         try:
-            octobot_mcp._req("api/test")
+            await octobot_mcp._req("api/test")
             args, kwargs = mock_request.call_args
             assert "Authorization" in kwargs["headers"]
             assert kwargs["headers"]["Authorization"] == "Bearer test_key_123"
@@ -69,8 +72,9 @@ def test_req_headers_with_api_key():
             octobot_mcp.OCTOBOT_API_KEY = original_api_key
 
 
-def test_req_headers_without_api_key():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_req_headers_without_api_key():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {}
@@ -80,18 +84,19 @@ def test_req_headers_without_api_key():
         octobot_mcp.OCTOBOT_API_KEY = None
 
         try:
-            octobot_mcp._req("api/test")
+            await octobot_mcp._req("api/test")
             args, kwargs = mock_request.call_args
             assert "Authorization" not in kwargs["headers"]
         finally:
             octobot_mcp.OCTOBOT_API_KEY = original_api_key
 
 
-def test_req_request_exception():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_req_request_exception():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_request.side_effect = Exception("Connection Timeout")
 
-        result = octobot_mcp._req("api/test")
+        result = await octobot_mcp._req("api/test")
 
         assert result["status_code"] == 500
         assert "text" in result
@@ -99,14 +104,15 @@ def test_req_request_exception():
         assert "json" not in result
 
 
-def test_status_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_status_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"bot_status": "running"}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp.status()
+        result = await octobot_mcp.status()
 
         assert result["status_code"] == 200
         assert result["json"] == {"bot_status": "running"}
@@ -115,11 +121,12 @@ def test_status_success():
         assert args[1].endswith("api/bot/status")
 
 
-def test_status_error():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_status_error():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_request.side_effect = Exception("API connection failed")
 
-        result = octobot_mcp.status()
+        result = await octobot_mcp.status()
 
         assert result["status_code"] == 500
         assert "text" in result
@@ -127,20 +134,22 @@ def test_status_error():
         assert "json" not in result
 
 
-def test_ping():
-    result = octobot_mcp.ping()
+@pytest.mark.asyncio
+async def test_ping():
+    result = await octobot_mcp.ping()
     assert "octobot_mcp alive" in result
     assert octobot_mcp.OCTOBOT_REST_URL in result
 
 
-def test_portfolio_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_portfolio_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"portfolio": {}}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp.portfolio()
+        result = await octobot_mcp.portfolio()
 
         assert result["status_code"] == 200
         assert result["json"] == {"portfolio": {}}
@@ -149,14 +158,15 @@ def test_portfolio_success():
         assert args[1].endswith("api/portfolio/get_portfolio")
 
 
-def test_start_bot_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_start_bot_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"started": True}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp.start_bot()
+        result = await octobot_mcp.start_bot()
 
         assert result["status_code"] == 200
         assert result["json"] == {"started": True}
@@ -166,14 +176,15 @@ def test_start_bot_success():
         assert args[1].endswith("api/bot/start")
 
 
-def test_stop_bot_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_stop_bot_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"stopped": True}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp.stop_bot()
+        result = await octobot_mcp.stop_bot()
 
         assert result["status_code"] == 200
         assert result["json"] == {"stopped": True}
@@ -183,14 +194,15 @@ def test_stop_bot_success():
         assert args[1].endswith("api/bot/stop")
 
 
-def test_history_success():
-    with patch("octobot_mcp.requests.request") as mock_request:
+@pytest.mark.asyncio
+async def test_history_success():
+    with patch("octobot_mcp._client.request", new_callable=AsyncMock) as mock_request:
         mock_response = MagicMock()
         mock_response.status_code = 200
         mock_response.json.return_value = {"history": []}
         mock_request.return_value = mock_response
 
-        result = octobot_mcp.history()
+        result = await octobot_mcp.history()
 
         assert result["status_code"] == 200
         assert result["json"] == {"history": []}
