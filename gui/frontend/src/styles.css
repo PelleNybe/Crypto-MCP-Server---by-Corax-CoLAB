@@ -204,6 +204,21 @@ input:focus, select:focus {
   box-shadow: 0 0 10px var(--accent-glow);
 }
 
+/* Accessibility focus indicators */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[role="button"]:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 4px var(--primary-glow);
+}
+
+button:focus:not(:focus-visible) {
+  outline: none;
+}
+
 /* Utilities */
 
 .text-green { color: var(--primary); text-shadow: 0 0 8px var(--primary-glow); }
@@ -298,6 +313,7 @@ input:focus, select:focus {
 .btn-primary:active::after, .btn-danger:active::after, .btn-outline:active::after {
   animation: ripple 0.6s ease-out;
 }
+
 
 button:disabled, .btn-primary:disabled, .btn-danger:disabled, .btn-outline:disabled {
   opacity: 0.5;
