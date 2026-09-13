@@ -301,8 +301,15 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
   if (cacheableTools.includes(toolName)) {
     const cached = mcpCache.get(cacheKey);
-    if (cached && (Date.now() - cached.timestamp < CACHE_TTL_MS)) {
-      return cached.data;
+    if (cached) {
+      // ⚡ Bolt: If it's a promise (in-flight request), await it to deduplicate concurrent requests.
+      if (cached instanceof Promise) {
+        return await cached;
+      }
+      // If it's resolved data and within TTL, return it
+      if (Date.now() - cached.timestamp < CACHE_TTL_MS) {
+        return cached.data;
+      }
     }
   }
 
@@ -315,42 +322,68 @@ async function callMCP(mcpUrl, toolName, args = {}) {
       arguments: args
     }
   };
-  const res = await axios.post(mcpUrl, payload, {
-    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json,text/event-stream' },
-    timeout: parseInt(process.env.MCP_TIMEOUT) || 8000,
-    signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000)
-  });
-  if (res.data && res.data.result) {
-    const r = res.data.result;
 
-    // Save to cache before returning
-    if (cacheableTools.includes(toolName)) {
-      let dataToCache = null;
+  const fetchPromise = (async () => {
+    const res = await axios.post(mcpUrl, payload, {
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json,text/event-stream' },
+      timeout: parseInt(process.env.MCP_TIMEOUT) || 8000,
+      signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000)
+    });
+
+    if (res.data && res.data.result) {
+      const r = res.data.result;
+
+      let resultData = null;
       if (r.structuredContent) {
-        dataToCache = r.structuredContent;
+        resultData = r.structuredContent;
       } else if (r.content && Array.isArray(r.content) && r.content.length > 0 && r.content[0].text) {
         try {
-          dataToCache = JSON.parse(r.content[0].text);
+          resultData = JSON.parse(r.content[0].text);
         } catch (e) {
-          dataToCache = r.content[0].text;
+          resultData = r.content[0].text;
         }
       }
-      if (dataToCache !== null) {
-        mcpCache.set(cacheKey, { timestamp: Date.now(), data: dataToCache });
+
+      if (resultData === null) {
+          resultData = res.data;
       }
+
+      // Save to cache before returning
+      if (cacheableTools.includes(toolName)) {
+        if (resultData !== null && resultData !== res.data) {
+          // Store the resolved data with timestamp
+          mcpCache.set(cacheKey, { timestamp: Date.now(), data: resultData });
+        } else {
+            // If we couldn't parse it nicely, just clear the promise from cache so it doesn't get stuck
+            mcpCache.delete(cacheKey);
+        }
+      }
+      return resultData;
     }
 
-    if (r.structuredContent) return r.structuredContent;
-    if (r.content && Array.isArray(r.content) && r.content.length > 0 && r.content[0].text) {
-      try {
-        return JSON.parse(r.content[0].text);
-      } catch (e) {
-        return r.content[0].text;
-      }
+    // Clear promise from cache if response is unexpected
+    if (cacheableTools.includes(toolName)) {
+        mcpCache.delete(cacheKey);
     }
-    return r;
+    return res.data;
+  })();
+
+  // ⚡ Bolt: Store the active promise in the cache immediately to prevent "thundering herd"
+  // multiple concurrent requests will now await this single promise.
+  if (cacheableTools.includes(toolName)) {
+    mcpCache.set(cacheKey, fetchPromise);
   }
-  return res.data;
+
+  // Await and return the result
+  try {
+      return await fetchPromise;
+  } catch (error) {
+      // If the request fails, remove the failed promise from the cache
+      if (cacheableTools.includes(toolName)) {
+          mcpCache.delete(cacheKey);
+      }
+      throw error;
+  }
 }
 
 /* Routes */
