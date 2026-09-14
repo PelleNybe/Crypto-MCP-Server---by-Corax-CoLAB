@@ -11,7 +11,10 @@ const express = require('express');
 const helmet = require('helmet');
 const compression = require('compression');
 const axios = require('axios');
+
 const http = require('http');
+const mcpHttpAgent = new http.Agent({ keepAlive: true });
+
 const { Server } = require('socket.io');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
@@ -325,9 +328,12 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
   const fetchPromise = (async () => {
     const res = await axios.post(mcpUrl, payload, {
-      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json,text/event-stream' },
+      headers: { "Content-Type": "application/json", "Accept": "application/json,text/event-stream" },
+      httpAgent: mcpHttpAgent,
       timeout: parseInt(process.env.MCP_TIMEOUT) || 8000,
-      signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000)
+      signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000),
+      maxContentLength: 5000000, // 5MB limit
+      maxBodyLength: 5000000
     });
 
     if (res.data && res.data.result) {

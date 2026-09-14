@@ -63,9 +63,9 @@ export default function OrderPanel(){
       <h3>Order / Trade</h3>
       <div style={{display:'grid',gap:8}}>
         <label htmlFor="exchangeInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Exchange</label>
-        <input id="exchangeInput" title="Exchange (e.g. binance)" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
+        <label htmlFor="exchangeInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Exchange</label><input id="exchangeInput" title="Exchange (e.g. binance)" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
         <label htmlFor="symbolInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Symbol</label>
-        <input id="symbolInput" title="Symbol (e.g. BTC/USDT)" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
+        <label htmlFor="symbolInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Symbol</label><input id="symbolInput" title="Symbol (e.g. BTC/USDT)" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
         <div style={{display:'flex',gap:8}}>
           <label htmlFor="sideSelect" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Order Side</label>
           <select id="sideSelect" title="Order Side" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
@@ -73,7 +73,7 @@ export default function OrderPanel(){
           <select id="typeSelect" title="Order Type" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)}><option>market</option><option>limit</option></select>
         </div>
         <label htmlFor="amountInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Amount</label>
-        <input id="amountInput" title="Amount" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
+        <label htmlFor="amountInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Amount</label><input id="amountInput" title="Amount" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
         {type==='limit' && <><label htmlFor="priceInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Limit Price</label><input id="priceInput" title="Price" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} /></>}
         <div style={{display:'flex',gap:8}}>
           <button className="btn-primary" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive} aria-busy={routingActive} aria-live="polite">{routingActive ? "Routing..." : "Force Preview"}</button>

@@ -71,8 +71,8 @@ export default function OrdersLogPanel() {
     };
   }, []);
 
-  const totalPages = Math.ceil(orders.length / rowsPerPage) || 1;
-  const currentOrders = orders.slice((page - 1) * rowsPerPage, page * rowsPerPage);
+  const totalPages = React.useMemo(() => Math.ceil(orders.length / rowsPerPage) || 1, [orders.length, rowsPerPage]);
+  const currentOrders = React.useMemo(() => orders.slice((page - 1) * rowsPerPage, page * rowsPerPage), [orders, page, rowsPerPage]);
 
   const approveOrder = useCallback(async (orderId: number) => {
     try {
