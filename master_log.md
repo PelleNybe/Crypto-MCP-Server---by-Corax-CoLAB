@@ -179,3 +179,12 @@ See ../master_log.md
 - Enforced strict length limits on `nodes` and `connections` arrays in Express payload handling.
 - Converted `display: 'none'` labels to visually hidden (sr-only) `clip: rect(...)` CSS in `OrderPanel.tsx`.
 - Moved `useMemo` hook to the component top-level to render `<Planet>` components in `AssetUniverse.tsx` cleanly.
+
+## 2026-09-14 - 5+ Performance and Security Optimizations
+**Learning:** Found 5 solid areas for optimization across the stack covering Backend Performance, Backend DoS Security, Frontend React Rendering, and UI Accessibility.
+- **Backend Performance**: Node.js `axios` calls to Python MCPs were opening new TCP connections on every single internal tick. Setting `http.Agent({ keepAlive: true })` reuses the pool.
+- **Backend Security**: `axios` defaults allow unbound response payload sizes, creating a DoS vector if an MCP returns a massive JSON object (e.g. 50M records). Capped at 5MB via `maxContentLength`.
+- **Frontend Rendering**: `OrdersLogPanel` array slicing created new refs on every render, invalidating child memoizations. Wrapped in `useMemo`.
+- **Accessibility**: Inputs in `OrderPanel` lacked associated `<label>` elements. Added visually hidden labels tied via `htmlFor`.
+- **Visual Polish**: Table rows lacked hover interactions. Added `table-row-hover` class.
+**Action:** Applied Keep-Alive agents, Axios strict size bounds, useMemo dependency fixes, semantic ARIA labels, and CSS transition hover states.

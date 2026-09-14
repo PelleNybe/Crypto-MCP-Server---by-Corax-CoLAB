@@ -7,7 +7,7 @@ import CyberpunkLoader from './CyberpunkLoader'
 
 // Memoized table row component for list rendering performance
 const PortfolioRow = React.memo(({ d, total }: { d: any, total: number }) => (
-  <tr style={{borderBottom: '1px solid rgba(255,255,255,0.05)'}}>
+  <tr style={{borderBottom: "1px solid rgba(255,255,255,0.05)", transition: "background 0.3s"}} className="table-row-hover">
     <td style={{padding: '8px', fontWeight: 'bold'}}>{d.asset}</td>
     <td style={{padding: '8px', fontFamily: 'monospace'}}>{Number(d.amount).toFixed(6)}</td>
     <td style={{padding: '8px', color: '#10b981'}}>${d.value_usd ? d.value_usd.toFixed(2) : '—'}</td>
