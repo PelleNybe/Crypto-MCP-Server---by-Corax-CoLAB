@@ -209,9 +209,10 @@ export default function OrbitalPortfolio() {
              const allocation = total > 0 ? (val / total) * 100 : 0;
              const size = Math.max(0.4, Math.min(2.0, (allocation / 100) * 3));
 
+             const coinUpper = coin.toUpperCase();
              return {
                  id: coin.toLowerCase(),
-                 name: coin.toUpperCase(),
+                 name: coinUpper,
                  amount: amount,
                  size: size,
                  val: val,

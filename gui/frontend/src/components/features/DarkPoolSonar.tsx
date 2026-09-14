@@ -109,7 +109,7 @@ export default function DarkPoolSonar() {
                             position: [x, 0, z],
                             color,
                             size,
-                            trade: { ...trade, sideUpper: trade.side.toUpperCase() }
+                            trade: { ...trade, sideUpper: trade.side === 'buy' ? 'BUY' : 'SELL' }
                         });
                     }
                 });
@@ -138,7 +138,7 @@ export default function DarkPoolSonar() {
   }, []);
 
   // Optimization: Pre-calculate toUpperCase
-  const activeExchangeUpper = activeExchange.toUpperCase();
+  const activeExchangeUpper = useMemo(() => activeExchange.toUpperCase(), [activeExchange]);
 
   return (
     <div className="card glass-panel interactive-element" style={{ display: 'flex', flexDirection: 'column', gap: '1rem', borderTop: '4px solid #8b5cf6', height: '400px' }}>

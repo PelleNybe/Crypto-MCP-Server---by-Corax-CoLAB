@@ -102,6 +102,7 @@ export default function SentimentWordCloud() {
                     const y = radius * Math.sin(theta) * Math.sin(phi);
                     const z = radius * Math.cos(phi);
 
+                    // Pre-calculate uppercase to avoid doing it inside the render
                     newWords.push({
                         text: k.toUpperCase(),
                         sentiment: keywordsMap[k].sentiment,

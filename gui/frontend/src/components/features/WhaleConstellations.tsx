@@ -131,9 +131,10 @@ export default function WhaleConstellations() {
             const rank = coin.market_cap_rank || 100;
             const nodeSize = Math.max(0.5, 2 - (rank / 100));
 
+            const symbolUpper = coin.symbol.toUpperCase();
             newNodes.push({
               id: coin.id,
-              name: coin.symbol.toUpperCase(),
+              name: symbolUpper,
               type: 'token',
               size: nodeSize,
               pos: nodePos
