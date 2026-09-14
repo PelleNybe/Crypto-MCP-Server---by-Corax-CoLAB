@@ -339,7 +339,8 @@ export default function BacktestArenaPanel() {
         <div style={{ flex: 1, position: 'relative', display: 'flex', alignItems: 'center' }}>
           <input
             type="range" aria-label="Playback progress"
-            aria-label="Playback progress"
+            title="Playback progress"
+            placeholder="Playback progress"
             min="0"
             max="100"
             value={progress}
