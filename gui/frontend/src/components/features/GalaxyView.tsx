@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { OrbitControls, Text, Html, Stars } from '@react-three/drei';
 import * as THREE from 'three';
@@ -33,7 +33,7 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
   });
 
   // Optimization: Pre-calculate toUpperCase to prevent redundant string operations during render
-  const symbolUpper = coin.symbol.toUpperCase();
+  const symbolUpper = useMemo(() => coin.symbol.toUpperCase(), [coin.symbol]);
 
   return (
     <group ref={orbitRef}>

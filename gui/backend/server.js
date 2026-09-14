@@ -302,7 +302,7 @@ async function callMCP(mcpUrl, toolName, args = {}) {
   if (cacheableTools.includes(toolName)) {
     const cached = mcpCache.get(cacheKey);
     if (cached) {
-      // ⚡ Bolt: If it's a promise (in-flight request), await it to deduplicate concurrent requests.
+      // Optimization: If it's a promise (in-flight request), await it to deduplicate concurrent requests.
       if (cached instanceof Promise) {
         return await cached;
       }
@@ -368,7 +368,7 @@ async function callMCP(mcpUrl, toolName, args = {}) {
     return res.data;
   })();
 
-  // ⚡ Bolt: Store the active promise in the cache immediately to prevent "thundering herd"
+  // Optimization: Store the active promise in the cache immediately to prevent "thundering herd"
   // multiple concurrent requests will now await this single promise.
   if (cacheableTools.includes(toolName)) {
     mcpCache.set(cacheKey, fetchPromise);
