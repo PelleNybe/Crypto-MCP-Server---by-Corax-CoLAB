@@ -1,7 +1,7 @@
 import React from 'react';
 import { Loader } from 'lucide-react';
 
-export const CyberpunkLoader = ({ message = "Decrypting Data Stream..." }) => (
+export const CyberpunkLoader = React.memo(({ message = "Decrypting Data Stream..." }) => (
   <div
     role="status"
     aria-live="polite"
@@ -34,6 +34,6 @@ export const CyberpunkLoader = ({ message = "Decrypting Data Stream..." }) => (
       <div className="skeleton-box" style={{ width: '60%', height: '8px', margin: '0 auto' }}></div>
     </div>
   </div>
-);
+));
 
 export default CyberpunkLoader;

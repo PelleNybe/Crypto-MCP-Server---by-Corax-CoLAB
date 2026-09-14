@@ -1,6 +1,6 @@
 import React, { useRef, useState, MouseEvent } from 'react';
 
-const TiltWrapper: React.FC<{ children: React.ReactNode, className?: string, style?: React.CSSProperties }> = ({ children, className = '', style = {} }) => {
+const TiltWrapper: React.FC<{ children: React.ReactNode, className?: string, style?: React.CSSProperties }> = React.memo(({ children, className = '', style = {} }) => {
   const [tiltStyle, setTiltStyle] = useState({});
   const cardRef = useRef<HTMLDivElement>(null);
 
@@ -38,6 +38,6 @@ const TiltWrapper: React.FC<{ children: React.ReactNode, className?: string, sty
       {children}
     </div>
   );
-};
+});
 
 export default TiltWrapper;
