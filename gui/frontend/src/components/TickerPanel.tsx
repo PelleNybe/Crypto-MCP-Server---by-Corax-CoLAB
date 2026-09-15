@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react'
 import socket from '../socket'
 import HoloOrderFlow from './features/HoloOrderFlow'
 import CyberpunkLoader from './CyberpunkLoader'
+import Tooltip from "./Tooltip";
 
 export default function TickerPanel(){
   const [ticker, setTicker] = useState<any>(null)
@@ -26,7 +27,7 @@ export default function TickerPanel(){
       <>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center', marginBottom: '1rem'}}>
         <h3 className="glitch" data-text="Tactical Market Overview" style={{margin: 0}}>Tactical Market Overview</h3>
-        <div className="small-muted" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
+        <div className="small-muted status-indicator-live" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
       </div>
 
       <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>
@@ -66,7 +67,7 @@ export default function TickerPanel(){
 
       <div style={{marginTop: '1.5rem'}}>
         <h4 style={{marginBottom: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#888', textTransform: 'uppercase', fontSize: '0.8rem'}}>
-          <div style={{width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981'}}></div>
+          <div className="status-indicator-live" style={{width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 8px #10b981'}}></div>
           Holographic Order Flow Terrain
         </h4>
         <HoloOrderFlow price={ticker.last || ticker.close || 0} symbol={symbol} />

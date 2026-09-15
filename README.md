@@ -1,76 +1,24 @@
-<div align="center">
-  <a href="https://cryptop.coraxcolab.com" target="_blank">
-    <img width="800" alt="Frontend Dashboard" src="./gui/frontend/public/images/dashboard.png" style="border-radius: 12px; margin-bottom: 20px; box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);" />
-  </a>
+# 🌌 Crypto MCP Server & Hedgehog Agentic Trading Dashboard 🦔
 
-  <h1>🌌 Crypto Multi-MCP Hub <br> <span style="font-size: 0.6em; color: #10b981;">by Corax CoLAB & Pelle Nyberg 🚀🪙</span></h1>
-  <h2>Hedge Fund AI Orchestrator</h2>
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![Node.js 20+](https://img.shields.io/badge/node-20+-brightgreen.svg)](https://nodejs.org/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-  <p>
-    <a href="https://github.com/PelleNybe"><img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&weight=600&size=24&pause=1000&color=10B981&center=true&vCenter=true&width=800&lines=Welcome+to+Crypto+MCP+Server;The+Future+of+Edge+AI+%26+Blockchain;AI-Driven+Command+Center;100%25+Real+Data+Integration;Built+with+React,+Three.js+%26+Python" alt="Typing SVG" /></a>
-  </p>
+A massively scaled **Model Context Protocol (MCP)** infrastructure designed to act as a localized, AI-powered Hedge Fund Orchestrator. It acts as the backbone for local LLMs (like Claude Desktop) to ingest real-time market data, analyze technicals/sentiment, and autonomously execute trades.
 
-  <p>
-    <a href="https://github.com/PelleNybe"><img src="https://img.shields.io/badge/version-3.0.0-blue.svg?style=for-the-badge&logo=github" alt="Version"/></a>
-    <img src="https://img.shields.io/badge/python->=3.10-blue.svg?style=for-the-badge&logo=python" alt="Python"/>
-    <img src="https://img.shields.io/badge/node->=20.x-green.svg?style=for-the-badge&logo=nodedotjs" alt="Node.js"/>
-    <img src="https://img.shields.io/badge/React-Vite-61dafb.svg?style=for-the-badge&logo=react" alt="React"/>
-    <img src="https://img.shields.io/badge/Three.js-3D-black.svg?style=for-the-badge&logo=three.js" alt="Three.js"/>
-    <img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="License"/>
-  </p>
-
-  <p><em>The ultimate AI-driven command center and Multi-MCP Hub for your local crypto operations, featuring a dark, cyberpunk/command-center aesthetic. Built for everyone, from homebrew Raspberry Pi setups to cloud servers.</em></p>
-</div>
-
----
-
-## 👨‍💻 Developer & Company
+> 🌟 **Author:** [Pelle Nyberg](https://github.com/PelleNybe) | [Corax CoLAB](https://coraxcolab.com)
+> 🎪 **Explore more:** [Crypto P's Crypto Circus](https://cryptop.coraxcolab.com)
 
 <div align="center">
-  <img src="https://raw.githubusercontent.com/PelleNybe/PelleNybe/main/assets/line.svg" width="100%" height="2" onerror="this.style.display='none'"/>
+  <img width="800" alt="Cyberpunk Crypto Dashboard" src="./gui/frontend/public/images/dashboard.jpg" style="border-radius: 12px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,255,150,0.1);" onerror="this.style.display='none'" />
 </div>
 
-<p align="center">
-  This project is masterminded by <strong>Pelle Nyberg</strong> and his cutting-edge technology firm, <strong>Corax CoLAB</strong>.
-</p>
+## 🧬 What makes this different?
 
-<div align="center">
-  <table>
-    <tr>
-      <td align="center" width="50%">
-        <h3><a href="https://pellenybe.github.io" target="_blank">Pelle Nyberg</a></h3>
-        <p><strong>Lead Developer & Architect</strong></p>
-        <p><em>Pioneering AI & Web3 ecosystems.</em></p>
-        <a href="https://github.com/PelleNybe"><img src="https://img.shields.io/badge/GitHub-100000?style=for-the-badge&logo=github&logoColor=white" alt="GitHub"/></a>
-        <a href="https://www.linkedin.com/in/pellenyberg/"><img src="https://img.shields.io/badge/LinkedIn-0077B5?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
-        <a href="https://pellenybe.github.io"><img src="https://img.shields.io/badge/Portfolio-FF5722?style=for-the-badge&logo=Web&logoColor=white" alt="Portfolio"/></a>
-      </td>
-      <td align="center" width="50%">
-        <h3><a href="https://coraxcolab.com" target="_blank">Corax CoLAB</a></h3>
-        <p><strong>Innovation & AI Solutions</strong></p>
-        <p><em>Where tomorrow's tech is built today.</em></p>
-        <a href="https://coraxcolab.com"><img src="https://img.shields.io/badge/Website-000000?style=for-the-badge&logo=Google-Chrome&logoColor=white" alt="Website"/></a>
-        <a href="https://cryptop.coraxcolab.com"><img src="https://img.shields.io/badge/Crypto_Hub_Live-10B981?style=for-the-badge&logo=planet&logoColor=white" alt="Live Project"/></a>
-      </td>
-    </tr>
-  </table>
-</div>
-
-<div align="center">
-  <img src="https://raw.githubusercontent.com/PelleNybe/PelleNybe/main/assets/line.svg" width="100%" height="2" onerror="this.style.display='none'"/>
-</div>
-
----
-
-## ✨ Features & Capabilities
-
-### 🎨 Visual & Technical Upgrades (v3.0)
-* 🌧️ **Matrix Digital Rain:** Ambient, immersive cyberpunk background animations.
-* 👾 **Cyberpunk Glitch Text:** Immersive text glitching effects across core UI headers.
-* 🧊 **Interactive 3D Card Tilt:** Hover over dashboard elements to see them dynamically tilt in 3D space.
-* 🔦 **Holographic Sweeps:** Primary buttons feature an animated light-sweep effect to represent active scanning.
-* ⌨️ **Typewriter AI Reasoning:** AI logic is animated character-by-character for a more authentic 'terminal' feel.
-* 🛡️ **Performance & Security:** Includes memoized 3D components, SSRF protection on endpoints, error-fallback for ERC20 contracts, and `hmac.compare_digest` for timing-safe equality in backend services.
+This is not just another API wrapper. It is a **multi-agent architectural playground**.
+* **Zero Mock-ups. 100% Real Data.** Every visualizer, sonar sweep, and grid is driven by live websockets and REST data.
+* **Extensible MCP Architecture.** Easily add new modules. The system natively multiplexes JSON-RPC commands.
+* **Hardened Security.** Local SQLite, password-protected backend execution, no cross-site scripting gaps. Uses `crypto.timingSafeEqual` for password verification.
 
 Our terminal is a living, breathing **Hedge Fund AI Orchestrator**, packed with cutting-edge tools.
 

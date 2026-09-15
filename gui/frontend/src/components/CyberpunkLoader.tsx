@@ -1,5 +1,6 @@
 import React from 'react';
 import { Loader } from 'lucide-react';
+import TypewriterText from './TypewriterText';
 
 export const CyberpunkLoader = React.memo(({ message = "Decrypting Data Stream..." }) => (
   <div
@@ -24,14 +25,14 @@ export const CyberpunkLoader = React.memo(({ message = "Decrypting Data Stream..
        <Loader size={32} style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', animation: 'pulse 2s infinite' }} />
     </div>
 
-    <span aria-label={message} className="glitch-update" style={{ letterSpacing: '2px', textTransform: 'uppercase', textShadow: '0 0 8px rgba(16, 185, 129, 0.5)' }}>
-      {message}
+    <span aria-label={message} className="glitch-update" style={{ letterSpacing: '2px', textTransform: 'uppercase', textShadow: '0 0 8px rgba(16, 185, 129, 0.5)', fontWeight: 'bold' }}>
+      <TypewriterText text={message} speed={40} />
     </span>
 
-    <div aria-hidden="true" style={{ marginTop: '20px', width: '200px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-      <div className="skeleton-box" style={{ width: '100%', height: '8px' }}></div>
-      <div className="skeleton-box" style={{ width: '80%', height: '8px', margin: '0 auto' }}></div>
-      <div className="skeleton-box" style={{ width: '60%', height: '8px', margin: '0 auto' }}></div>
+    <div aria-hidden="true" style={{ marginTop: '30px', width: '250px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      <div className="skeleton-box" style={{ width: '100%', height: '4px', background: 'rgba(16,185,129,0.2)' }}></div>
+      <div className="skeleton-box" style={{ width: '80%', height: '4px', margin: '0 auto', background: 'rgba(16,185,129,0.15)' }}></div>
+      <div className="skeleton-box" style={{ width: '60%', height: '4px', margin: '0 auto', background: 'rgba(16,185,129,0.1)' }}></div>
     </div>
   </div>
 ));
