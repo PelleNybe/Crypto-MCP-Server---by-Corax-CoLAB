@@ -1,86 +1,103 @@
-import MatrixRain from "./components/MatrixRain";
-import React, { useState, useEffect, Suspense } from 'react'
-const PortfolioPanel = React.lazy(() => import('./components/PortfolioPanel'));const TickerPanel = React.lazy(() => import('./components/TickerPanel'));const OrderPanel = React.lazy(() => import('./components/OrderPanel'));const OrdersLogPanel = React.lazy(() => import('./components/OrdersLogPanel'));const OracleCopilot = React.lazy(() => import('./components/features/OracleCopilot'));const MarketSentimentAnalyzer = React.lazy(() => import('./components/features/MarketSentimentAnalyzer'));
-const GlobalWeatherSystem = React.lazy(() => import('./components/features/GlobalWeatherSystem'));const WhaleSonarSweep = React.lazy(() => import('./components/features/WhaleSonarSweep'));const VolatilityMatrix = React.lazy(() => import('./components/features/VolatilityMatrix'));const PredictiveGhosting = React.lazy(() => import('./components/features/PredictiveGhosting'));const RiskRadarPanel = React.lazy(() => import('./components/features/RiskRadarPanel'));const BacktestArenaPanel = React.lazy(() => import('./components/features/BacktestArenaPanel'));const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'));const NewsSingularity = React.lazy(() => import('./components/features/NewsSingularity'));const AlgoGridArchitect = React.lazy(() => import('./components/features/AlgoGridArchitect'));const QuantumRiskMap = React.lazy(() => import('./components/features/QuantumRiskMap'));const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'));const SystemOverview = React.lazy(() => import('./components/features/SystemOverview'));const NeuralNetLiquidity = React.lazy(() => import('./components/features/NeuralNetLiquidity'));
-const HoloTopographicOrderBook = React.lazy(() => import('./components/features/HoloTopographicOrderBook'));
-const OrbitalPortfolio = React.lazy(() => import('./components/features/OrbitalPortfolio'));
-
-const DarkPoolSonar = React.lazy(() => import('./components/features/DarkPoolSonar'));const FlashCrashMatrix = React.lazy(() => import('./components/features/FlashCrashMatrix'));const GalaxyView = React.lazy(() => import('./components/features/GalaxyView'));const SentimentWordCloud = React.lazy(() => import('./components/features/SentimentWordCloud'));const GasHologram = React.lazy(() => import('./components/features/GasHologram'));import { getAuthToken, setAuthToken } from './auth'
+import { useState, useEffect } from 'react'
+import React from 'react'
+import { Loader } from 'lucide-react'
+import './styles.css'
 import socket from './socket'
-import { callMcpEndpoint } from './api_mcp'
-import { useActivePortfolioSymbol } from './hooks/useActivePortfolioSymbol'
-import { Loader } from 'lucide-react';
-import TiltWrapper from './components/TiltWrapper';
+
+import PortfolioPanel from './components/PortfolioPanel'
+import TickerPanel from './components/TickerPanel'
+import OrderPanel from './components/OrderPanel'
+import OrdersLogPanel from './components/OrdersLogPanel'
+
+import RiskRadarPanel from './components/features/RiskRadarPanel'
+import MarketSentimentAnalyzer from './components/features/MarketSentimentAnalyzer'
+import AlgoGridArchitect from './components/features/AlgoGridArchitect'
+import BacktestArenaPanel from './components/features/BacktestArenaPanel'
+import SystemOverview from './components/features/SystemOverview'
+import NeuralNetLiquidity from './components/features/NeuralNetLiquidity'
+
+import DarkPoolSonar from './components/features/DarkPoolSonar'
+import FlashCrashMatrix from './components/features/FlashCrashMatrix'
+import GalaxyView from './components/features/GalaxyView'
+import SentimentWordCloud from './components/features/SentimentWordCloud'
+import GasHologram from './components/features/GasHologram'
+
+import VolatilityMatrix from './components/features/VolatilityMatrix'
+import WhaleSonarSweep from './components/features/WhaleSonarSweep'
+import WhaleConstellations from './components/features/WhaleConstellations'
+import PredictiveGhosting from './components/features/PredictiveGhosting'
+import NewsSingularity from './components/features/NewsSingularity'
+import HoloTopographicOrderBook from './components/features/HoloTopographicOrderBook'
+import QuantumRiskMap from './components/features/QuantumRiskMap'
+import OrbitalPortfolio from './components/features/OrbitalPortfolio'
+import OracleCopilot from './components/features/OracleCopilot'
+import ArbitrageWormhole from './components/features/ArbitrageWormhole'
+
+import GlobalWeatherSystem from './components/features/GlobalWeatherSystem'
+
+import { TiltWrapper } from './components/TiltWrapper'
+import { setAuthToken } from './auth'
+import NeonToasts from './components/NeonToasts'
+
+const MatrixRain = React.memo(() => {
+  const canvasRef = React.useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%&|<>'.split('');
+    const fontSize = 14;
+    const columns = canvas.width / fontSize;
+    const drops: number[] = [];
+    for (let x = 0; x < columns; x++) drops[x] = 1;
+
+    let rafId: number;
+    const draw = () => {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#0F0'; // Green text
+      ctx.font = fontSize + 'px monospace';
+
+      for (let i = 0; i < drops.length; i++) {
+        const text = letters[Math.floor(Math.random() * letters.length)];
+        ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+        if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+        drops[i]++;
+      }
+      rafId = requestAnimationFrame(draw);
+    };
+    rafId = requestAnimationFrame(draw);
+    return () => cancelAnimationFrame(rafId);
+  }, []);
+
+  return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, opacity: 0.1, pointerEvents: 'none' }} />;
+});
 
 export default function App() {
-  const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral');
-  const [isAuthenticated, setIsAuthenticated] = useState(!!getAuthToken());
-  const [socketConnected, setSocketConnected] = useState(socket.connected);
-  const [password, setPassword] = useState('');
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'analytics' | 'system'>('dashboard');
-  const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
-
+  const [password, setPassword] = useState('')
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [isLoggingIn, setIsLoggingIn] = useState(false)
+  const [socketConnected, setSocketConnected] = useState(false)
+  const [activeTab, setActiveTab] = useState('dashboard') // dashboard, analytics, system
+  const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral')
 
   useEffect(() => {
-    function onConnect() { setSocketConnected(true); }
-    function onDisconnect() { setSocketConnected(false); }
-
-    socket.on('connect', onConnect);
-    socket.on('disconnect', onDisconnect);
-
+    const handleConnect = () => setSocketConnected(true)
+    const handleDisconnect = () => setSocketConnected(false)
+    socket.on('connect', handleConnect)
+    socket.on('disconnect', handleDisconnect)
+    if(socket.connected) { setTimeout(() => setSocketConnected(true), 0) }
     return () => {
-      socket.off('connect', onConnect);
-      socket.off('disconnect', onDisconnect);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleAuthError = () => setIsAuthenticated(false);
-    window.addEventListener('auth_error', handleAuthError);
-    return () => window.removeEventListener('auth_error', handleAuthError);
-  }, []);
-
-  // Auto-update global sentiment based on TA data
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const fetchGlobalSentiment = async () => {
-        try {
-            const targetSymbol = activeSymbol;
-
-            const taData = await callMcpEndpoint('MCP_TA', 'compute_indicators', { exchange: 'binance', symbol: targetSymbol, timeframe: '1h' });
-            if (taData && taData.signal) {
-                if (taData.signal === 'buy') { setSentiment('bull'); document.body.setAttribute('data-sentiment', 'bull'); }
-                else if (taData.signal === 'sell') { setSentiment('bear'); document.body.setAttribute('data-sentiment', 'bear'); }
-                else { setSentiment('neutral'); document.body.setAttribute('data-sentiment', 'neutral'); }
-            }
-        } catch (err) {
-            console.error("Failed to fetch TA for global sentiment", err);
-        }
-    };
-
-
-    let timeoutId: ReturnType<typeof setTimeout>;
-    let isCancelled = false;
-
-    const fetchGlobalSentimentWithPolling = async () => {
-      if (isCancelled) return;
-      try {
-        await fetchGlobalSentiment();
-      } finally {
-        if (!isCancelled) {
-          timeoutId = setTimeout(fetchGlobalSentimentWithPolling, 120000);
-        }
-      }
-    };
-
-    fetchGlobalSentimentWithPolling();
-    return () => {
-      isCancelled = true;
-      clearTimeout(timeoutId);
-    };
-  }, [isAuthenticated, activeSymbol]);
+      socket.off('connect', handleConnect)
+      socket.off('disconnect', handleDisconnect)
+    }
+  }, [])
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,6 +156,7 @@ export default function App() {
     <div style={{ position: 'relative', minHeight: '100vh', background: '#020205' }}>
       <GlobalWeatherSystem sentiment={sentiment} />
       <MatrixRain />
+      <NeonToasts />
       <div className="bg-sentiment" style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none' }}></div>
       <div className="scanline-effect"></div>
       {/* Background grid effect */}
