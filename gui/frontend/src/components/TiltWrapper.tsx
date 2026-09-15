@@ -40,4 +40,5 @@ const TiltWrapper: React.FC<{ children: React.ReactNode, className?: string, sty
   );
 });
 
+export { TiltWrapper };
 export default TiltWrapper;

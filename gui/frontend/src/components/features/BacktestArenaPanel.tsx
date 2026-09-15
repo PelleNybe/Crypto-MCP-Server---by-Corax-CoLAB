@@ -340,7 +340,7 @@ export default function BacktestArenaPanel() {
           <input
             type="range" aria-label="Playback progress"
             title="Playback progress"
-            placeholder="Playback progress"
+
             min="0"
             max="100"
             value={progress}

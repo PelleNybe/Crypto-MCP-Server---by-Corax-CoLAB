@@ -4,6 +4,7 @@ import { authenticatedFetch } from "../auth"
 import React, { useState, useEffect } from 'react'
 import { useDebounce } from '../hooks/useDebounce'
 import { useToast } from '../hooks/useToast'
+import Tooltip from "./Tooltip";
 
 export default function OrderPanel(){
   const [exchange,setExchange]=useState('binance')
@@ -45,7 +46,7 @@ export default function OrderPanel(){
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange,symbol,side,type,amount,price})})
     const j = await resp.json()
-    if (j.ok) setPreview(j.data); else addToast(j.error, 'info')
+    if (j.ok) setPreview(j.data); else addToast(j.error, 'error')
     setTimeout(() => setRoutingActive(false), 2000)
   }, [exchange, symbol, side, type, amount, price, addToast]);
 
@@ -54,37 +55,71 @@ export default function OrderPanel(){
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/execute', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange,symbol,side,type,amount,price,execute:true})})
     const j = await resp.json()
-    if (j.ok) { setResult(j.data); addToast('Order placed') } else addToast(j.error, 'info')
+    if (j.ok) { setResult(j.data); addToast('Order placed', 'success') } else addToast(j.error, 'error')
     setTimeout(() => setRoutingActive(false), 2000)
   }, [exchange, symbol, side, type, amount, price, addToast]);
 
   return (
-    <div className="card interactive-element">
-      <h3>Order / Trade</h3>
-      <div style={{display:'grid',gap:8}}>
-        <label htmlFor="exchangeInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Exchange</label>
-        <label htmlFor="exchangeInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Exchange</label><input id="exchangeInput" title="Exchange (e.g. binance)" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} />
-        <label htmlFor="symbolInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Symbol</label>
-        <label htmlFor="symbolInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Symbol</label><input id="symbolInput" title="Symbol (e.g. BTC/USDT)" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} />
-        <div style={{display:'flex',gap:8}}>
-          <label htmlFor="sideSelect" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Order Side</label>
-          <select id="sideSelect" title="Order Side" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)}><option>buy</option><option>sell</option></select>
-          <label htmlFor="typeSelect" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Order Type</label>
-          <select id="typeSelect" title="Order Type" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)}><option>market</option><option>limit</option></select>
+    <div className="card interactive-element glass-panel">
+      <h3 className="glitch" data-text="Terminal Order Execution">Terminal Order Execution</h3>
+      <div style={{display:'grid',gap:12}}>
+
+        <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+          <label htmlFor="exchangeInput" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Exchange Node</label>
+          <input id="exchangeInput" title="Exchange (e.g. binance)" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
         </div>
-        <label htmlFor="amountInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Amount</label>
-        <label htmlFor="amountInput" className="sr-only" style={{position: "absolute", width: "1px", height: "1px", overflow: "hidden", clip: "rect(0,0,0,0)"}}>Amount</label><input id="amountInput" title="Amount" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} />
-        {type==='limit' && <><label htmlFor="priceInput" style={{position: 'absolute', width: '1px', height: '1px', overflow: 'hidden', clip: 'rect(0,0,0,0)'}}>Limit Price</label><input id="priceInput" title="Price" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} /></>}
-        <div style={{display:'flex',gap:8}}>
-          <button className="btn-primary" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive} aria-busy={routingActive} aria-live="polite">{routingActive ? "Routing..." : "Force Preview"}</button>
-          <button onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite">{routingActive ? "Placing..." : "Place"}</button>
+
+        <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+           <label htmlFor="symbolInput" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Asset Target</label>
+           <input id="symbolInput" title="Symbol (e.g. BTC/USDT)" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
         </div>
-        {preview && <pre style={{background:'#334155',padding:8, overflowX: 'auto'}}>{JSON.stringify(preview,null,2)}</pre>}
-        {result && <pre style={{background:'#064e3b',padding:8, overflowX: 'auto'}}>{JSON.stringify(result,null,2)}</pre>}
+
+        <div style={{display:'flex',gap:12}}>
+          <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 1}}>
+             <label htmlFor="sideSelect" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Protocol Directive</label>
+             <select id="sideSelect" title="Order Side" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: side === 'buy' ? '#10b981' : '#ef4444', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
+               <option value="buy">Initiate Buy</option>
+               <option value="sell">Execute Sell</option>
+             </select>
+          </div>
+          <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 1}}>
+             <label htmlFor="typeSelect" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Execution Type</label>
+             <select id="typeSelect" title="Order Type" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#60a5fa', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
+               <option value="market">Market</option>
+               <option value="limit">Limit</option>
+             </select>
+          </div>
+        </div>
+
+        <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+           <label htmlFor="amountInput" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Quantity Vector</label>
+           <input id="amountInput" title="Amount" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+        </div>
+
+        {type==='limit' && (
+          <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
+             <label htmlFor="priceInput" className="small-muted" style={{textTransform: 'uppercase', fontSize: '10px'}}>Target Limit</label>
+             <input id="priceInput" title="Price" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+          </div>
+        )}
+
+        <div style={{display:'flex',gap:12, marginTop: '10px'}}>
+          <Tooltip text="Calculate potential fees and exact amounts without placing real order">
+             <button className="btn-outline" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 1, padding: '10px', fontSize: '12px'}}>{routingActive ? "Routing..." : "Force Preview"}</button>
+          </Tooltip>
+          <Tooltip text="Execute live market/limit order immediately">
+             <button className={side === 'buy' ? "btn-primary" : "btn-danger"} onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 2, padding: '10px', fontSize: '14px', letterSpacing: '1px', fontWeight: 'bold'}}>{routingActive ? "Placing..." : `Confirm ${side.toUpperCase()}`}</button>
+          </Tooltip>
+        </div>
+        {preview && <pre style={{background:'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#94a3b8'}}>{JSON.stringify(preview,null,2)}</pre>}
+        {result && <pre style={{background:'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#10b981'}}>{JSON.stringify(result,null,2)}</pre>}
       </div>
       {/* Neural Trade Visualizer Overlay Component */}
       <div style={{ marginTop: '20px' }}>
-          <h4 style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase', marginBottom: '8px' }}>Smart Routing Diagnostics</h4>
+          <h4 style={{ fontSize: '12px', color: '#888', textTransform: 'uppercase', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '5px' }}>
+            <div className={routingActive ? "status-indicator-live" : ""} style={{width: '6px', height: '6px', borderRadius: '50%', background: routingActive ? '#10b981' : '#334155'}}></div>
+            Smart Routing Diagnostics
+          </h4>
           <NeuralTradeVisualizer active={routingActive} exchange={exchange} symbol={symbol} />
       </div>
     </div>

@@ -1,9 +1,11 @@
 import { authenticatedFetch } from "../auth"
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import OrbitalPortfolio from './features/OrbitalPortfolio'
+import Tooltip from './Tooltip'
 import socket from '../socket'
 import AssetUniverse from './features/AssetUniverse'
 import CyberpunkLoader from './CyberpunkLoader'
+
 
 // Memoized table row component for list rendering performance
 const PortfolioRow = React.memo(({ d, total }: { d: any, total: number }) => (
@@ -16,7 +18,6 @@ const PortfolioRow = React.memo(({ d, total }: { d: any, total: number }) => (
 ));
 
 export default function PortfolioPanel() {
-  const [glitchKey, setGlitchKey] = useState(0);
   const [details, setDetails] = useState<any[]>([])
   const [total, setTotal] = useState<number>(0)
   const [viewMode, setViewMode] = useState<'3d' | 'list'>('3d')
@@ -58,26 +59,30 @@ export default function PortfolioPanel() {
       {!dataLoaded ? <CyberpunkLoader message="Syncing Assets..." /> :
       <>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center', marginBottom: '1rem'}}>
-        <h3 style={{margin: 0}}>Asset Universe</h3>
+        <h3 style={{margin: 0}} className="glitch" data-text="Asset Universe">Asset Universe</h3>
         <div style={{display:'flex', gap: '0.5rem'}}>
-          <button
-            onClick={() => setViewMode('3d')}
-            aria-label="View Asset Universe in 3D HUD"
-            aria-pressed={viewMode === '3d'}
-            className="btn-outline"
-            style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === '3d' ? 1 : 0.5}}
-          >
-            3D HUD
-          </button>
-          <button
-            onClick={() => setViewMode('list')}
-            aria-label="View Asset Universe as List"
-            aria-pressed={viewMode === 'list'}
-            className="btn-outline"
-            style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === 'list' ? 1 : 0.5}}
-          >
-            LIST
-          </button>
+          <Tooltip text="View Asset Universe in 3D HUD">
+            <button
+              onClick={() => setViewMode('3d')}
+              aria-label="View Asset Universe in 3D HUD"
+              aria-pressed={viewMode === '3d'}
+              className="btn-outline"
+              style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === '3d' ? 1 : 0.5}}
+            >
+              3D HUD
+            </button>
+          </Tooltip>
+          <Tooltip text="View Asset Universe as List">
+            <button
+              onClick={() => setViewMode('list')}
+              aria-label="View Asset Universe as List"
+              aria-pressed={viewMode === 'list'}
+              className="btn-outline"
+              style={{padding: '0.2rem 0.5rem', fontSize: '0.8rem', opacity: viewMode === 'list' ? 1 : 0.5}}
+            >
+              LIST
+            </button>
+          </Tooltip>
         </div>
       </div>
 
@@ -85,7 +90,7 @@ export default function PortfolioPanel() {
         <div style={{fontSize:28,fontWeight:900, color: '#10b981', textShadow: '0 0 10px rgba(16, 185, 129, 0.4)'}}>
           ${total ? total.toFixed(2) : '—'}
         </div>
-        <div className="small-muted" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
+        <div className="small-muted status-indicator-live" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
       </div>
 
       {viewMode === '3d' ? (
