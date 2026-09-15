@@ -203,7 +203,7 @@ export default function PredictiveGhosting() {
             <input
                 type="range" aria-label="Scrub forward in time"
                 title="Timeline Scrubber"
-                placeholder="Timeline Scrubber"
+
                 min="0"
                 max="20"
                 value={scrubberValue}
