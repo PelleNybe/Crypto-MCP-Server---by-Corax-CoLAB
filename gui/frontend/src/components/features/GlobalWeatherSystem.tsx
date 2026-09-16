@@ -94,10 +94,10 @@ const Particles = React.memo(({ sentiment }: { sentiment: 'bull' | 'bear' | 'neu
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ marketSentiment }: { marketSentiment: string }) => {
+const CanvasScene = ({ sentiment }: { sentiment: string }) => {
   return (
 <Canvas camera={{ position: [0, 0, 15], fov: 75 }}>
-        <Particles sentiment={sentiment} />
+        <Particles sentiment={sentiment as 'bull' | 'bear' | 'neutral'} />
       </Canvas>
   );
 };
@@ -129,7 +129,7 @@ export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentime
 
   return (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none', opacity: sentiment === 'neutral' ? 0.3 : 0.8 }}>
-      <CanvasScene marketSentiment={marketSentiment} />
+      <CanvasScene sentiment={sentiment as 'bull' | 'bear' | 'neutral'} />
 
       {/* Glitch Overlay for Bear Market */}
       {sentiment === 'bear' && (

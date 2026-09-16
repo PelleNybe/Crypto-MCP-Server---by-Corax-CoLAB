@@ -212,3 +212,5 @@ node_modules/
 
 # Trading Diary Reports
 trading_diary/*.md
+gui/backend/orders.db-shm
+gui/backend/orders.db-wal
