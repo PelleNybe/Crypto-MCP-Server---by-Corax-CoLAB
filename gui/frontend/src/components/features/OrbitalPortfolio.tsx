@@ -159,7 +159,7 @@ const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }:
               <bufferAttribute
                  attach="attributes-position"
                  count={500}
-                 array={new Float32Array(1500).map((_, i) => (Math.sin(i * (totalValue || 123.456)) * 100))}
+                 array={React.useMemo(() => new Float32Array(1500).map((_, i) => (Math.sin(i * (totalValue || 123.456)) * 100)), [totalValue])}
                  itemSize={3}
               />
            </bufferGeometry>

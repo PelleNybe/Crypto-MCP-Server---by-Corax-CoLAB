@@ -43,6 +43,18 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
+  const renderedBids = useMemo(() => {
+    return orderBook.bids.map((bid: any, index: number) => (
+      <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={orderBook.maxVolume} index={index} />
+    ));
+  }, [orderBook.bids, orderBook.maxVolume]);
+
+  const renderedAsks = useMemo(() => {
+    return orderBook.asks.map((ask: any, index: number) => (
+      <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={orderBook.maxVolume} index={index} />
+    ));
+  }, [orderBook.asks, orderBook.maxVolume]);
+
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 45 }}>
           <color attach="background" args={['#020205']} />
@@ -64,14 +76,10 @@ const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) 
           </group>
 
           {/* Render Bids */}
-          {orderBook.bids.map((bid: any, index: number) => (
-            <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={orderBook.maxVolume} index={index} />
-          ))}
+          {renderedBids}
 
           {/* Render Asks */}
-          {orderBook.asks.map((ask: any, index: number) => (
-            <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={orderBook.maxVolume} index={index} />
-          ))}
+          {renderedAsks}
 
           <OrbitControls
             enablePan={true}

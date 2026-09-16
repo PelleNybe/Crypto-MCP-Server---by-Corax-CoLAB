@@ -40,15 +40,19 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ words }: { words: any[] }) => {
+  const wordComponents = React.useMemo(() => {
+    return words.map((w, i) => (
+        <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
+    ));
+  }, [words]);
+
   return (
 <Canvas camera={{ position: [0, 0, 16], fov: 50 }}>
               <ambientLight intensity={1} />
               <fog attach="fog" args={['#020205', 10, 25]} />
 
               <group>
-                  {words.map((w, i) => (
-                      <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
-                  ))}
+                  {wordComponents}
               </group>
 
               {/* Connecting lines sphere effect */}
