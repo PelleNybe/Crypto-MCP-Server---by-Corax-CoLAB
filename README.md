@@ -1,5 +1,7 @@
 # 🌌 Crypto MCP Server & Hedgehog Agentic Trading Dashboard 🦔
 
+**A Professional-Grade, Fully Localized AI Hedge Fund Orchestrator.**
+
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![Node.js 20+](https://img.shields.io/badge/node-20+-brightgreen.svg)](https://nodejs.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
