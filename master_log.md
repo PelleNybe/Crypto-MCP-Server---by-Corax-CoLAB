@@ -188,3 +188,11 @@ See ../master_log.md
 - **Accessibility**: Inputs in `OrderPanel` lacked associated `<label>` elements. Added visually hidden labels tied via `htmlFor`.
 - **Visual Polish**: Table rows lacked hover interactions. Added `table-row-hover` class.
 **Action:** Applied Keep-Alive agents, Axios strict size bounds, useMemo dependency fixes, semantic ARIA labels, and CSS transition hover states.
+
+## 2026-09-18 - Rules of Hooks in ThreeJS Fiber Components
+**Learning:** Wrapping an entire mapped element list inside JSX (e.g. `{useMemo(() => arr.map(...), [])}`) or directly in a prop violates React's Rules of Hooks because hooks must be called at the top level of a function component, not inside a JSX tree or conditionally.
+**Action:** Always extract the `useMemo` computation to the top level of the functional component before the `return` statement, and assign it to a variable (e.g. `const renderedList = useMemo(...)`), then reference that variable inside the JSX.
+
+## 2026-09-18 - Heavy Array instantiations in ThreeJS
+**Learning:** In Three.js Canvas components, constructing heavy structures like `new Float32Array(1500).map(...)` inside JSX props causes the array to be discarded and recreated on every render tick, significantly degrading performance.
+**Action:** Extract large or complex object/array instantiations (like `Float32Array`) into `useMemo` blocks dependent only on the variables that alter them.
