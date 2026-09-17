@@ -86,6 +86,8 @@ Claude Desktop communicates via JSON-RPC with the Crypto MCP Server backend (RES
 <div align="center">
   <img width="800" alt="Architectural Overview" src="./gui/frontend/public/images/architecture.jpg" style="border-radius: 12px; margin-bottom: 20px; border: 1px solid #333; box-shadow: 0 4px 15px rgba(0,255,150,0.1);" onerror="this.style.display='none'" />
 </div>
+
+> 📸 **[INSERT LATEST GUI SCREENSHOT HERE]** *(Please upload the latest working system screenshot or animation here)*
 </details>
 
 <details>
