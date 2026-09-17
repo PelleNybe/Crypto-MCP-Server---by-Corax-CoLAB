@@ -11,7 +11,7 @@ const MatrixBar = React.memo(({ position, height, color, opacity, label }: { pos
             <mesh position={[0, height / 2, 0]}>
                 <boxGeometry args={[0.8, height, 0.8]} />
                 <meshStandardMaterial color={color}
-                              opacity={opacity} emissive={color} emissiveIntensity={opacity * 2} transparent opacity={opacity} />
+                              emissive={color} emissiveIntensity={opacity * 2} transparent opacity={opacity} />
             </mesh>
             <Text position={[0, -0.5, 0]} fontSize={0.3} color="#cbd5e1" anchorX="center" anchorY="middle" rotation={[-Math.PI / 2, 0, 0]}>
                 {label}

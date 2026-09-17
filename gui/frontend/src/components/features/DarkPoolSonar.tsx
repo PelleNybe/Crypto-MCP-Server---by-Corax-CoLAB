@@ -38,7 +38,7 @@ const SonarPing = React.memo(({ position, color, size, onComplete }: { position:
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { activeSymbolHook: string, trades: any[], pings: any[], onPingComplete: any }) => {
+const CanvasScene = ({ pings, onPingComplete }: { pings: any[], onPingComplete: any }) => {
   return (
 <Canvas camera={{ position: [0, 8, 8], fov: 60 }}>
               <ambientLight intensity={0.5} />
@@ -58,7 +58,7 @@ const CanvasScene = ({ activeSymbolHook, trades, pings, onPingComplete }: { acti
                         position={ping.position}
                         color={ping.color}
                         size={ping.size}
-                        onComplete={() => removePing(ping.id)}
+                        onComplete={() => onPingComplete(ping.id)}
                     />
                     <Html position={[ping.position[0], 0.5, ping.position[2]]} center>
                         <div style={{ color: ping.color, fontSize: '10px', fontFamily: 'monospace', pointerEvents: 'none', background: 'rgba(0,0,0,0.7)', padding: '4px 6px', borderRadius: '4px', border: `1px solid ${ping.color}`, textShadow: `0 0 5px ${ping.color}` }}>
@@ -152,7 +152,7 @@ export default function DarkPoolSonar() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <CanvasScene activeSymbolHook={activeSymbolHook} trades={trades} pings={pings} onPingComplete={onPingComplete} />
+          <CanvasScene pings={pings} onPingComplete={removePing} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
               SCANNING {activeExchangeUpper} {activeSymbolHook}
