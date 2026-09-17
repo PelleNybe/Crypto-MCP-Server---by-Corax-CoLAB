@@ -157,18 +157,24 @@ export default function BacktestArenaPanel() {
 
   // Optimization: Pre-calculate the mapped arrays once per historical dataset to avoid
   // heavy O(N) array transformations on every 100ms playback tick.
+  // We use a single loop to populate the arrays (O(N) instead of O(N * 9)).
   const mappedData = useMemo(() => {
-    return {
-      date: historicalData.map(d => d.date),
-      close: historicalData.map(d => d.close),
-      high: historicalData.map(d => d.high),
-      low: historicalData.map(d => d.low),
-      open: historicalData.map(d => d.open),
-      shortSMA: historicalData.map(d => d.shortSMA),
-      longSMA: historicalData.map(d => d.longSMA),
-      buys: historicalData.map(d => d.trade === 'BUY' ? d : null),
-      sells: historicalData.map(d => d.trade === 'SELL' ? d : null)
+    const result: Record<string, any[]> = {
+      date: [], close: [], high: [], low: [], open: [], shortSMA: [], longSMA: [], buys: [], sells: []
     };
+    for (let i = 0; i < historicalData.length; i++) {
+        const d = historicalData[i];
+        result.date.push(d.date);
+        result.close.push(d.close);
+        result.high.push(d.high);
+        result.low.push(d.low);
+        result.open.push(d.open);
+        result.shortSMA.push(d.shortSMA);
+        result.longSMA.push(d.longSMA);
+        result.buys.push(d.trade === 'BUY' ? d : null);
+        result.sells.push(d.trade === 'SELL' ? d : null);
+    }
+    return result;
   }, [historicalData]);
 
   // Render Chart
