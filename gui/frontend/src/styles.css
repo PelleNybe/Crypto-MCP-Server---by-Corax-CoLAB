@@ -361,5 +361,5 @@ body[data-sentiment='bear'] { --primary-glow: rgba(239, 68, 68, 0.6); --primary-
 body[data-sentiment='neutral'] { --primary-glow: rgba(96, 165, 250, 0.6); --primary-border: #60a5fa; }
 
 /* Focus outline accessibility */
-button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
+button:focus-visible, input:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
 button:focus:not(:focus-visible) { outline: none; }

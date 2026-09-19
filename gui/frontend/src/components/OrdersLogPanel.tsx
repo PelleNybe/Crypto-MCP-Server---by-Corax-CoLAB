@@ -61,11 +61,15 @@ export default function OrdersLogPanel() {
 
     const handleOrderPlaced = (o: any) => {
       setOrders(prev => [o, ...prev]);
-      addToast(`Order placed: ${o.side.toUpperCase()} ${o.amount} ${o.symbol}`, 'success');
+      // Optimization: Pre-calculate toUpperCase to prevent redundant operations
+      const sideUpper = o.side ? o.side.toUpperCase() : 'UNKNOWN';
+      addToast(`Order placed: ${sideUpper} ${o.amount} ${o.symbol}`, 'success');
     };
     const handleOrderPending = (o: any) => {
       setOrders(prev => [o, ...prev]);
-      addToast(`Order pending approval: ${o.side.toUpperCase()} ${o.amount} ${o.symbol}`, 'warning');
+      // Optimization: Pre-calculate toUpperCase to prevent redundant operations
+      const sideUpper = o.side ? o.side.toUpperCase() : 'UNKNOWN';
+      addToast(`Order pending approval: ${sideUpper} ${o.amount} ${o.symbol}`, 'warning');
     };
 
     socket.on('order_placed', handleOrderPlaced);
