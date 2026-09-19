@@ -430,7 +430,7 @@ app.get('/api/portfolio', async (req, res) => {
 // GET /api/ticker
 
 // GET /api/mcp
-app.post('/api/mcp', async (req, res) => {
+app.post('/api/mcp', sensitiveLimiter, async (req, res) => {
   const { mcp, method, params } = req.body || {};
   if (!mcp || typeof mcp !== 'string' || !method || typeof method !== 'string') return res.status(400).json({ ok: false, error: 'Missing or invalid mcp or method' });
   if (mcp.length > 50 || method.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
@@ -597,17 +597,6 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
   }
 });
 
-// GET /api/orders
-app.get('/api/orders_old', (req, res) => {
-  db.all('SELECT * FROM orders ORDER BY created_at DESC LIMIT 100', [], (err, rows) => {
-    if (err) {
-      console.error('Database query failed:', err);
-      return res.status(500).json({ ok:false, error: 'Database query failed' });
-    }
-    res.json({ ok:true, data: rows });
-  });
-});
-
 /* Socket.io + periodic polling */
 const server = http.createServer(app);
 const io = new Server(server, {
@@ -678,7 +667,7 @@ app.get("/api/strategies", (req, res) => {
 });
 
 // POST /api/strategies
-app.post("/api/strategies", (req, res) => {
+app.post("/api/strategies", sensitiveLimiter, (req, res) => {
   const { name, nodes, connections, active } = req.body || {};
   if (!name || !nodes || !connections) {
     return res.status(400).json({ ok: false, error: "Missing required fields" });
