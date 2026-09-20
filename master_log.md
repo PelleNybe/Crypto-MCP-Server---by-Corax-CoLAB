@@ -196,3 +196,13 @@ See ../master_log.md
 ## 2026-09-18 - Heavy Array instantiations in ThreeJS
 **Learning:** In Three.js Canvas components, constructing heavy structures like `new Float32Array(1500).map(...)` inside JSX props causes the array to be discarded and recreated on every render tick, significantly degrading performance.
 **Action:** Extract large or complex object/array instantiations (like `Float32Array`) into `useMemo` blocks dependent only on the variables that alter them.
+## 2026-09-20 - 4+ Performance, Security, and Accessibility Enhancements
+**Learning:** Found multiple areas where performance, security, and accessibility were degraded.
+- **Frontend Performance**: The background `<canvas>` animation `MatrixRain` set dimensions on mount but didn't have a `resize` listener, meaning if the window resized, it would stretch poorly or fail to render new columns. Code-splitting using `React.lazy()` was missing, causing all 3D features to be bundled into one massive javascript file.
+- **Accessibility**: The top-level tab buttons for switching views (`Dashboard`, `Analytics`, `System Logs`) were inside a regular `div` lacking `role="tablist"` and `role="tab"`, breaking standard keyboard/screen reader expectations.
+- **Backend Security**: The `/api/mcp` endpoint proxy verified strings, but `params` could be injected as a maliciously crafted array instead of an object, potentially crashing underlying endpoints anticipating a dict.
+**Action:**
+- Added a debounced `resize` listener to `MatrixRain`.
+- Refactored `App.tsx` imports from static to dynamic `React.lazy` loading for 3D elements, leveraging the existing `Suspense` boundary effectively to decrease initial load bundle.
+- Applied `role="tablist"`, `role="tab"`, and `aria-selected` attributes to the main navigation menu.
+- Enforced `typeof params === 'object' && !Array.isArray(params)` in the proxy API to validate JSON-RPC compatibility.
