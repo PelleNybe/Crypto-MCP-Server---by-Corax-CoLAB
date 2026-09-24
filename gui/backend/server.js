@@ -560,7 +560,8 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
 
     // Build exchange-specific params safely, merging provided routing parameters
     const exchangeKey = (exchange || '').toLowerCase();
-    let exchangeParams = Object.assign({}, (params && typeof params === 'object') ? params : {});
+    // Ensure params is an object to prevent Array injection DoS
+    let exchangeParams = Object.assign({}, (params && typeof params === 'object' && !Array.isArray(params)) ? params : {});
 
     const orderArgs = {
       exchange,
