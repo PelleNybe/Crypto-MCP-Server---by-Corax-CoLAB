@@ -9,7 +9,7 @@ import TickerPanel from './components/TickerPanel'
 import OrderPanel from './components/OrderPanel'
 import OrdersLogPanel from './components/OrdersLogPanel'
 
-import RiskRadarPanel from './components/features/RiskRadarPanel'
+const RiskRadarPanel = React.lazy(() => import('./components/features/RiskRadarPanel'))
 import MarketSentimentAnalyzer from './components/features/MarketSentimentAnalyzer'
 import AlgoGridArchitect from './components/features/AlgoGridArchitect'
 import BacktestArenaPanel from './components/features/BacktestArenaPanel'
@@ -18,20 +18,20 @@ import NeuralNetLiquidity from './components/features/NeuralNetLiquidity'
 
 import DarkPoolSonar from './components/features/DarkPoolSonar'
 import FlashCrashMatrix from './components/features/FlashCrashMatrix'
-import GalaxyView from './components/features/GalaxyView'
+const GalaxyView = React.lazy(() => import('./components/features/GalaxyView'))
 import SentimentWordCloud from './components/features/SentimentWordCloud'
-import GasHologram from './components/features/GasHologram'
+const GasHologram = React.lazy(() => import('./components/features/GasHologram'))
 
 import VolatilityMatrix from './components/features/VolatilityMatrix'
 import WhaleSonarSweep from './components/features/WhaleSonarSweep'
-import WhaleConstellations from './components/features/WhaleConstellations'
+const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'))
 import PredictiveGhosting from './components/features/PredictiveGhosting'
 import NewsSingularity from './components/features/NewsSingularity'
-import HoloTopographicOrderBook from './components/features/HoloTopographicOrderBook'
-import QuantumRiskMap from './components/features/QuantumRiskMap'
+const HoloTopographicOrderBook = React.lazy(() => import('./components/features/HoloTopographicOrderBook'))
+const QuantumRiskMap = React.lazy(() => import('./components/features/QuantumRiskMap'))
 import OrbitalPortfolio from './components/features/OrbitalPortfolio'
 import OracleCopilot from './components/features/OracleCopilot'
-import ArbitrageWormhole from './components/features/ArbitrageWormhole'
+const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'))
 
 import GlobalWeatherSystem from './components/features/GlobalWeatherSystem'
 
@@ -218,11 +218,11 @@ export default function App() {
       </div>
 
       <div className="main-grid" style={{ position: 'relative', zIndex: 1, padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
-      <React.Suspense fallback={<div style={{color: '#10b981', textAlign: 'center', gridColumn: '1 / -1'}}>Loading Dashboard Elements...</div>}>
 
 
 
 
+      <React.Suspense fallback={<div style={{color: '#10b981', textAlign: 'center', padding: '20px'}}>Loading Holographic Components...</div>}>
         {activeTab === 'dashboard' && (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
