@@ -206,3 +206,15 @@ See ../master_log.md
 - Refactored `App.tsx` imports from static to dynamic `React.lazy` loading for 3D elements, leveraging the existing `Suspense` boundary effectively to decrease initial load bundle.
 - Applied `role="tablist"`, `role="tab"`, and `aria-selected` attributes to the main navigation menu.
 - Enforced `typeof params === 'object' && !Array.isArray(params)` in the proxy API to validate JSON-RPC compatibility.
+
+## 2026-09-21 - 4+ Performance, Security, and Accessibility Enhancements
+**Learning:** Found multiple areas across the stack to improve performance, tighten security bounds, and improve accessibility.
+- **Frontend Code Splitting**: Heavy 3D components were being statically imported in `App.tsx`, causing large initial bundle sizes and slow Time to Interactive (TTI).
+- **Backend Performance**: Node.js `axios` internal requests defaulted to recreating TCP connections.
+- **Accessibility**: Cyberpunk Navigation Tabs in `App.tsx` were built with generic divs and buttons, breaking standard screen reader tab navigation patterns.
+- **Backend Security**: While some `req.query` params were checked, incoming JSON-RPC `params` objects were not strictly verified to not be an array, creating a potential DoS vector.
+**Action:**
+- Refactored `gui/frontend/src/App.tsx` to dynamically import heavy 3D feature components using `React.lazy` inside the existing `<React.Suspense>` boundary.
+- Verified and enforced `mcpHttpAgent` uses `keepAlive: true` for Axios.
+- Upgraded the tab container to `role="tablist"`, and added `role="tab"` + `aria-selected` to the tab buttons.
+- Added strict `!Array.isArray(params)` validation to the `/api/mcp` endpoint proxy.
