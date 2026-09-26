@@ -44,8 +44,9 @@ const Constellation = React.memo(({ nodes, links }: { nodes: any[], links: any[]
         const points = [startNode.pos, endNode.pos];
 
         return (
+          // Performance Improvement: Replaced index with unique string key to prevent React render state bugs
           <Line
-            key={i}
+            key={`${l.source}-${l.target}`}
             points={points}
             color="#3b82f6"
             lineWidth={l.value}

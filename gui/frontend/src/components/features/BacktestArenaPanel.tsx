@@ -160,7 +160,7 @@ export default function BacktestArenaPanel() {
   // We use a single loop to populate the arrays (O(N) instead of O(N * 9)).
   const mappedData = useMemo(() => {
     const result: Record<string, any[]> = {
-      date: [], close: [], high: [], low: [], open: [], shortSMA: [], longSMA: [], buys: [], sells: []
+      date: [], close: [], high: [], low: [], open: [], shortSMA: [], longSMA: [], buys: [], sells: [], buyDates: [], buyY: [], sellDates: [], sellY: []
     };
     for (let i = 0; i < historicalData.length; i++) {
         const d = historicalData[i];
@@ -171,8 +171,15 @@ export default function BacktestArenaPanel() {
         result.open.push(d.open);
         result.shortSMA.push(d.shortSMA);
         result.longSMA.push(d.longSMA);
-        result.buys.push(d.trade === 'BUY' ? d : null);
-        result.sells.push(d.trade === 'SELL' ? d : null);
+        if (d.trade === 'BUY') {
+            result.buys.push(i);
+            result.buyDates.push(d.date);
+            result.buyY.push(d.low - (d.close * 0.02));
+        } else if (d.trade === 'SELL') {
+            result.sells.push(i);
+            result.sellDates.push(d.date);
+            result.sellY.push(d.high + (d.close * 0.02));
+        }
     }
     return result;
   }, [historicalData]);
@@ -216,12 +223,13 @@ export default function BacktestArenaPanel() {
       name: 'SMA(20)'
     };
 
-    const visibleBuys = mappedData.buys.slice(0, visibleIndex).filter(d => d !== null) as any[];
-    const visibleSells = mappedData.sells.slice(0, visibleIndex).filter(d => d !== null) as any[];
+    // Optimization: Filter pre-mapped index arrays to find visible items, avoiding .map() inside render loops
+    const visibleBuysCount = mappedData.buys.filter((i: number) => i < visibleIndex).length;
+    const visibleSellsCount = mappedData.sells.filter((i: number) => i < visibleIndex).length;
 
     const traceBuys = {
-      x: visibleBuys.map(d => d.date),
-      y: visibleBuys.map(d => d.low - (d.close * 0.02)), // Offset below low
+      x: mappedData.buyDates.slice(0, visibleBuysCount),
+      y: mappedData.buyY.slice(0, visibleBuysCount),
       mode: 'markers',
       type: 'scatter',
       marker: { symbol: 'triangle-up', size: 10, color: '#10b981', line: {width: 2, color: '#fff'} },
@@ -229,8 +237,8 @@ export default function BacktestArenaPanel() {
     };
 
     const traceSells = {
-      x: visibleSells.map(d => d.date),
-      y: visibleSells.map(d => d.high + (d.close * 0.02)), // Offset above high
+      x: mappedData.sellDates.slice(0, visibleSellsCount),
+      y: mappedData.sellY.slice(0, visibleSellsCount),
       mode: 'markers',
       type: 'scatter',
       marker: { symbol: 'triangle-down', size: 10, color: '#ef4444', line: {width: 2, color: '#fff'} },

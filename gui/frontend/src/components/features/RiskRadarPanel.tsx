@@ -205,7 +205,8 @@ export default function RiskRadarPanel() {
 
       <div role="log" aria-live="polite" style={{ marginTop: '1rem', background: 'rgba(0,0,0,0.5)', padding: '10px', borderRadius: '6px', fontFamily: 'monospace', fontSize: '11px', color: '#a3a3a3', height: '80px', overflowY: 'hidden', borderLeft: `3px solid ${defcon === 'RED' ? '#ef4444' : '#334155'}` }}>
         {logs.map((log, i) => (
-          <div key={i} style={{
+          // Performance Improvement: Replaced index with unique string key to prevent React render state bugs
+          <div key={`${log}-${i}`} style={{
             marginBottom: '4px',
             color: log.includes('[ALERT]') || log.includes('RED') ? '#ef4444' : log.includes('[WARN]') || log.includes('YELLOW') ? '#f59e0b' : '#a3a3a3',
             opacity: 1 - (i * 0.2) // fade out older logs
