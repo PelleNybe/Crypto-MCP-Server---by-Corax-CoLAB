@@ -230,3 +230,9 @@ See ../master_log.md
 - Implemented `if (!active) return` logic in `MarketSentimentAnalyzer.tsx` and tracked component mount status using a `useRef` in `OrderPanel.tsx` to halt orphaned state setters.
 - Masked raw API error logs with generic "Order execution failed" text in the backend `/api/order/approve` catch block.
 - Applied `aria-live="polite"` and `role="status"` to dynamic `<pre>` tags in `OrderPanel.tsx`.
+
+## 2024-05-18 - [Accessibility & Performance Optimizations]
+**Learning:** Found multiple areas where performance and accessibility were degraded.
+- **Frontend Performance**: The background `<canvas>` animation `MatrixRain` set dimensions on mount but didn't have a `resize` listener, meaning if the window resized, it would stretch poorly or fail to render new columns. Code-splitting using `React.lazy()` was missing, causing all 3D features to be bundled into one massive javascript file.
+- **Accessibility**: The top-level tab buttons for switching views (`Dashboard`, `Analytics`, `System Logs`) were inside a regular `div` lacking `role="tablist"` and `role="tab"`, breaking standard keyboard/screen reader expectations. Inputs in `OrderPanel` used generic `small-muted` text which isn't effectively hidden from sighted users without sacrificing screen reader accessibility.
+**Action:** Added a debounced `resize` listener to `MatrixRain`. Refactored `App.tsx` imports from static to dynamic `React.lazy` loading for 3D elements. Applied `role="tablist"`, `role="tab"`, and `aria-selected` attributes to the main navigation menu. Added `.sr-only` class to visually hide input labels in `OrderPanel.tsx` while keeping them accessible.
