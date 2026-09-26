@@ -435,6 +435,11 @@ app.post('/api/mcp', sensitiveLimiter, async (req, res) => {
   if (!mcp || typeof mcp !== 'string' || !method || typeof method !== 'string') return res.status(400).json({ ok: false, error: 'Missing or invalid mcp or method' });
   if (mcp.length > 50 || method.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
 
+  // Security Fix: Prevent Array injection DoS by ensuring params is strictly a JSON object.
+  if (params && (typeof params !== 'object' || Array.isArray(params))) {
+    return res.status(400).json({ ok: false, error: 'params must be a JSON-RPC compliant object' });
+  }
+
   if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
     return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
   }
@@ -818,7 +823,8 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
 
 // POST /api/order/reasoning
 // Log AI reasoning for a specific order.
-app.post('/api/order/reasoning', (req, res) => {
+// Security Fix: Added sensitiveLimiter to prevent DoS attacks on the endpoint
+app.post('/api/order/reasoning', sensitiveLimiter, (req, res) => {
   const { trade_id, explanation } = req.body || {};
   if (typeof trade_id !== 'string' || typeof explanation !== 'string') return res.status(400).json({ ok: false, error: 'Invalid types for trade_id or explanation' });
   if (trade_id.length > 50 || explanation.length > 10000) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });

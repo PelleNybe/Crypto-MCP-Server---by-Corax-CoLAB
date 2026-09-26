@@ -147,7 +147,8 @@ const CanvasScene = ({ selectedExchanges, prices, arbitragePairs }: { selectedEx
           <>
             <WormholeTunnel />
             {Array.from({ length: 20 }).map((_, i) => (
-              <ArbitrageParticle key={i} start={sourcePos} end={targetPos} speed={0.5 + (i % 3) * 0.5} />
+              // Performance Improvement: Replaced index with unique string key to prevent React render state bugs
+              <ArbitrageParticle key={`particle-${i}`} start={sourcePos} end={targetPos} speed={0.5 + (i % 3) * 0.5} />
             ))}
           </>
         )}
