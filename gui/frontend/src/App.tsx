@@ -25,15 +25,15 @@ const GasHologram = React.lazy(() => import('./components/features/GasHologram')
 import VolatilityMatrix from './components/features/VolatilityMatrix'
 import WhaleSonarSweep from './components/features/WhaleSonarSweep'
 const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'))
-import PredictiveGhosting from './components/features/PredictiveGhosting'
-import NewsSingularity from './components/features/NewsSingularity'
+const PredictiveGhosting = React.lazy(() => import('./components/features/PredictiveGhosting'))
+const NewsSingularity = React.lazy(() => import('./components/features/NewsSingularity'))
 const HoloTopographicOrderBook = React.lazy(() => import('./components/features/HoloTopographicOrderBook'))
 const QuantumRiskMap = React.lazy(() => import('./components/features/QuantumRiskMap'))
-import OrbitalPortfolio from './components/features/OrbitalPortfolio'
-import OracleCopilot from './components/features/OracleCopilot'
+const OrbitalPortfolio = React.lazy(() => import('./components/features/OrbitalPortfolio'))
+const OracleCopilot = React.lazy(() => import('./components/features/OracleCopilot'))
 const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'))
 
-import GlobalWeatherSystem from './components/features/GlobalWeatherSystem'
+const GlobalWeatherSystem = React.lazy(() => import('./components/features/GlobalWeatherSystem'))
 
 import { TiltWrapper } from './components/TiltWrapper'
 import { setAuthToken } from './auth'
@@ -51,11 +51,28 @@ const MatrixRain = React.memo(() => {
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%&|<>'.split('');
+const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%&|<>'.split('');
     const fontSize = 14;
-    const columns = canvas.width / fontSize;
-    const drops: number[] = [];
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops: number[] = [];
     for (let x = 0; x < columns; x++) drops[x] = 1;
+
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(() => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const newColumns = Math.floor(canvas.width / fontSize);
+        if (newColumns > columns) {
+          for (let x = columns; x < newColumns; x++) drops[x] = 1;
+        } else if (newColumns < columns) {
+          drops = drops.slice(0, newColumns);
+        }
+        columns = newColumns;
+      }, 250);
+    };
+    window.addEventListener('resize', handleResize);
 
     let rafId: number;
     const draw = () => {
@@ -73,7 +90,11 @@ const MatrixRain = React.memo(() => {
       rafId = requestAnimationFrame(draw);
     };
     rafId = requestAnimationFrame(draw);
-    return () => cancelAnimationFrame(rafId);
+    return () => {
+      cancelAnimationFrame(rafId);
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
   }, []);
 
   return <canvas ref={canvasRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0, opacity: 0.1, pointerEvents: 'none' }} />;
@@ -181,9 +202,8 @@ export default function App() {
 
 
       {/* Cyberpunk Navigation Tabs */}
-      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px', position: 'relative', zIndex: 10, borderBottom: '1px solid rgba(16, 185, 129, 0.2)', marginBottom: '20px', background: 'rgba(2, 2, 5, 0.8)', backdropFilter: 'blur(10px)' }}>
-        <button
-          aria-label="Dashboard Tab"
+      <div role="tablist" style={{ display: 'flex', justifyContent: 'center', gap: '20px', padding: '20px', position: 'relative', zIndex: 10, borderBottom: '1px solid rgba(16, 185, 129, 0.2)', marginBottom: '20px', background: 'rgba(2, 2, 5, 0.8)', backdropFilter: 'blur(10px)' }}>
+        <button role="tab" aria-selected={activeTab === 'dashboard'} aria-label="Dashboard Tab"
           onClick={() => setActiveTab('dashboard')}
           className="btn-outline"
           style={{
@@ -193,8 +213,7 @@ export default function App() {
             fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'dashboard' ? 'bold' : 'normal'
           }}
         >DASHBOARD</button>
-        <button
-          aria-label="Analytics Tab"
+        <button role="tab" aria-selected={activeTab === 'analytics'} aria-label="Analytics Tab"
           onClick={() => setActiveTab('analytics')}
           className="btn-outline"
           style={{
@@ -204,8 +223,7 @@ export default function App() {
             fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'analytics' ? 'bold' : 'normal'
           }}
         >ANALYTICS</button>
-        <button
-          aria-label="System Logs Tab"
+        <button role="tab" aria-selected={activeTab === 'system'} aria-label="System Logs Tab"
           onClick={() => setActiveTab('system')}
           className="btn-outline"
           style={{
