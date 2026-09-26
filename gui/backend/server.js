@@ -811,7 +811,7 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
       });
     } catch (apiErr) {
       console.error('Execute error', apiErr);
-      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', String(apiErr.message || apiErr), orderId], (err) => {
+      db.run('UPDATE orders SET status = ?, response = ? WHERE id = ?', ['error', 'Order execution failed', orderId], (err) => {
         if (err) {
           console.error('DB UPDATE error (error status):', err);
         }
