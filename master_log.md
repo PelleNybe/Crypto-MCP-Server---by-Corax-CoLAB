@@ -218,3 +218,15 @@ See ../master_log.md
 - Verified and enforced `mcpHttpAgent` uses `keepAlive: true` for Axios.
 - Upgraded the tab container to `role="tablist"`, and added `role="tab"` + `aria-selected` to the tab buttons.
 - Added strict `!Array.isArray(params)` validation to the `/api/mcp` endpoint proxy.
+
+## 2026-09-24 - Frontend Resiliency and Backend Security Enhancements
+**Learning:**
+- **Frontend Performance**: Defining helper functions like `getStatusColor` inside a React component defeats the purpose of `React.memo` by recreating the function reference on every render loop.
+- **Frontend Resiliency**: Asynchronous functions inside `useEffect` and debounced callbacks (e.g. `fetchSentiment` or `previewOrderDebounced`) can attempt to set React state after the component has unmounted, leading to memory leaks and errors.
+- **Backend Security**: Saving direct API error messages into SQLite rows directly from a `catch` block (e.g., `String(apiErr.message)`) risks leaking sensitive backend stack traces to the database, which could later surface to the frontend.
+- **Accessibility**: Real-time updating `pre` tags for simulation results (like dry-runs in `OrderPanel`) were missing ARIA descriptors, preventing screen readers from recognizing dynamic changes.
+**Action:**
+- Extracted `getStatusColor` outside of `OrderRow` in `OrdersLogPanel.tsx` to maintain referential equality.
+- Implemented `if (!active) return` logic in `MarketSentimentAnalyzer.tsx` and tracked component mount status using a `useRef` in `OrderPanel.tsx` to halt orphaned state setters.
+- Masked raw API error logs with generic "Order execution failed" text in the backend `/api/order/approve` catch block.
+- Applied `aria-live="polite"` and `role="status"` to dynamic `<pre>` tags in `OrderPanel.tsx`.

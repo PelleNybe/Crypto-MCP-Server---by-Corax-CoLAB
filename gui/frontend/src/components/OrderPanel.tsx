@@ -24,13 +24,18 @@ export default function OrderPanel(){
   const debouncedType = useDebounce(type, 500);
   const debouncedAmount = useDebounce(amount, 500);
   const debouncedPrice = useDebounce(price, 500);
+  const isMounted = React.useRef(true);
+
+  useEffect(() => {
+    return () => { isMounted.current = false; };
+  }, []);
 
   const previewOrderDebounced = useCallback(async () => {
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange: debouncedExchange,symbol: debouncedSymbol,side: debouncedSide,type: debouncedType,amount: debouncedAmount,price: debouncedPrice})})
     const j = await resp.json()
-    if (j.ok) setPreview(j.data); // Suppress errors for auto-preview
-    setTimeout(() => setRoutingActive(false), 500)
+    if (j.ok && isMounted.current) setPreview(j.data); // Suppress errors for auto-preview
+    setTimeout(() => { if (isMounted.current) setRoutingActive(false) }, 500)
   }, [debouncedExchange, debouncedSymbol, debouncedSide, debouncedType, debouncedAmount, debouncedPrice]);
 
   useEffect(() => {
@@ -46,8 +51,8 @@ export default function OrderPanel(){
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange,symbol,side,type,amount,price})})
     const j = await resp.json()
-    if (j.ok) setPreview(j.data); else addToast(j.error, 'error')
-    setTimeout(() => setRoutingActive(false), 2000)
+    if (j.ok && isMounted.current) setPreview(j.data); else if (isMounted.current) addToast(j.error, 'error')
+    setTimeout(() => { if (isMounted.current) setRoutingActive(false) }, 2000)
   }, [exchange, symbol, side, type, amount, price, addToast]);
 
   const placeOrder = useCallback(async () => {
@@ -55,8 +60,10 @@ export default function OrderPanel(){
     setRoutingActive(true)
     const resp = await authenticatedFetch('/api/order/execute', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange,symbol,side,type,amount,price,execute:true})})
     const j = await resp.json()
-    if (j.ok) { setResult(j.data); addToast('Order placed', 'success') } else addToast(j.error, 'error')
-    setTimeout(() => setRoutingActive(false), 2000)
+    if (isMounted.current) {
+        if (j.ok) { setResult(j.data); addToast('Order placed', 'success') } else addToast(j.error, 'error')
+    }
+    setTimeout(() => { if (isMounted.current) setRoutingActive(false) }, 2000)
   }, [exchange, symbol, side, type, amount, price, addToast]);
 
   return (
@@ -111,8 +118,8 @@ export default function OrderPanel(){
              <button className={side === 'buy' ? "btn-primary" : "btn-danger"} onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 2, padding: '10px', fontSize: '14px', letterSpacing: '1px', fontWeight: 'bold'}}>{routingActive ? "Placing..." : `Confirm ${side.toUpperCase()}`}</button>
           </Tooltip>
         </div>
-        {preview && <pre style={{background:'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#94a3b8'}}>{JSON.stringify(preview,null,2)}</pre>}
-        {result && <pre style={{background:'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#10b981'}}>{JSON.stringify(result,null,2)}</pre>}
+        {preview && <pre aria-live="polite" role="status" style={{background:'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#94a3b8'}}>{JSON.stringify(preview,null,2)}</pre>}
+        {result && <pre aria-live="polite" role="status" style={{background:'rgba(16, 185, 129, 0.1)', border: '1px solid #10b981', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#10b981'}}>{JSON.stringify(result,null,2)}</pre>}
       </div>
       {/* Neural Trade Visualizer Overlay Component */}
       <div style={{ marginTop: '20px' }}>

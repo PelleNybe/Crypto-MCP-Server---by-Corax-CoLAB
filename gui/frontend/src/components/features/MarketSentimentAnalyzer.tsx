@@ -17,6 +17,7 @@ export default function MarketSentimentAnalyzer() {
       setAnalysis('Querying LLM MCP for latest market data synthesis...');
 
       try {
+        if (!active) return;
         const targetExchange = 'binance';
         const targetSymbol = activeSymbol;
 
@@ -31,6 +32,7 @@ export default function MarketSentimentAnalyzer() {
 
         const response = await callMcpEndpoint('MCP_LLM', 'generate_text', { prompt: prompt, max_tokens: 150, temperature: 0.3 });
 
+        if (!active) return;
         if (response && response.response) {
             try {
                 let jsonStr = response.response.trim();
@@ -43,23 +45,27 @@ export default function MarketSentimentAnalyzer() {
                 const parsed = JSON.parse(jsonStr);
 
                 if (parsed.sentiment && ['bullish', 'bearish', 'neutral'].includes(parsed.sentiment.toLowerCase())) {
-                    setSentiment(parsed.sentiment.toLowerCase() as any);
-                    setAnalysis(parsed.analysis || "Analysis received.");
-                    setConfidence(parsed.confidence || 85);
+                    if (active) {
+                        setSentiment(parsed.sentiment.toLowerCase() as any);
+                        setAnalysis(parsed.analysis || "Analysis received.");
+                        setConfidence(parsed.confidence || 85);
+                    }
                 } else {
                     throw new Error("Invalid format");
                 }
 
             } catch (parseError) {
                 console.error("Failed to parse LLM response as JSON:", response.response);
-                const text = response.response.toLowerCase();
-                let detectedSentiment = 'neutral';
-                if (text.includes('bullish') || text.includes('uptrend')) detectedSentiment = 'bullish';
-                if (text.includes('bearish') || text.includes('downtrend')) detectedSentiment = 'bearish';
+                if (active) {
+                    const text = response.response.toLowerCase();
+                    let detectedSentiment = 'neutral';
+                    if (text.includes('bullish') || text.includes('uptrend')) detectedSentiment = 'bullish';
+                    if (text.includes('bearish') || text.includes('downtrend')) detectedSentiment = 'bearish';
 
-                setSentiment(detectedSentiment as any);
-                setAnalysis(response.response.substring(0, 200) + "...");
-                setConfidence(75);
+                    setSentiment(detectedSentiment as any);
+                    setAnalysis(response.response.substring(0, 200) + "...");
+                    setConfidence(75);
+                }
             }
         } else {
             throw new Error("Empty response from LLM");
@@ -67,9 +73,11 @@ export default function MarketSentimentAnalyzer() {
 
       } catch (err) {
         console.error("Error fetching sentiment:", err);
-        setSentiment('neutral');
-        setAnalysis('Unable to reach LLM MCP. Relying on default heuristics.');
-        setConfidence(50);
+        if (active) {
+            setSentiment('neutral');
+            setAnalysis('Unable to reach LLM MCP. Relying on default heuristics.');
+            setConfidence(50);
+        }
       }
     };
 

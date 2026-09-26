@@ -5,17 +5,17 @@ import TypewriterText from './TypewriterText';
 import Tooltip from './Tooltip';
 import { useToast } from '../hooks/useToast';
 
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'placed': return { color: '#10b981', textShadow: '0 0 5px rgba(16, 185, 129, 0.5)' };
+    case 'pending': return { color: '#f59e0b', textShadow: '0 0 5px rgba(245, 158, 11, 0.5)' };
+    case 'error': return { color: '#ef4444', textShadow: '0 0 5px rgba(239, 68, 68, 0.5)' };
+    default: return { color: '#94a3b8' };
+  }
+};
+
 // Memoized table row component for performance
 const OrderRow = React.memo(({ o, idx, approveOrder }: { o: any, idx: number, approveOrder: (id: number) => void }) => {
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'placed': return { color: '#10b981', textShadow: '0 0 5px rgba(16, 185, 129, 0.5)' };
-      case 'pending': return { color: '#f59e0b', textShadow: '0 0 5px rgba(245, 158, 11, 0.5)' };
-      case 'error': return { color: '#ef4444', textShadow: '0 0 5px rgba(239, 68, 68, 0.5)' };
-      default: return { color: '#94a3b8' };
-    }
-  };
-
   return (
     <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', transition: 'background 0.3s' }} className="table-row-hover">
       <td style={{ padding: '12px 10px', fontSize: '12px', color: '#cbd5e1' }}>{new Date(o.created_at || new Date()).toLocaleString()}</td>
