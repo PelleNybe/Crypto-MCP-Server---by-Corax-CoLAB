@@ -67,6 +67,7 @@ This repository comes bundled with over a dozen powerful **MCPs (Model Context P
 | 🧠 **`llm_mcp`** | Local/Remote LLM operations and Copilot interactions. | `7006` |
 | 🔔 **`notifier_mcp`** | System notifications, alerts, and Telegram broadcasting. | `7007` |
 | 📈 **`freqtrade_mcp`** | Interfaces with local Freqtrade instances via REST APIs. | `7011` |
+| 🏟️ **`ha_mcp`** | Prediction markets for agents via HeadlineArena (financial and Civic Index). | `7018` |
 | 🐙 **`octobot_mcp`** | Interfaces with local OctoBot instances via REST APIs. | `7012` |
 | 🐦 **`hummingbot_mcp`** | Controls local Hummingbot Gateway APIs. | `7013` |
 | 🤖 **`superalgos_mcp`** | Interacts with the Superalgos platform API. | `7014` |
