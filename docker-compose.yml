@@ -7,7 +7,7 @@ services:
       - MCP_CCXT=http://mcp_ccxt:7001/mcp
       - MCP_PORTFOLIO=http://mcp_portfolio:7004/mcp
       - PORT=4000
-    volumes:
+    volumess:
       - db_data:/app
     depends_on:
       - mcp_ccxt
@@ -113,5 +113,13 @@ services:
       - DASHBOARD_API_URL=http://backend:4000
     command: ["python3", "news_mcp.py"]
 
-volumes:
+volumess:
   db_data:
+
+  mcp_headlinearena:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: python ha_mcp.py
+    ports:
+      - "7018:7018"

@@ -1,5 +1,11 @@
 {
   "mcpServers": {
+    "headlinearena": {
+      "command": "python3",
+      "args": [
+        "<PATH_TO_YOUR_CLONED_REPO>/ha_mcp.py"
+      ]
+    },
     "corax-crypto": {
       "command": "python3",
       "args": [
