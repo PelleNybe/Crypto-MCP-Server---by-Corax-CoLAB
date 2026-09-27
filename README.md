@@ -46,6 +46,20 @@ The Crypto MCP Server uses **real data** across all visualizers. The entire syst
 * 🧠 **AI Sentiment Word-Cloud Sphere:** Extracts trending keywords and sentiment from real-time news to form an interactive 3D floating sphere.
 * ⚡ **Gas & Network Congestion Hologram:** Visualizes Ethereum network congestion as a glowing, pulsating reactor core.
 * 🔬 **Time-Machine Backtest Arena:** Fully functional OHLCV visualizer to playback and simulate trading strategies (e.g. SMA Crossovers).
+* 🧠 **Oracle Copilot:** Voice-activated command center powered by local LLMs via `MCP_LLM`.
+* 🌍 **Global Weather System:** Dynamic 3D visualization of market volatility and network states using `@react-three/fiber`.
+* 🌊 **Whale Sonar Sweep & Constellations:** 3D plotting of significant market movers using CoinGecko and CCXT data.
+* 🌀 **Arbitrage Wormhole:** Scans and visualizes cross-exchange price discrepancies via `MCP_CCXT`.
+* 📊 **Risk Radar Panel & Quantum Risk Map:** Spatial representation of portfolio risk, exposure, and technical analysis indicators (RSI, MACD) via `MCP_TA`.
+* 📡 **Market Sentiment Analyzer:** Synthesizes news, price action, and LLM analysis for a comprehensive market mood score.
+* 🔮 **Predictive Ghosting:** Overlays projected price actions based on historical patterns using `plotly` and `MCP_TA`.
+* 🌐 **Neural Net Liquidity & Trade Visualizer:** 3D force-directed graphs showing the flow of liquidity and order execution.
+* 🏗️ **Algo Grid Architect:** Node-based strategy builder and visualizer for algorithmic trading logic.
+* 📈 **Holo Order Flow & Topographic Order Book:** Three-dimensional mapping of order book depth and flow.
+* 🪐 **Asset Universe & Orbital Portfolio:** Represents portfolio holdings as a 3D solar system with relative distances and sizes.
+* 📰 **News Singularity:** Aggregates and visually groups crypto news streams using `MCP_NEWS`.
+* ⚡ **Volatility Matrix:** Visualizes standard deviations and market swings in a grid.
+* 🖥️ **System Overview:** A comprehensive hub showing MCP node statuses and system health.
 
 ---
 
