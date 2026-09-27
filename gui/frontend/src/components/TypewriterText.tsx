@@ -4,13 +4,13 @@ const TypewriterText: React.FC<{ text: string, speed?: number }> = ({ text, spee
   const [displayedText, setDisplayedText] = useState('');
   const [index, setIndex] = useState(0);
 
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-        setDisplayedText('');
-        setIndex(0);
-    }, 0);
-    return () => clearTimeout(timeoutId);
-  }, [text]);
+  const [prevText, setPrevText] = useState(text);
+
+  if (text !== prevText) {
+    setPrevText(text);
+    setDisplayedText('');
+    setIndex(0);
+  }
 
   useEffect(() => {
     if (index < text.length) {

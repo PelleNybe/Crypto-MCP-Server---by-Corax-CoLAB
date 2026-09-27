@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import React from 'react'
 import { Loader } from 'lucide-react'
 import './styles.css'
@@ -108,6 +108,21 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard') // dashboard, analytics, system
   const [sentiment, setSentiment] = useState<'bull' | 'bear' | 'neutral'>('neutral')
 
+  const handleSetBull = useCallback(() => {
+    setSentiment('bull');
+    document.body.setAttribute('data-sentiment', 'bull');
+  }, []);
+
+  const handleSetNeutral = useCallback(() => {
+    setSentiment('neutral');
+    document.body.setAttribute('data-sentiment', 'neutral');
+  }, []);
+
+  const handleSetBear = useCallback(() => {
+    setSentiment('bear');
+    document.body.setAttribute('data-sentiment', 'bear');
+  }, []);
+
   useEffect(() => {
     const handleConnect = () => setSocketConnected(true)
     const handleDisconnect = () => setSocketConnected(false)
@@ -148,7 +163,6 @@ export default function App() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             aria-label="Enter Access Key"
-            title="Enter Access Key"
             placeholder="Enter Access Key"
             style={{ padding: '12px', borderRadius: '4px', border: '1px solid #334155', background: 'rgba(0,0,0,0.5)', color: '#10b981', fontFamily: 'monospace', outline: 'none', transition: 'border 0.3s' }}
             onFocus={(e) => e.target.style.border = '1px solid #10b981'}
@@ -195,9 +209,9 @@ export default function App() {
           <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: socketConnected ? '#10b981' : '#ef4444', boxShadow: `0 0 8px ${socketConnected ? '#10b981' : '#ef4444'}` }}></div>
           <span style={{ color: '#fff', fontSize: '12px', fontFamily: 'monospace' }}>{socketConnected ? 'WS LIVE' : 'WS DISCONNECTED'}</span>
         </div>
-        <button aria-label="Set Bull Market Mode" aria-pressed={sentiment === 'bull'} onClick={() => { setSentiment('bull'); document.body.setAttribute('data-sentiment', 'bull'); }} className="btn-outline" style={{ color: '#10b981', borderColor: sentiment === 'bull' ? '#10b981' : '#333' }}>BULL MODE</button>
-        <button aria-label="Set Neutral Market Mode" aria-pressed={sentiment === 'neutral'} onClick={() => { setSentiment('neutral'); document.body.setAttribute('data-sentiment', 'neutral'); }} className="btn-outline" style={{ color: '#60a5fa', borderColor: sentiment === 'neutral' ? '#60a5fa' : '#333' }}>NEUTRAL</button>
-        <button aria-label="Set Bear Market Mode" aria-pressed={sentiment === 'bear'} onClick={() => { setSentiment('bear'); document.body.setAttribute('data-sentiment', 'bear'); }} className="btn-outline" style={{ color: '#ef4444', borderColor: sentiment === 'bear' ? '#ef4444' : '#333' }}>BEAR MODE</button>
+        <button aria-label="Set Bull Market Mode" aria-pressed={sentiment === 'bull'} onClick={handleSetBull} className="btn-outline" style={{ color: '#10b981', borderColor: sentiment === 'bull' ? '#10b981' : '#333' }}>BULL MODE</button>
+        <button aria-label="Set Neutral Market Mode" aria-pressed={sentiment === 'neutral'} onClick={handleSetNeutral} className="btn-outline" style={{ color: '#60a5fa', borderColor: sentiment === 'neutral' ? '#60a5fa' : '#333' }}>NEUTRAL</button>
+        <button aria-label="Set Bear Market Mode" aria-pressed={sentiment === 'bear'} onClick={handleSetBear} className="btn-outline" style={{ color: '#ef4444', borderColor: sentiment === 'bear' ? '#ef4444' : '#333' }}>BEAR MODE</button>
       </div>
 
 
