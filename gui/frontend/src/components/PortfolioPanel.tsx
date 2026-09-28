@@ -108,7 +108,7 @@ export default function PortfolioPanel() {
             </thead>
             <tbody>
               {sortedDetails.map((d,i)=>(
-                <PortfolioRow key={i} d={d} total={total} />
+                <PortfolioRow key={d.asset} d={d} total={total} />
               ))}
             </tbody>
           </table>

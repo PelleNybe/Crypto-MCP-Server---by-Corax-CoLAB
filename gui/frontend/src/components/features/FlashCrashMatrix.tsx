@@ -37,7 +37,7 @@ const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
 
                       return (
                           <MatrixBar
-                              key={i}
+                              key={bucket.price}
                               position={[i, 0, 0]}
                               height={height}
                               color={color}
