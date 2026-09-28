@@ -461,8 +461,12 @@ app.get('/api/ticker', async (req, res) => {
   let rawSymbol = req.query.symbol;
   let exchange = Array.isArray(rawExchange) ? rawExchange[0] : (rawExchange || 'binance');
   let symbol = Array.isArray(rawSymbol) ? rawSymbol[0] : (rawSymbol || 'BTC/USDT');
-  if (typeof exchange !== 'string') exchange = String(exchange);
-  if (typeof symbol !== 'string') symbol = String(symbol);
+  if (typeof exchange !== 'string') {
+    return res.status(400).json({ ok: false, error: 'Invalid exchange parameter format' });
+  }
+  if (typeof symbol !== 'string') {
+    return res.status(400).json({ ok: false, error: 'Invalid symbol parameter format' });
+  }
   if (exchange.length > 50 || symbol.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   try {
     const result = await callMCP(mcpUrls.MCP_CCXT, 'get_ticker', { exchange, symbol });
@@ -476,6 +480,9 @@ app.get('/api/ticker', async (req, res) => {
 // POST /api/order/dry_run
 app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, params } = req.body || {};
+  if (params && (typeof params !== 'object' || Array.isArray(params))) {
+    return res.status(400).json({ ok: false, error: 'params must be a valid JSON object' });
+  }
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
   }
@@ -532,6 +539,9 @@ app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
 // POST /api/order/execute
 app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, execute, params } = req.body || {};
+  if (params && (typeof params !== 'object' || Array.isArray(params))) {
+    return res.status(400).json({ ok: false, error: 'params must be a valid JSON object' });
+  }
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok:false, error: 'Missing or invalid required fields' });
   }
@@ -719,6 +729,9 @@ process.on('unhandledRejection', (reason) => {
 // Called by ccxt_mcp when AI tries to create an order
 app.post('/api/order/pending', sensitiveLimiter, (req, res) => {
   const { exchange, symbol, side, type, amount, price, params, estimated_usd } = req.body || {};
+  if (params && (typeof params !== 'object' || Array.isArray(params))) {
+    return res.status(400).json({ ok: false, error: 'params must be a valid JSON object' });
+  }
   if (!exchange || typeof exchange !== 'string' || !symbol || typeof symbol !== 'string' || !side || typeof side !== 'string' || !type || typeof type !== 'string' || !amount) {
     return res.status(400).json({ ok: false, error: 'Missing or invalid required fields' });
   }
