@@ -42,7 +42,7 @@ const Word = React.memo(({ text, sentiment, position, index, weight }: { text: s
 const CanvasScene = ({ words }: { words: any[] }) => {
   const wordComponents = React.useMemo(() => {
     return words.map((w, i) => (
-        <Word key={i} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
+        <Word key={w.text} index={i} text={w.text} sentiment={w.sentiment} position={w.position} weight={w.weight} />
     ));
   }, [words]);
 

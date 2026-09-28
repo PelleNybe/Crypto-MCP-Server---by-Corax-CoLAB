@@ -89,12 +89,16 @@ export default function DarkPoolSonar() {
 
             if (active && trades && Array.isArray(trades)) {
                 // Find "whale" trades relative to the batch
-                const amounts = trades.map((t: any) => t.amount * t.price);
-                const avgVolume = amounts.reduce((a, b) => a + b, 0) / (amounts.length || 1);
+                let totalVolume = 0;
+                const processedTrades = trades.map((trade: any) => {
+                    const volumeUsd = trade.amount * trade.price;
+                    totalVolume += volumeUsd;
+                    return { trade, volumeUsd };
+                });
+                const avgVolume = totalVolume / (trades.length || 1);
 
                 const newPings: any[] = [];
-                trades.forEach((trade: any, idx: number) => {
-                    const volumeUsd = trade.amount * trade.price;
+                processedTrades.forEach(({ trade, volumeUsd }, idx: number) => {
                     if (volumeUsd > avgVolume * 1.5) { // 1.5x average is a "whale" in this context
                         // Randomize position slightly for visual effect on a plane
                         const angle = (Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2;

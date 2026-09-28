@@ -196,7 +196,7 @@ export default function AlgoGridArchitect() {
 
       {/* Connections */}
       {connections.map((c, i) => (
-         <Connection key={i} start={c.start} end={c.end} active={activePath} />
+         <Connection key={`${c.start.x}-${c.start.y}-${c.end.x}-${c.end.y}`} start={c.start} end={c.end} active={activePath} />
       ))}
 
       {/* Nodes */}
