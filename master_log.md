@@ -240,3 +240,15 @@ See ../master_log.md
 ## 2024-05-18 - [Optimization] React Key Anti-Pattern and Redundant Loops
 **Learning:** Found multiple components (`SentimentWordCloud`, `FlashCrashMatrix`, `PortfolioPanel`, `AlgoGridArchitect`) using array indices (`key={i}`) inside React `.map()` iterations. This is an anti-pattern that can cause unexpected state bugs during re-renders or sorting. Additionally, in `DarkPoolSonar`, a loop iterating over arrays multiple times (e.g., using `.map` followed by `.reduce` on the same scale) unnecessarily increases computational overhead.
 **Action:** Replaced index-based keys with unique identifiers (e.g., asset names, coordinate strings, or specific IDs) to guarantee rendering stability. Refactored the array operation in `DarkPoolSonar` to process total volume and map values simultaneously within a single O(N) iteration instead of separated passes.
+
+## 2024-09-29 - 5 Performance, Security, and Accessibility Enhancements
+**Learning:** Found multiple areas where performance, security, and accessibility could be improved across the frontend and backend.
+- **Backend Security**: The `/api/portfolio` endpoint in Express.js was vulnerable to Large Payload / Array Injection DoS attacks because it processed the `exchangesParam` without strict length or type validation.
+- **Frontend Performance**: In Three.js components (`HoloTopographicOrderBook` and `HoloOrderFlow`), array indices were used as `key` props, which causes React reconciliation bugs and degrades rendering performance.
+- **Frontend Algorithm Performance**: In `DarkPoolSonar`, a double iteration (first `.map` to create an array, then `.forEach` to process it) was unnecessarily allocating a large intermediate array and running in O(2N) time.
+- **Accessibility**: The `OracleCopilot` toggle orb was built using a standard `<div>` with an `onClick` handler, breaking keyboard accessibility (Tab navigation) and missing screen reader focus capabilities.
+**Action:**
+- Enforced strict length limits (max 50 array items / 100 characters) and explicitly validated the `typeof` for `req.query.exchanges` in `server.js`.
+- Replaced array index `key` props with semantically unique `price` values in `HoloTopographicOrderBook.tsx` and `HoloOrderFlow.tsx`.
+- Refactored the `trades.map` and `processedTrades.forEach` into a unified `for` loop in `DarkPoolSonar.tsx` to process the total volume and generate whale pings with zero intermediate array allocations.
+- Converted the `<div>` toggle orb in `OracleCopilot.tsx` into a semantic `<button>` tag and added appropriate `aria-label` and `aria-pressed` states.

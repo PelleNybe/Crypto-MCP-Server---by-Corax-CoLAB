@@ -45,13 +45,13 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
   const renderedBids = useMemo(() => {
     return orderBook.bids.map((bid: any, index: number) => (
-      <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={orderBook.maxVolume} index={index} />
+      <Wall key={`bid-${bid.price}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={orderBook.maxVolume} index={index} />
     ));
   }, [orderBook.bids, orderBook.maxVolume]);
 
   const renderedAsks = useMemo(() => {
     return orderBook.asks.map((ask: any, index: number) => (
-      <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={orderBook.maxVolume} index={index} />
+      <Wall key={`ask-${ask.price}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={orderBook.maxVolume} index={index} />
     ));
   }, [orderBook.asks, orderBook.maxVolume]);
 

@@ -90,15 +90,15 @@ export default function DarkPoolSonar() {
             if (active && trades && Array.isArray(trades)) {
                 // Find "whale" trades relative to the batch
                 let totalVolume = 0;
-                const processedTrades = trades.map((trade: any) => {
-                    const volumeUsd = trade.amount * trade.price;
-                    totalVolume += volumeUsd;
-                    return { trade, volumeUsd };
-                });
+                for (let i = 0; i < trades.length; i++) {
+                    totalVolume += trades[i].amount * trades[i].price;
+                }
                 const avgVolume = totalVolume / (trades.length || 1);
 
                 const newPings: any[] = [];
-                processedTrades.forEach(({ trade, volumeUsd }, idx: number) => {
+                for (let idx = 0; idx < trades.length; idx++) {
+                    const trade = trades[idx];
+                    const volumeUsd = trade.amount * trade.price;
                     if (volumeUsd > avgVolume * 1.5) { // 1.5x average is a "whale" in this context
                         // Randomize position slightly for visual effect on a plane
                         const angle = (Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2;
@@ -116,7 +116,7 @@ export default function DarkPoolSonar() {
                             trade: { ...trade, sideUpper: trade.side === 'buy' ? 'BUY' : 'SELL' }
                         });
                     }
-                });
+                }
 
                 if (newPings.length > 0) {
                     setPings(prev => [...prev, ...newPings].slice(-15)); // Keep last 15
