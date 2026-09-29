@@ -415,8 +415,15 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 // GET /api/portfolio
 app.get('/api/portfolio', async (req, res) => {
   let exchangesParam = req.query.exchanges || 'binance';
-  if (Array.isArray(exchangesParam)) exchangesParam = exchangesParam.join(',');
-  else if (typeof exchangesParam !== 'string') exchangesParam = String(exchangesParam);
+  if (Array.isArray(exchangesParam)) {
+    // Security Fix: Prevent large array injection DoS
+    if (exchangesParam.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
+    exchangesParam = exchangesParam.join(',');
+  }
+  else if (typeof exchangesParam !== 'string') {
+    return res.status(400).json({ ok: false, error: 'Invalid exchange parameter format' });
+  }
+  if (exchangesParam.length > 100) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   const exchanges = exchangesParam.split(',').map(s => s.trim());
   try {
     const result = await callMCP(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', exchanges);

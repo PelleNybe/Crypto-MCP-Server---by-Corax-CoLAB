@@ -134,8 +134,10 @@ export default function OracleCopilot() {
           gap: '0.5rem'
         }}
       >
-        <div
+        <button
           onClick={toggleListening}
+          aria-label={isListening ? "Deactivate Oracle" : "Activate Oracle Co-Pilot"}
+          aria-pressed={isListening}
           style={{
             width: '60px',
             height: '60px',
@@ -149,11 +151,12 @@ export default function OracleCopilot() {
             transition: 'all 0.3s ease',
             animation: isListening ? 'pulse 1s infinite alternate' : 'float 3s infinite ease-in-out',
             border: `2px solid ${isListening ? '#34d399' : '#60a5fa'}`,
+            padding: 0
           }}
           title={isListening ? "Deactivate Oracle" : "Activate Oracle Co-Pilot"}
         >
           {isListening ? <Mic size={24} color="#fff" /> : <BrainCircuit size={28} color="#fff" />}
-        </div>
+        </button>
         <div style={{
           fontSize: '10px',
           fontFamily: 'monospace',

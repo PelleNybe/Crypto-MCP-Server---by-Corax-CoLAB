@@ -41,11 +41,11 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ bids, asks, maxVol, price }: { bids: any[], asks: any[], maxVol: number, price?: number }) => {
   const renderedBids = useMemo(() => bids.map((bid, index) => (
-    <Wall key={`bid-${index}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={maxVol} index={index} />
+    <Wall key={`bid-${bid.price}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={maxVol} index={index} />
   )), [bids, maxVol]);
 
   const renderedAsks = useMemo(() => asks.map((ask, index) => (
-    <Wall key={`ask-${index}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={maxVol} index={index} />
+    <Wall key={`ask-${ask.price}`} type="ask" price={ask.price} volume={ask.volume} maxVolume={maxVol} index={index} />
   )), [asks, maxVol]);
 
   return (
