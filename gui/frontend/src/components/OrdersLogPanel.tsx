@@ -110,7 +110,7 @@ export default function OrdersLogPanel() {
           <h2 className="glitch" data-text="Execution Archive" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', textTransform: 'uppercase', margin: 0 }}>
              Execution Archive
           </h2>
-          <div className="status-indicator-live" style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }} title="Socket Connected"></div>
+          <div className="status-indicator-live" role="status" aria-live="polite" style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }} title="Socket Connected"></div>
       </div>
 
       <div style={{ flexGrow: 1, minHeight: '300px' }}>
