@@ -73,25 +73,25 @@ export default function OrderPanel(){
 
         <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
           <label htmlFor="exchangeInput" className="sr-only">Exchange Node</label>
-          <input id="exchangeInput" title="Exchange (e.g. binance)" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+          <input id="exchangeInput" aria-label="Enter Exchange Name" placeholder="Exchange (e.g. binance)" value={exchange} onChange={e=>setExchange(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
         </div>
 
         <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
            <label htmlFor="symbolInput" className="sr-only">Asset Target</label>
-           <input id="symbolInput" title="Symbol (e.g. BTC/USDT)" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+           <input id="symbolInput" aria-label="Enter Trading Symbol" placeholder="Symbol (e.g. BTC/USDT)" value={symbol} onChange={e=>setSymbol(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#10b981', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
         </div>
 
         <div style={{display:'flex',gap:12}}>
           <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 1}}>
              <label htmlFor="sideSelect" className="sr-only">Protocol Directive</label>
-             <select id="sideSelect" title="Order Side" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: side === 'buy' ? '#10b981' : '#ef4444', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
+             <select id="sideSelect" aria-label="Order Side" value={side} onChange={e=>setSide(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: side === 'buy' ? '#10b981' : '#ef4444', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
                <option value="buy">Initiate Buy</option>
                <option value="sell">Execute Sell</option>
              </select>
           </div>
           <div style={{display: 'flex', flexDirection: 'column', gap: 4, flex: 1}}>
              <label htmlFor="typeSelect" className="sr-only">Execution Type</label>
-             <select id="typeSelect" title="Order Type" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#60a5fa', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
+             <select id="typeSelect" aria-label="Order Type" value={type} onChange={e=>setType(e.target.value)} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#60a5fa', outline: 'none', borderRadius: '4px', fontFamily: 'monospace', textTransform: 'uppercase'}}>
                <option value="market">Market</option>
                <option value="limit">Limit</option>
              </select>
@@ -100,13 +100,13 @@ export default function OrderPanel(){
 
         <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
            <label htmlFor="amountInput" className="sr-only">Quantity Vector</label>
-           <input id="amountInput" title="Amount" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+           <input id="amountInput" aria-label="Enter Trade Amount" placeholder="Amount" type="number" value={amount} onChange={e=>setAmount(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
         </div>
 
         {type==='limit' && (
           <div style={{display: 'flex', flexDirection: 'column', gap: 4}}>
              <label htmlFor="priceInput" className="sr-only">Target Limit</label>
-             <input id="priceInput" title="Price" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
+             <input id="priceInput" aria-label="Enter Limit Price" placeholder="Price" type="number" value={price ?? ''} onChange={e=>setPrice(Number(e.target.value))} style={{background: 'rgba(0,0,0,0.5)', border: '1px solid #334155', padding: '8px', color: '#f8fafc', outline: 'none', borderRadius: '4px', fontFamily: 'monospace'}} />
           </div>
         )}
 

@@ -52,9 +52,9 @@ export default function RiskRadarPanel() {
     };
   }, []);
 
-  const addLog = (msg: string) => {
+  const addLog = useCallback((msg: string) => {
     setLogs(prev => [msg, ...prev].slice(0, 5));
-  };
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -140,7 +140,7 @@ export default function RiskRadarPanel() {
 
     fetchDataWithPolling();
     return () => { active = false; clearTimeout(timeoutId); };
-  }, [defcon, activeSymbol]);
+  }, [defcon, activeSymbol, addLog]);
 
 
   return (
