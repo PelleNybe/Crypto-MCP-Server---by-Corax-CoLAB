@@ -90,7 +90,7 @@ export default function PortfolioPanel() {
         <div style={{fontSize:28,fontWeight:900, color: '#10b981', textShadow: '0 0 10px rgba(16, 185, 129, 0.4)'}}>
           ${total ? total.toFixed(2) : '—'}
         </div>
-        <div className="small-muted status-indicator-live" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
+        <div className="small-muted status-indicator-live" role="status" aria-live="polite" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
       </div>
 
       {viewMode === '3d' ? (

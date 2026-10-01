@@ -13,12 +13,14 @@ const compression = require('compression');
 const axios = require('axios');
 
 const http = require('http');
+const https = require('https');
 const mcpHttpAgent = new http.Agent({ keepAlive: true });
 
 const { Server } = require('socket.io');
 const cors = require('cors');
 const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
+
 const crypto = require('crypto');
 const rateLimit = require('express-rate-limit');
 
