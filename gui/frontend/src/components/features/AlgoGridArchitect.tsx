@@ -170,6 +170,14 @@ export default function AlgoGridArchitect() {
       }
   };
 
+  const renderedConnections = React.useMemo(() => connections.map((c, i) => (
+    <Connection key={`${c.start.x}-${c.start.y}-${c.end.x}-${c.end.y}`} start={c.start} end={c.end} active={activePath} />
+  )), [connections, activePath]);
+
+  const renderedNodes = React.useMemo(() => nodes.map(n => (
+    <Node key={n.id} type={n.type} title={n.title} position={n.pos} active={activePath} />
+  )), [nodes, activePath]);
+
   return (
     <div className="card interactive-element" style={{ gridColumn: '1 / -1', height: '350px', position: 'relative', overflow: 'hidden', backgroundColor: '#020205' }}>
       <div style={{ position: 'absolute', top: 15, left: 15, zIndex: 20, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -195,14 +203,10 @@ export default function AlgoGridArchitect() {
       }} />
 
       {/* Connections */}
-      {connections.map((c, i) => (
-         <Connection key={`${c.start.x}-${c.start.y}-${c.end.x}-${c.end.y}`} start={c.start} end={c.end} active={activePath} />
-      ))}
+      {renderedConnections}
 
       {/* Nodes */}
-      {nodes.map(n => (
-        <Node key={n.id} type={n.type} title={n.title} position={n.pos} active={activePath} />
-      ))}
+      {renderedNodes}
     </div>
   );
 }
