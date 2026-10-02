@@ -85,10 +85,12 @@ export default function SentimentWordCloud() {
                 data.news.forEach((n: any) => {
                     if (n.currencies) {
                         n.currencies.forEach((c: string) => {
-                            if (!keywordsMap[c]) keywordsMap[c] = { count: 0, sentiment: n.sentiment };
-                            keywordsMap[c].count++;
+                            // Optimization: Pre-calculate toUpperCase at the source to prevent redundant operations in map loop later
+                            const cUpper = c.toUpperCase();
+                            if (!keywordsMap[cUpper]) keywordsMap[cUpper] = { count: 0, sentiment: n.sentiment };
+                            keywordsMap[cUpper].count++;
                             // Override neutral if a polarized article appears
-                            if (n.sentiment !== 'neutral') keywordsMap[c].sentiment = n.sentiment;
+                            if (n.sentiment !== 'neutral') keywordsMap[cUpper].sentiment = n.sentiment;
                         });
                     }
                 });
@@ -106,9 +108,8 @@ export default function SentimentWordCloud() {
                     const y = radius * Math.sin(theta) * Math.sin(phi);
                     const z = radius * Math.cos(phi);
 
-                    // Pre-calculate uppercase to avoid doing it inside the render
                     newWords.push({
-                        text: k.toUpperCase(),
+                        text: k,
                         sentiment: keywordsMap[k].sentiment,
                         weight: keywordsMap[k].count,
                         position: [x, y, z]

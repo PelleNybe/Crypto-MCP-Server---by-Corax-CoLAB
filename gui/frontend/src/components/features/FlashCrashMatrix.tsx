@@ -23,6 +23,25 @@ const MatrixBar = React.memo(({ position, height, color, opacity, label }: { pos
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
 const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
+  const renderedBars = React.useMemo(() => {
+    return matrixData.map((bucket, i) => {
+      const color = bucket.imbalance > 0 ? '#10b981' : (bucket.imbalance < 0 ? '#ef4444' : '#60a5fa');
+      const opacity = Math.min(0.9, Math.max(0.4, (Math.abs(bucket.imbalance) / (bucket.totalVol || 1)))); // Green if more bids, Red if more asks
+      const height = Math.max(0.1, bucket.normalizedHeight);
+
+      return (
+          <MatrixBar
+              key={bucket.price}
+              position={[i, 0, 0]}
+              height={height}
+              color={color}
+              opacity={opacity}
+              label={`$${bucket.price.toFixed(0)}`}
+          />
+      );
+    });
+  }, [matrixData]);
+
   return (
 <Canvas camera={{ position: [0, 5, 8], fov: 50 }}>
               <ambientLight intensity={0.5} />
@@ -30,22 +49,7 @@ const CanvasScene = ({ matrixData }: { matrixData: any[] }) => {
               <gridHelper args={[12, 12, '#334155', '#1e293b']} position={[0, -0.01, 0]} />
 
               <group position={[-4.5, 0, 0]}>
-                  {matrixData.map((bucket, i) => {
-                      const color = bucket.imbalance > 0 ? '#10b981' : (bucket.imbalance < 0 ? '#ef4444' : '#60a5fa');
-                      const opacity = Math.min(0.9, Math.max(0.4, (Math.abs(bucket.imbalance) / (bucket.totalVol || 1)))); // Green if more bids, Red if more asks
-                      const height = Math.max(0.1, bucket.normalizedHeight);
-
-                      return (
-                          <MatrixBar
-                              key={bucket.price}
-                              position={[i, 0, 0]}
-                              height={height}
-                              color={color}
-                              opacity={opacity}
-                              label={`$${bucket.price.toFixed(0)}`}
-                          />
-                      );
-                  })}
+                  {renderedBars}
               </group>
 
               <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate={true} autoRotateSpeed={0.5} />

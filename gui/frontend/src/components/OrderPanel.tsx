@@ -66,6 +66,9 @@ export default function OrderPanel(){
     setTimeout(() => { if (isMounted.current) setRoutingActive(false) }, 2000)
   }, [exchange, symbol, side, type, amount, price, addToast]);
 
+  // Optimization: Pre-calculate toUpperCase to prevent redundant operations inside JSX return
+  const sideUpper = React.useMemo(() => side.toUpperCase(), [side]);
+
   return (
     <div className="card interactive-element glass-panel">
       <h3 className="glitch" data-text="Terminal Order Execution">Terminal Order Execution</h3>
@@ -115,7 +118,7 @@ export default function OrderPanel(){
              <button className="btn-outline" aria-label={routingActive ? "Routing order preview..." : "Force Order Preview"} onClick={previewOrder} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 1, padding: '10px', fontSize: '12px'}}>{routingActive ? "Routing..." : "Force Preview"}</button>
           </Tooltip>
           <Tooltip text="Execute live market/limit order immediately">
-             <button className={side === 'buy' ? "btn-primary" : "btn-danger"} onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 2, padding: '10px', fontSize: '14px', letterSpacing: '1px', fontWeight: 'bold'}}>{routingActive ? "Placing..." : `Confirm ${side.toUpperCase()}`}</button>
+             <button className={side === 'buy' ? "btn-primary" : "btn-danger"} onClick={placeOrder} aria-label={routingActive ? "Placing order..." : "Place Order"} disabled={routingActive} aria-busy={routingActive} aria-live="polite" style={{flex: 2, padding: '10px', fontSize: '14px', letterSpacing: '1px', fontWeight: 'bold'}}>{routingActive ? "Placing..." : `Confirm ${sideUpper}`}</button>
           </Tooltip>
         </div>
         {preview && <pre aria-live="polite" role="status" style={{background:'rgba(15, 23, 42, 0.8)', border: '1px solid #334155', padding:10, overflowX: 'auto', borderRadius: '4px', fontSize: '11px', color: '#94a3b8'}}>{JSON.stringify(preview,null,2)}</pre>}
