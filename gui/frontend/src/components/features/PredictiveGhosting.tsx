@@ -202,7 +202,7 @@ export default function PredictiveGhosting() {
             </div>
             <input
                 type="range" aria-label="Scrub forward in time"
-                title="Timeline Scrubber"
+
 
                 min="0"
                 max="20"

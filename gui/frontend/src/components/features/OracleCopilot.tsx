@@ -138,6 +138,7 @@ export default function OracleCopilot() {
           onClick={toggleListening}
           aria-label={isListening ? "Deactivate Oracle" : "Activate Oracle Co-Pilot"}
           aria-pressed={isListening}
+          title={isListening ? "Deactivate Oracle" : "Activate Oracle Co-Pilot"}
           style={{
             width: '60px',
             height: '60px',
@@ -153,7 +154,6 @@ export default function OracleCopilot() {
             border: `2px solid ${isListening ? '#34d399' : '#60a5fa'}`,
             padding: 0
           }}
-          title={isListening ? "Deactivate Oracle" : "Activate Oracle Co-Pilot"}
         >
           {isListening ? <Mic size={24} color="#fff" /> : <BrainCircuit size={28} color="#fff" />}
         </button>
