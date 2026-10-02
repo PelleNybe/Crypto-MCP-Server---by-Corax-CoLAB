@@ -5,13 +5,11 @@ import TypewriterText from './TypewriterText';
 import Tooltip from './Tooltip';
 import { useToast } from '../hooks/useToast';
 
-const getStatusColor = (status: string) => {
-  switch (status) {
-    case 'placed': return { color: '#10b981', textShadow: '0 0 5px rgba(16, 185, 129, 0.5)' };
-    case 'pending': return { color: '#f59e0b', textShadow: '0 0 5px rgba(245, 158, 11, 0.5)' };
-    case 'error': return { color: '#ef4444', textShadow: '0 0 5px rgba(239, 68, 68, 0.5)' };
-    default: return { color: '#94a3b8' };
-  }
+const STATUS_STYLES: Record<string, React.CSSProperties> = {
+  placed: { color: '#10b981', textShadow: '0 0 5px rgba(16, 185, 129, 0.5)' },
+  pending: { color: '#f59e0b', textShadow: '0 0 5px rgba(245, 158, 11, 0.5)' },
+  error: { color: '#ef4444', textShadow: '0 0 5px rgba(239, 68, 68, 0.5)' },
+  default: { color: '#94a3b8' }
 };
 
 // Memoized table row component for performance
@@ -24,7 +22,7 @@ const OrderRow = React.memo(({ o, idx, approveOrder }: { o: any, idx: number, ap
         <span style={{ color: o.side === 'buy' ? '#10b981' : '#ef4444', fontWeight: 'bold' }}>{o.side}</span> / <span style={{ color: '#94a3b8' }}>{o.type}</span>
       </td>
       <td style={{ padding: '12px 10px', color: '#cbd5e1' }}>{o.amount} <span style={{color: '#64748b'}}>@</span> {o.price || 'Market'}</td>
-      <td style={{ padding: '12px 10px', textTransform: 'uppercase', fontWeight: 'bold', ...getStatusColor(o.status) }}>
+      <td style={{ padding: '12px 10px', textTransform: 'uppercase', fontWeight: 'bold', ...(STATUS_STYLES[o.status] || STATUS_STYLES.default) }}>
         {o.status}
       </td>
       <td style={{ padding: '12px 10px' }}>
@@ -110,7 +108,7 @@ export default function OrdersLogPanel() {
           <h2 className="glitch" data-text="Execution Archive" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10b981', textTransform: 'uppercase', margin: 0 }}>
              Execution Archive
           </h2>
-          <div className="status-indicator-live" role="status" aria-live="polite" style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }} title="Socket Connected"></div>
+          <div className="status-indicator-live" role="status" aria-live="polite" aria-label="Socket Connected" style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', boxShadow: '0 0 10px #3b82f6' }}></div>
       </div>
 
       <div style={{ flexGrow: 1, minHeight: '300px' }}>

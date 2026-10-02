@@ -10,7 +10,6 @@ const StatusIndicator = React.memo(({ status }: { status: string }) => {
         aria-live="polite"
         aria-atomic="true"
         aria-label={`Node status is ${status}`}
-        title={`Node status is ${status}`}
         style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
       >
         <div style={{
