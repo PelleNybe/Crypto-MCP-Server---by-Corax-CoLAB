@@ -99,7 +99,9 @@ export default function SentimentWordCloud() {
 
                 // No fallback data
 
-                keys.forEach((k, i) => {
+                // Optimization: Replaced O(N) array iteration via .forEach with a simple for loop to reduce function call overhead
+                for (let i = 0; i < keys.length; i++) {
+                    const k = keys[i];
                     // Golden ratio distribution on sphere
                     const phi = Math.acos(-1 + (2 * i) / keys.length);
                     const theta = Math.sqrt(keys.length * Math.PI) * phi;
@@ -114,7 +116,7 @@ export default function SentimentWordCloud() {
                         weight: keywordsMap[k].count,
                         position: [x, y, z]
                     });
-                });
+                }
 
                 setWords(newWords);
             }

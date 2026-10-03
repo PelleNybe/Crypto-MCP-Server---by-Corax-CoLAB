@@ -67,11 +67,11 @@ export default function SystemOverview() {
           // Optimization: Batch state updates from all node checks into a single update
           // to prevent unnecessary React re-renders for each individual promise resolution.
           const newStatuses: Record<string, 'online' | 'offline' | 'checking'> = {};
-          results.forEach(result => {
+          for (const result of results) {
              if (result.status === 'fulfilled' && result.value) {
                 newStatuses[result.value.mcp] = result.value.status as 'online' | 'offline';
              }
-          });
+          }
           setStatuses(prev => ({ ...prev, ...newStatuses }));
         }
 

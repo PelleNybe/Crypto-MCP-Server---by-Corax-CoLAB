@@ -115,12 +115,23 @@ export default function HoloTopographicOrderBook() {
             setCurrentPrice(tickerData.last);
         }
 
-        const bids = obData.bids.map((b: any[]) => ({ price: b[0], volume: b[1] }));
-        const asks = obData.asks.map((a: any[]) => ({ price: a[0], volume: a[1] }));
-
         let maxVolume = 0;
-        bids.forEach((b: any) => maxVolume = Math.max(maxVolume, b.volume));
-        asks.forEach((a: any) => maxVolume = Math.max(maxVolume, a.volume));
+        const bids = [];
+        const asks = [];
+
+        // Optimization: Consolidated multiple map and forEach array operations into a single O(N) loop
+        for (let i = 0; i < Math.max(obData.bids.length, obData.asks.length); i++) {
+            if (i < obData.bids.length) {
+                const bVol = obData.bids[i][1];
+                bids.push({ price: obData.bids[i][0], volume: bVol });
+                if (bVol > maxVolume) maxVolume = bVol;
+            }
+            if (i < obData.asks.length) {
+                const aVol = obData.asks[i][1];
+                asks.push({ price: obData.asks[i][0], volume: aVol });
+                if (aVol > maxVolume) maxVolume = aVol;
+            }
+        }
 
         setOrderBook({ bids, asks, maxVolume });
       } catch (err) {

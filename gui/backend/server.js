@@ -612,7 +612,8 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
   } catch (err) {
     console.error('execute order error', err.message || err);
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
-    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', String(err.message || err), (dbErr) => {
+    // Security Fix: Replaced raw error message with generic string to prevent leaking backend stack traces to the database and frontend.
+    stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'error', "Order execution failed", (dbErr) => {
       if (dbErr) {
         console.error('DB error during error logging:', dbErr);
       }

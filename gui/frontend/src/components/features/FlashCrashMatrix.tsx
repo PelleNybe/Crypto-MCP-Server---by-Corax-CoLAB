@@ -85,36 +85,56 @@ export default function FlashCrashMatrix() {
 
             let maxVol = 0;
 
+            // Pre-initialize buckets to avoid inner allocations
             for (let i = 0; i < numBuckets; i++) {
                 const priceTarget = midPrice - range + (i * bucketSize);
-
-                let bidVol = 0;
-                let askVol = 0;
-
-                obData.bids.forEach((b: any) => {
-                    if (Math.abs(b[0] - priceTarget) <= bucketSize / 2) bidVol += b[1];
-                });
-
-                obData.asks.forEach((a: any) => {
-                    if (Math.abs(a[0] - priceTarget) <= bucketSize / 2) askVol += a[1];
-                });
-
-                const totalVol = bidVol + askVol;
-                if (totalVol > maxVol) maxVol = totalVol;
-
                 buckets.push({
                     price: priceTarget,
-                    bidVol,
-                    askVol,
-                    imbalance: bidVol - askVol,
-                    totalVol
+                    bidVol: 0,
+                    askVol: 0,
+                    imbalance: 0,
+                    totalVol: 0,
+                    normalizedHeight: 0
                 });
             }
 
+            const halfBucket = bucketSize / 2;
+
+            // Optimization: Iterate sequentially with early-breaks to reduce unnecessary loop overhead (O(N * M))
+            for (let i = 0; i < obData.bids.length; i++) {
+                const price = obData.bids[i][0];
+                const vol = obData.bids[i][1];
+                for (let j = 0; j < numBuckets; j++) {
+                     if (Math.abs(price - buckets[j].price) <= halfBucket) {
+                         buckets[j].bidVol += vol;
+                         break;
+                     }
+                }
+            }
+
+            for (let i = 0; i < obData.asks.length; i++) {
+                const price = obData.asks[i][0];
+                const vol = obData.asks[i][1];
+                for (let j = 0; j < numBuckets; j++) {
+                     if (Math.abs(price - buckets[j].price) <= halfBucket) {
+                         buckets[j].askVol += vol;
+                         break;
+                     }
+                }
+            }
+
+            for (let i = 0; i < numBuckets; i++) {
+                buckets[i].totalVol = buckets[i].bidVol + buckets[i].askVol;
+                buckets[i].imbalance = buckets[i].bidVol - buckets[i].askVol;
+                if (buckets[i].totalVol > maxVol) {
+                    maxVol = buckets[i].totalVol;
+                }
+            }
+
             // Normalize heights
-            buckets.forEach(b => {
-                b.normalizedHeight = maxVol > 0 ? (b.totalVol / maxVol) * 5 : 0;
-            });
+            for (let i = 0; i < numBuckets; i++) {
+                 buckets[i].normalizedHeight = maxVol > 0 ? (buckets[i].totalVol / maxVol) * 5 : 0;
+            }
 
             setMatrixData(buckets);
         } catch (err) {
