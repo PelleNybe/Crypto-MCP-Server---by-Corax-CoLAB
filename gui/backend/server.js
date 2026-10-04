@@ -89,7 +89,8 @@ const corsOptions = {
 
 // Explicitly pass corsOptions to the cors middleware
 app.use(cors(corsOptions));
-app.use(bodyParser.json({ limit: '100kb' }));
+// Optimization: Strict limit of 10kb on body parser to prevent large JSON payload DoS
+app.use(bodyParser.json({ limit: '10kb' }));
 
 // Basic auth middleware for all /api routes
 app.use('/api', (req, res, next) => {

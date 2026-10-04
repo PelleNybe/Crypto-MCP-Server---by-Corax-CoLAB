@@ -76,7 +76,6 @@ export default function SentimentWordCloud() {
         try {
             const data = await callMcpEndpoint('MCP_NEWS', 'get_latest_news', { limit: 50 });
             if (active && data && data.news) {
-                const newWords: any[] = [];
                 const radius = 6;
 
                 // Extract unique currencies/keywords
@@ -100,6 +99,8 @@ export default function SentimentWordCloud() {
                 // No fallback data
 
                 // Optimization: Replaced O(N) array iteration via .forEach with a simple for loop to reduce function call overhead
+                // Optimization: Pre-allocate array to avoid dynamic memory resizing during loop execution
+                const newWords = new Array(keys.length);
                 for (let i = 0; i < keys.length; i++) {
                     const k = keys[i];
                     // Golden ratio distribution on sphere
@@ -110,12 +111,12 @@ export default function SentimentWordCloud() {
                     const y = radius * Math.sin(theta) * Math.sin(phi);
                     const z = radius * Math.cos(phi);
 
-                    newWords.push({
+                    newWords[i] = {
                         text: k,
                         sentiment: keywordsMap[k].sentiment,
                         weight: keywordsMap[k].count,
                         position: [x, y, z]
-                    });
+                    };
                 }
 
                 setWords(newWords);
