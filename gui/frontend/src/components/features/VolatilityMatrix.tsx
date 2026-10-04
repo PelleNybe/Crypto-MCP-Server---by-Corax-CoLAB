@@ -11,6 +11,13 @@ const Terrain = React.memo(({ waveHeight }: { waveHeight: number }) => {
   // Create a grid geometry
   const [geometry] = useState(() => new THREE.PlaneGeometry(20, 20, 50, 50));
 
+  useEffect(() => {
+    // Optimization: explicitly dispose geometry on unmount to prevent WebGL memory leak
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
+
   // eslint-disable-next-line react-hooks/immutability
   useFrame((state) => {
     if (!mesh.current) return;

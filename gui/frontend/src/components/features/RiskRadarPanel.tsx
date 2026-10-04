@@ -121,7 +121,13 @@ export default function RiskRadarPanel() {
             console.warn("Could not fetch TA data for risk assessment", taErr);
         }
 
-        setData({ nodes, links });
+        // Optimization: Prevent unnecessary ForceGraph3D re-renders by deeply comparing data
+        setData(prevData => {
+           if (JSON.stringify(prevData.nodes) === JSON.stringify(nodes) && JSON.stringify(prevData.links) === JSON.stringify(links)) {
+               return prevData;
+           }
+           return { nodes, links };
+        });
       } catch (err) {
         console.error("Failed to fetch risk radar data", err);
         addLog('[ERROR] Connection to exchange nodes failed. Risk unknown.');

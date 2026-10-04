@@ -113,6 +113,7 @@ export default function OrdersLogPanel() {
 
       <div style={{ flexGrow: 1, minHeight: '300px' }}>
           <table className="table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontFamily: 'monospace' }}>
+            <caption className="sr-only" style={{clip: 'rect(0,0,0,0)', position: 'absolute', width: '1px', height: '1px'}}>Execution Archive Orders Log</caption>
             <thead>
               <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.1)', color: '#94a3b8', textTransform: 'uppercase', fontSize: '11px', letterSpacing: '1px' }}>
                 <th style={{ padding: '10px' }}>Timestamp</th>
