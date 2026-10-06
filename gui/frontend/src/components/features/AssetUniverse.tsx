@@ -12,7 +12,7 @@ const Planet = React.memo(({ asset, amount, value, index, totalValue }: { asset:
   const radius = Math.max(0.5, proportion * 5);
   const distance = index === 0 ? 0 : 3 + index * 2;
   const speed = 0.5 / (index + 1);
-  const color = new THREE.Color().setHSL((index * 0.15) % 1, 0.8, 0.5);
+  const color = useMemo(() => new THREE.Color().setHSL((index * 0.15) % 1, 0.8, 0.5), [index]);
 
   useFrame((state, delta) => {
     if (meshRef.current) {
