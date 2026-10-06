@@ -469,14 +469,26 @@ app.post('/api/mcp', sensitiveLimiter, async (req, res) => {
 app.get('/api/ticker', async (req, res) => {
   let rawExchange = req.query.exchange;
   let rawSymbol = req.query.symbol;
-  let exchange = Array.isArray(rawExchange) ? rawExchange[0] : (rawExchange || 'binance');
-  let symbol = Array.isArray(rawSymbol) ? rawSymbol[0] : (rawSymbol || 'BTC/USDT');
-  if (typeof exchange !== 'string') {
+
+  // Security Fix: Prevent Array/Object injection DoS by ensuring it's either an array of strings or a direct string, then extract the first item safely.
+  let exchange = 'binance';
+  if (Array.isArray(rawExchange) && typeof rawExchange[0] === 'string') {
+    exchange = rawExchange[0];
+  } else if (typeof rawExchange === 'string') {
+    exchange = rawExchange;
+  } else if (rawExchange !== undefined) {
     return res.status(400).json({ ok: false, error: 'Invalid exchange parameter format' });
   }
-  if (typeof symbol !== 'string') {
+
+  let symbol = 'BTC/USDT';
+  if (Array.isArray(rawSymbol) && typeof rawSymbol[0] === 'string') {
+    symbol = rawSymbol[0];
+  } else if (typeof rawSymbol === 'string') {
+    symbol = rawSymbol;
+  } else if (rawSymbol !== undefined) {
     return res.status(400).json({ ok: false, error: 'Invalid symbol parameter format' });
   }
+
   if (exchange.length > 50 || symbol.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   try {
     const result = await callMCP(mcpUrls.MCP_CCXT, 'get_ticker', { exchange, symbol });

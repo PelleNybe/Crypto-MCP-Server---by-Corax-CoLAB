@@ -27,6 +27,13 @@ const Terrain = React.memo(({ stressLevel }: { stressLevel: number }) => {
     return geo;
   }, [size, segments]);
 
+  useEffect(() => {
+    // Optimization: explicitly dispose geometry on unmount to prevent WebGL memory leak
+    return () => {
+      geometry.dispose();
+    };
+  }, [geometry]);
+
   useFrame((state) => {
     if (meshRef.current) {
       const pos = meshRef.current.geometry.attributes.position;

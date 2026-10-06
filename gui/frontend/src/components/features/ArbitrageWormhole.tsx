@@ -211,8 +211,8 @@ export default function ArbitrageWormhole() {
   }, [activeSymbol]);
 
 
-  const sourcePos = new THREE.Vector3(-4, 0, 0);
-  const targetPos = new THREE.Vector3(4, 0, 0);
+  const sourcePos = useMemo(() => new THREE.Vector3(-4, 0, 0), []);
+  const targetPos = useMemo(() => new THREE.Vector3(4, 0, 0), []);
 
   return (
     <div className="card interactive-element" style={{ gridColumn: '1 / -1', height: '350px', position: 'relative', overflow: 'hidden', padding: 0 }}>

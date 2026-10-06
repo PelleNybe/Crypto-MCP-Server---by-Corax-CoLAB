@@ -10,15 +10,21 @@ export default function TickerPanel(){
   const [symbol, setSymbol] = useState('BTC/USDT')
 
   useEffect(() => {
+    let active = true;
     authenticatedFetch('/api/ticker?exchange=binance&symbol=BTC/USDT').then(r=>r.json()).then(j=>{
-      if (j.ok) setTicker(j.data)
+      if (j.ok && active) setTicker(j.data)
     }).catch(console.error)
 
-    const handleTicker = (data:any) => setTicker(data)
+    const handleTicker = (data:any) => {
+      if (active) setTicker(data);
+    }
     socket.on('ticker', handleTicker)
     // Optimization: Use socket.off() instead of socket.disconnect() to avoid breaking shared WS connection
     // Impact: Prevents global websocket disconnects for other components when TickerPanel unmounts
-    return ()=>{ socket.off('ticker', handleTicker) }
+    return ()=>{
+      active = false;
+      socket.off('ticker', handleTicker)
+    }
   }, [])
 
   return (
