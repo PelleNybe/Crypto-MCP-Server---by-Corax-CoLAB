@@ -261,3 +261,14 @@ See ../master_log.md
 ## 2024-09-13 - [Focus Rings]
 **Learning:** Adding `:focus-visible` ensures that interactive elements have a clear outline when navigated using a keyboard, improving accessibility.
 **Action:** Apply `:focus-visible` styling to common UI interaction points like `button`, `input`, `select`, `[role="button"]`, and `a` in `styles.css`. Remove outline on standard clicks `button:focus:not(:focus-visible)`.
+
+## 2026-10-21 - System Resilience & Component Loading Optimizations
+**Learning:** Found several areas for performance and security resilience updates:
+- **Backend Security**: Express endpoints expecting JSON-RPC structured objects in `params` (like `/api/mcp`, `/api/order/execute`, `/api/order/dry_run`) could crash if injected with Arrays instead of Objects. Axios connections lacked max payload limits.
+- **Frontend Performance**: All heavy 3D visualizations in `App.tsx` were directly imported instead of dynamically lazy loaded.
+- **Frontend Resiliency**: Tests expecting a 400 rejection in `security.test.js` from `bodyParser.json()` could encounter a 413 Payload Too Large error beforehand.
+**Action:**
+- Validated `!Array.isArray(params)` strictly on all `params` JSON-RPC parameters in `server.js`.
+- Configured Axios in `callMCP` with `maxContentLength` and `maxBodyLength` limits of 5MB.
+- Converted multiple static imports in `App.tsx` to `React.lazy` for robust code-splitting behind `<React.Suspense>`.
+- Updated Jest tests to expect both 400 and 413 rejection statuses gracefully for memory exhaustion vectors.

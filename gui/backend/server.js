@@ -353,8 +353,8 @@ async function callMCP(mcpUrl, toolName, args = {}) {
       httpAgent: mcpHttpAgent,
       timeout: parseInt(process.env.MCP_TIMEOUT) || 8000,
       signal: AbortSignal.timeout(parseInt(process.env.MCP_TIMEOUT) || 8000),
-      maxContentLength: 5000000, // 5MB limit
-      maxBodyLength: 5000000
+      maxContentLength: 5 * 1024 * 1024, // 5MB limit
+      maxBodyLength: 5 * 1024 * 1024
     });
 
     if (res.data && res.data.result) {
