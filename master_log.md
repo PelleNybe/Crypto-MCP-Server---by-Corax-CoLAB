@@ -272,3 +272,4 @@ See ../master_log.md
 - Configured Axios in `callMCP` with `maxContentLength` and `maxBodyLength` limits of 5MB.
 - Converted multiple static imports in `App.tsx` to `React.lazy` for robust code-splitting behind `<React.Suspense>`.
 - Updated Jest tests to expect both 400 and 413 rejection statuses gracefully for memory exhaustion vectors.
+- Performed a security review for newly discovered PHP threats. Verified that the repository does not contain any PHP code, so no updates were necessary.
