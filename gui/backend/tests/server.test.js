@@ -15,7 +15,7 @@ describe('Backend API Tests', () => {
   });
 
   test('POST /api/mcp should validate input', async () => {
-    const res = await request(app).post('/api/mcp').set('Authorization', 'Bearer testpass').send({
+    const res = await request(app).post('/api/mcp').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`).send({
       mcp: 'INVALID_MCP',
       method: 'test'
     });
@@ -25,7 +25,7 @@ describe('Backend API Tests', () => {
   });
 
   test('GET /api/strategies should return a list of strategies', async () => {
-    const res = await request(app).get('/api/strategies').set('Authorization', 'Bearer testpass');
+    const res = await request(app).get('/api/strategies').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`);
     expect(res.statusCode).toBe(200);
     expect(res.body.ok).toBe(true);
     expect(Array.isArray(res.body.data)).toBe(true);

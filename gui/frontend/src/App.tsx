@@ -10,20 +10,20 @@ import OrderPanel from './components/OrderPanel'
 import OrdersLogPanel from './components/OrdersLogPanel'
 
 const RiskRadarPanel = React.lazy(() => import('./components/features/RiskRadarPanel'))
-import MarketSentimentAnalyzer from './components/features/MarketSentimentAnalyzer'
-import AlgoGridArchitect from './components/features/AlgoGridArchitect'
-import BacktestArenaPanel from './components/features/BacktestArenaPanel'
-import SystemOverview from './components/features/SystemOverview'
-import NeuralNetLiquidity from './components/features/NeuralNetLiquidity'
+const MarketSentimentAnalyzer = React.lazy(() => import('./components/features/MarketSentimentAnalyzer'))
+const AlgoGridArchitect = React.lazy(() => import('./components/features/AlgoGridArchitect'))
+const BacktestArenaPanel = React.lazy(() => import('./components/features/BacktestArenaPanel'))
+const SystemOverview = React.lazy(() => import('./components/features/SystemOverview'))
+const NeuralNetLiquidity = React.lazy(() => import('./components/features/NeuralNetLiquidity'))
 
-import DarkPoolSonar from './components/features/DarkPoolSonar'
-import FlashCrashMatrix from './components/features/FlashCrashMatrix'
+const DarkPoolSonar = React.lazy(() => import('./components/features/DarkPoolSonar'))
+const FlashCrashMatrix = React.lazy(() => import('./components/features/FlashCrashMatrix'))
 const GalaxyView = React.lazy(() => import('./components/features/GalaxyView'))
-import SentimentWordCloud from './components/features/SentimentWordCloud'
+const SentimentWordCloud = React.lazy(() => import('./components/features/SentimentWordCloud'))
 const GasHologram = React.lazy(() => import('./components/features/GasHologram'))
 
-import VolatilityMatrix from './components/features/VolatilityMatrix'
-import WhaleSonarSweep from './components/features/WhaleSonarSweep'
+const VolatilityMatrix = React.lazy(() => import('./components/features/VolatilityMatrix'))
+const WhaleSonarSweep = React.lazy(() => import('./components/features/WhaleSonarSweep'))
 const WhaleConstellations = React.lazy(() => import('./components/features/WhaleConstellations'))
 const PredictiveGhosting = React.lazy(() => import('./components/features/PredictiveGhosting'))
 const NewsSingularity = React.lazy(() => import('./components/features/NewsSingularity'))
