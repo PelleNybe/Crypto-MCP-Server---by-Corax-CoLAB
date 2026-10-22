@@ -98,6 +98,7 @@ export default function PortfolioPanel() {
       ) : (
         <div style={{maxHeight: '400px', overflowY: 'auto'}}>
           <table className="table" style={{width: '100%'}}>
+            <caption className="sr-only" style={{clip: 'rect(0,0,0,0)', position: 'absolute', width: '1px', height: '1px'}}>Portfolio Assets Overview</caption>
             <thead>
               <tr style={{textAlign: 'left', borderBottom: '1px solid rgba(255,255,255,0.1)'}}>
                 <th style={{padding: '8px'}}>Asset</th>

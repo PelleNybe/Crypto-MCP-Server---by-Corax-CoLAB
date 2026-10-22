@@ -33,7 +33,7 @@ export default function TickerPanel(){
       <>
       <div style={{display:'flex',justifyContent:'space-between',alignItems:'center', marginBottom: '1rem'}}>
         <h3 className="glitch" data-text="Tactical Market Overview" style={{margin: 0}}>Tactical Market Overview</h3>
-        <div className="small-muted status-indicator-live" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
+        <div className="small-muted status-indicator-live" role="status" aria-live="polite" style={{textTransform: 'uppercase', letterSpacing: '1px'}}>Live Sync</div>
       </div>
 
       <div style={{display:'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', padding: '1rem', background: 'rgba(255,255,255,0.05)', borderRadius: '8px'}}>

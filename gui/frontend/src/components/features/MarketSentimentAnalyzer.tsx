@@ -106,7 +106,7 @@ export default function MarketSentimentAnalyzer() {
   const Icon = sentiment === 'bullish' ? TrendingUp : sentiment === 'bearish' ? TrendingDown : sentiment === 'neutral' ? Minus : Activity;
 
   return (
-    <div className="card interactive-element" style={{ gridColumn: '1 / -1', minHeight: '150px', position: 'relative', overflow: 'hidden', backgroundColor: '#050510', borderLeft: `4px solid ${getStyleColor()}` }}>
+    <div className="card interactive-element" role="status" aria-live="polite" style={{ gridColumn: '1 / -1', minHeight: '150px', position: 'relative', overflow: 'hidden', backgroundColor: '#050510', borderLeft: `4px solid ${getStyleColor()}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '15px' }}>
         <BrainCircuit size={24} color={getStyleColor()} />
         <h3 style={{ margin: 0, textTransform: 'uppercase', letterSpacing: '1px', color: getStyleColor() }}>AI Market Sentiment Analyzer</h3>

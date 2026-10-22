@@ -83,8 +83,10 @@ async def gather_market_data(target_ticker: str, config: dict):
                     target_tool = None
                     schema = None
                     for t in tools:
+                        t_name_low = t.name.lower()
+                        t_desc_low = (t.description or "").lower()
                         if any(
-                            kw in t.name.lower() or kw in (t.description or "").lower()
+                            kw in t_name_low or kw in t_desc_low
                             for kw in ["signal", "macd", "technical"]
                         ):
                             target_tool = t.name
@@ -131,8 +133,10 @@ async def gather_market_data(target_ticker: str, config: dict):
                     target_tool = None
                     schema = None
                     for t in tools:
+                        t_name_low = t.name.lower()
+                        t_desc_low = (t.description or "").lower()
                         if any(
-                            kw in t.name.lower() or kw in (t.description or "").lower()
+                            kw in t_name_low or kw in t_desc_low
                             for kw in ["sentiment", "social"]
                         ):
                             target_tool = t.name
