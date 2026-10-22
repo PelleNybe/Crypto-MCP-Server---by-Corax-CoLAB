@@ -417,7 +417,11 @@ async function callMCP(mcpUrl, toolName, args = {}) {
 
 // GET /api/portfolio
 app.get('/api/portfolio', async (req, res) => {
-  let exchangesParam = req.query.exchanges || 'binance';
+  let rawEx = req.query.exchanges;
+  if (rawEx && typeof rawEx !== 'string' && !Array.isArray(rawEx)) {
+    return res.status(400).json({ ok: false, error: 'Invalid parameter type' });
+  }
+  let exchangesParam = rawEx || 'binance';
   if (Array.isArray(exchangesParam)) {
     // Security Fix: Prevent large array injection DoS
     if (exchangesParam.length > 50) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
@@ -468,7 +472,9 @@ app.post('/api/mcp', sensitiveLimiter, async (req, res) => {
 
 app.get('/api/ticker', async (req, res) => {
   let rawExchange = req.query.exchange;
+  if (rawExchange && typeof rawExchange !== 'string' && !Array.isArray(rawExchange)) return res.status(400).json({ ok: false, error: 'Invalid parameter type' });
   let rawSymbol = req.query.symbol;
+  if (rawSymbol && typeof rawSymbol !== 'string' && !Array.isArray(rawSymbol)) return res.status(400).json({ ok: false, error: 'Invalid parameter type' });
 
   // Security Fix: Prevent Array/Object injection DoS by ensuring it's either an array of strings or a direct string, then extract the first item safely.
   let exchange = 'binance';
