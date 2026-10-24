@@ -272,3 +272,7 @@ See ../master_log.md
 - Configured Axios in `callMCP` with `maxContentLength` and `maxBodyLength` limits of 5MB.
 - Converted multiple static imports in `App.tsx` to `React.lazy` for robust code-splitting behind `<React.Suspense>`.
 - Updated Jest tests to expect both 400 and 413 rejection statuses gracefully for memory exhaustion vectors.
+
+## 2026-10-24 - Test Coverage Report Generation
+**Learning:** Found that running tests locally provides an overview of which tests are passing and which components lack coverage. Python MCP backend is mostly tested, but some files entirely lack tests (e.g. `app.py`, `backtest_orchestrator.py`). Frontend tests fail due to Vite dev server not being started beforehand. Node.js backend tests pass when `DASHBOARD_PASSWORD` is supplied, but coverage for `server.js` is quite low.
+**Action:** Generated a test report markdown file capturing these coverage gaps and execution statuses to inform future testing efforts.
