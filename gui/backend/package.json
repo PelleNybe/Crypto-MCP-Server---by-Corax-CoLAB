@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "DASHBOARD_PASSWORD=test_password jest"
   },
   "dependencies": {
     "axios": "^1.17.0",
