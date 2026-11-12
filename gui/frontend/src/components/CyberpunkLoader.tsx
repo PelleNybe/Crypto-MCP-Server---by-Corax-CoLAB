@@ -2,7 +2,7 @@ import React from 'react';
 import { Loader } from 'lucide-react';
 import TypewriterText from './TypewriterText';
 
-export const CyberpunkLoader = React.memo(({ message = "Decrypting Data Stream..." }) => (
+export const CyberpunkLoader = React.memo(({ message = "Decrypting Data Stream..." }: { message?: string }) => (
   <div
     role="status"
     aria-live="polite"

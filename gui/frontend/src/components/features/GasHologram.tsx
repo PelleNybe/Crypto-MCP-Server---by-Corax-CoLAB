@@ -100,7 +100,12 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
             </mesh>
 
             {/* Particles */}
-            {particles}
+            {particles.map((p, i) => (
+                <mesh key={`gas-particle-${i}`} position={p.position}>
+                    <sphereGeometry args={[0.08, 8, 8]} />
+                    <meshBasicMaterial color={p.color} />
+                </mesh>
+            ))}
 
             {/* Text Overlay */}
             <Text position={[0, 0, 2]} fontSize={1.2} color="#ffffff" anchorX="center" anchorY="middle" font="https://fonts.gstatic.com/s/orbitron/v25/yq5yMKwQR1Nfp8snFwdA.woff" outlineWidth={0.05} outlineColor={color}>
@@ -115,7 +120,7 @@ const ReactorCore = React.memo(({ gasPriceGwei }: { gasPriceGwei: number }) => {
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ gasPriceGwei, particles }: { gasPriceGwei: number, particles: any[] }) => {
+const CanvasScene = ({ gasPriceGwei }: { gasPriceGwei: number }) => {
   return (
 <Canvas camera={{ position: [0, 2, 10], fov: 50 }}>
               <ambientLight intensity={0.5} />
@@ -123,7 +128,7 @@ const CanvasScene = ({ gasPriceGwei, particles }: { gasPriceGwei: number, partic
 
               <Stars radius={20} depth={20} count={500} factor={2} saturation={0} fade speed={1} />
 
-              <ReactorCore gasPriceGwei={gasPrice} />
+              <ReactorCore gasPriceGwei={gasPriceGwei} />
 
               <OrbitControls enableZoom={true} enablePan={false} enableRotate={true} autoRotate autoRotateSpeed={0.5} />
           </Canvas>
@@ -136,7 +141,7 @@ export default function GasHologram() {
   useEffect(() => {
     let active = true;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchGas = async () => {
         try {
@@ -171,7 +176,7 @@ export default function GasHologram() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <CanvasScene gasPriceGwei={gasPriceGwei} particles={particles} />
+          <CanvasScene gasPriceGwei={gasPrice} />
 
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>
               STATUS: {gasPrice > 50 ? 'CRITICAL (HIGH FEES)' : gasPrice > 20 ? 'ELEVATED' : 'OPTIMAL'}

@@ -80,7 +80,7 @@ export default function DarkPoolSonar() {
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchTrades = async () => {
         try {
@@ -100,9 +100,10 @@ export default function DarkPoolSonar() {
                     const trade = trades[idx];
                     const volumeUsd = trade.amount * trade.price;
                     if (volumeUsd > avgVolume * 1.5) { // 1.5x average is a "whale" in this context
-                        // Randomize position slightly for visual effect on a plane
-                        const angle = (Math.sin(Date.now()) * 0.5 + 0.5) * Math.PI * 2;
-                        const radius = (Math.sin(Date.now()) * 0.5 + 0.5) * 8;
+                        // Deterministic polar placement per trade using golden angle & relative size
+                        const seed = Number(trade.timestamp || idx) + idx * 137.508;
+                        const angle = (seed % 360) * (Math.PI / 180);
+                        const radius = Math.min(8.5, Math.max(1.5, 9 - Math.min(7, volumeUsd / (avgVolume || 1))));
                         const x = Math.cos(angle) * radius;
                         const z = Math.sin(angle) * radius;
                         const color = trade.side === 'buy' ? '#10b981' : '#ef4444';

@@ -34,6 +34,7 @@ const OracleCopilot = React.lazy(() => import('./components/features/OracleCopil
 const ArbitrageWormhole = React.lazy(() => import('./components/features/ArbitrageWormhole'))
 
 const GlobalWeatherSystem = React.lazy(() => import('./components/features/GlobalWeatherSystem'))
+const BotFleetPanel = React.lazy(() => import('./components/features/BotFleetPanel'))
 
 import { TiltWrapper } from './components/TiltWrapper'
 import { setAuthToken } from './auth'
@@ -57,7 +58,7 @@ const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%&|<>'.split('');
     let drops: number[] = [];
     for (let x = 0; x < columns; x++) drops[x] = 1;
 
-    let resizeTimeout: NodeJS.Timeout;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -247,6 +248,16 @@ export default function App() {
             fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'system' ? 'bold' : 'normal'
           }}
         >SYSTEM LOGS</button>
+        <button role="tab" aria-selected={activeTab === 'bots'} aria-label="Bot Fleet Tab"
+          onClick={() => setActiveTab('bots')}
+          className="btn-outline"
+          style={{
+            borderColor: activeTab === 'bots' ? 'var(--primary-border)' : 'rgba(255,255,255,0.2)',
+            color: activeTab === 'bots' ? 'var(--primary-border)' : '#fff',
+            boxShadow: activeTab === 'bots' ? '0 0 10px var(--primary-glow)' : 'none',
+            fontSize: '16px', padding: '10px 20px', fontWeight: activeTab === 'bots' ? 'bold' : 'normal'
+          }}
+        >BOT FLEET</button>
       </div>
 
       <div className="main-grid" style={{ position: 'relative', zIndex: 1, padding: '20px', maxWidth: '1600px', margin: '0 auto' }}>
@@ -303,6 +314,10 @@ export default function App() {
             <BacktestArenaPanel />
             <OracleCopilot />
           </div>
+        )}
+
+        {activeTab === 'bots' && (
+          <BotFleetPanel />
         )}
 
       </React.Suspense>

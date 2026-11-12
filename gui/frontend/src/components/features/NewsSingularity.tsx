@@ -1,33 +1,9 @@
-import React, { useRef, useMemo, useState, useEffect } from 'react';
+import React, { useMemo, useRef, useState, useEffect } from 'react';
 import { callMcpEndpoint } from '../../api_mcp';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Text, Html } from '@react-three/drei';
-import * as THREE from 'three';
 import ForceGraph3D from 'react-force-graph-3d';
 
 const MemoizedForceGraph3D = React.memo(({ data, ...props }: any) => {
   return <ForceGraph3D graphData={data} {...props} />;
-});
-
-
-const SentimentParticle = React.memo(({ position, sentiment }: { position: THREE.Vector3, sentiment: 'bullish' | 'bearish' | 'neutral' }) => {
-    const meshRef = useRef<THREE.Mesh>(null);
-    const color = sentiment === 'bullish' ? '#10b981' : sentiment === 'bearish' ? '#ef4444' : '#6366f1';
-
-    useFrame((state) => {
-        if (meshRef.current) {
-            meshRef.current.position.y += Math.sin(state.clock.elapsedTime + position.x) * 0.01;
-            meshRef.current.rotation.x += 0.01;
-            meshRef.current.rotation.y += 0.01;
-        }
-    });
-
-    return (
-        <mesh ref={meshRef} position={position}>
-            <octahedronGeometry args={[0.2, 0]} />
-            <meshStandardMaterial color={color} emissive={color} emissiveIntensity={0.5} wireframe />
-        </mesh>
-    );
 });
 
 export default function NewsSingularity() {
@@ -89,8 +65,7 @@ export default function NewsSingularity() {
             }
         };
 
-        fetchMarketDataAndCreateNews();
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchMarketDataAndCreateNewsWithPolling = async () => {
       try {

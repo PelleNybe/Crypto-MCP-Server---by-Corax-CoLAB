@@ -19,7 +19,7 @@ export const ActivePortfolioSymbolProvider: React.FC<{ children: React.ReactNode
 
     useEffect(() => {
         let active = true;
-        let timeoutId: NodeJS.Timeout;
+        let timeoutId: ReturnType<typeof setTimeout>;
 
         const fetchPortfolioPair = async () => {
             try {

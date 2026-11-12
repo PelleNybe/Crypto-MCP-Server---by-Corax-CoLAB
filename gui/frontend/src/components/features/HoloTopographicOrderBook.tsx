@@ -42,7 +42,7 @@ const Wall = React.memo(({ type, price, volume, maxVolume, index }: { type: 'bid
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ orderBook, maxVol }: { orderBook: any, maxVol: number }) => {
+const CanvasScene = ({ orderBook, currentPrice }: { orderBook: any, currentPrice: number | null }) => {
   const renderedBids = useMemo(() => {
     return orderBook.bids.map((bid: any, index: number) => (
       <Wall key={`bid-${bid.price}`} type="bid" price={bid.price} volume={bid.volume} maxVolume={orderBook.maxVolume} index={index} />
@@ -158,7 +158,7 @@ export default function HoloTopographicOrderBook() {
       </h3>
 
       <div style={{ width: '100%', height: '350px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-        <CanvasScene orderBook={orderBook} maxVol={maxVol} />
+        <CanvasScene orderBook={orderBook} currentPrice={currentPrice} />
 
         <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#10b981', fontSize: '12px', fontFamily: 'monospace', textShadow: '0 0 5px #10b981' }}>
           HOLOGRAPHIC DEPTH: BIDS

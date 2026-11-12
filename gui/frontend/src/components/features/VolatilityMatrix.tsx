@@ -95,8 +95,7 @@ export default function VolatilityMatrix() {
       }
     };
 
-    fetchVolatilityData();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchVolatilityDataWithPolling = async () => {
       try {

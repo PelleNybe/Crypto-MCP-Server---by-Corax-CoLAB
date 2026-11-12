@@ -62,6 +62,7 @@ def test_send_telegram_success(mock_post):
     mock_post.assert_called_once_with(
         "https://api.telegram.org/bottest_token/sendMessage",
         json={"chat_id": "test_chat", "text": "test message"},
+        timeout=10,
     )
 
 
@@ -93,7 +94,9 @@ def test_send_discord_success(mock_post):
     assert res["status"] == 204
     assert res["result_text"] == "success"
     mock_post.assert_called_once_with(
-        "https://discord.com/api/webhooks/123", json={"content": "test message"}
+        "https://discord.com/api/webhooks/123",
+        json={"content": "test message"},
+        timeout=10,
     )
 
 

@@ -109,14 +109,26 @@ const Starfield = ({ totalValue }: { totalValue: number }) => {
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }: { portfolio: any[], totalValue: number, onSelectAsset: any, activeSymbolHook: string }) => {
+const CanvasScene = ({
+  assets,
+  totalValue,
+  selectedAsset,
+  onSelectAsset,
+  onClearSelected,
+}: {
+  assets: any[];
+  totalValue: number;
+  selectedAsset: string | null;
+  onSelectAsset: (a: any) => void;
+  onClearSelected: () => void;
+}) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 45 }}>
         <ambientLight intensity={0.2} />
         <pointLight position={[0, 0, 0]} intensity={2} color="#ffffff" />
 
         {/* Central Star (Total Portfolio) */}
-        <mesh onClick={() => setSelectedAsset(null)}>
+        <mesh onClick={onClearSelected}>
            <sphereGeometry args={[2, 32, 32]} />
            <meshStandardMaterial color="#fbbf24" emissive="#fbbf24" emissiveIntensity={0.5} wireframe />
            <Text
@@ -134,7 +146,7 @@ const CanvasScene = ({ portfolio, totalValue, onSelectAsset, activeSymbolHook }:
           <Planet
              key={asset.id}
              asset={asset}
-             onSelect={handleSelectAsset}
+             onSelect={onSelectAsset}
              selected={selectedAsset === asset.id}
           />
         ))}
@@ -206,7 +218,18 @@ export default function OrbitalPortfolio() {
           })
           .filter(a => parseFloat(a.allocation) > 1.0) // Only show top assets > 1% allocation
           .sort((a, b) => b.val - a.val) // Largest allocation closer to center? Or furthest? Let's do largest = biggest size, distance increments
-          .map((coinData) => {
+          .map((coinData: {
+             id: string;
+             name: string;
+             amount: any;
+             size: number;
+             val: number;
+             allocation: string;
+             value: string;
+             distance?: number;
+             speed?: number;
+             color?: string;
+          }) => {
              coinData.distance = currentDistance;
              coinData.speed = 0.1 + (parseFloat(coinData.allocation) * 0.005); // Speed based on allocation
              coinData.color = colors[colorIdx % colors.length];
@@ -222,8 +245,7 @@ export default function OrbitalPortfolio() {
       }
     };
 
-    fetchPortfolioData();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchPortfolioDataWithPolling = async () => {
       try {
@@ -257,7 +279,13 @@ export default function OrbitalPortfolio() {
       )}
 
       {/* 3D Scene */}
-      <CanvasScene portfolio={portfolio} totalValue={totalValue} onSelectAsset={onSelectAsset} activeSymbolHook={activeSymbolHook} />
+      <CanvasScene
+        assets={assets}
+        totalValue={totalValue}
+        selectedAsset={selectedAsset}
+        onSelectAsset={handleSelectAsset}
+        onClearSelected={() => setSelectedAsset(null)}
+      />
     </div>
   );
 }

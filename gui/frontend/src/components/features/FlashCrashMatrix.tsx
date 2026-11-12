@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 
-const MatrixBar = React.memo(({ position, height, color, opacity, label }: { position: [number, number, number], height: number, color: string, label: string }) => {
+const MatrixBar = React.memo(({ position, height, color, opacity, label }: { position: [number, number, number], height: number, color: string, opacity: number, label: string }) => {
     return (
         <group position={position}>
             <mesh position={[0, height / 2, 0]}>
@@ -64,7 +64,7 @@ export default function FlashCrashMatrix() {
   useEffect(() => {
     let active = true;
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchOrderBook = async () => {
         try {

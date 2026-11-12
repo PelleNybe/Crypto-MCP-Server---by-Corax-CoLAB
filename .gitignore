@@ -214,3 +214,6 @@ node_modules/
 trading_diary/*.md
 gui/backend/orders.db-shm
 gui/backend/orders.db-wal
+.venv/
+data/mcp_signals.json
+data/mcp_signal_history.db

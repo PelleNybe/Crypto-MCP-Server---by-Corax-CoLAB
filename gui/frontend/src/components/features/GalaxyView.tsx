@@ -82,7 +82,7 @@ const CryptoStar = React.memo(({ coin, onSelect, selected }: { coin: any, onSele
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ sortedCoins, handleSelect, activeSymbolHook }: { sortedCoins: any[], handleSelect: any, activeSymbolHook: string }) => {
+const CanvasScene = ({ coins, selectedCoin, handleSelect }: { coins: any[], selectedCoin: any, handleSelect: (coin: any) => void }) => {
   return (
 <Canvas camera={{ position: [0, 15, 20], fov: 60 }}>
               <ambientLight intensity={0.2} />
@@ -144,8 +144,7 @@ export default function GalaxyView() {
         }
     };
 
-    fetchCoins();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchCoinsWithPolling = async () => {
       try {
@@ -176,7 +175,7 @@ export default function GalaxyView() {
       </div>
 
       <div style={{ width: '100%', height: '100%', position: 'relative', background: 'radial-gradient(circle, rgba(15,23,42,1) 0%, rgba(2,2,5,1) 100%)', borderRadius: '8px', overflow: 'hidden' }}>
-          <CanvasScene sortedCoins={sortedCoins} handleSelect={handleSelect} activeSymbolHook={activeSymbolHook} />
+          <CanvasScene coins={coins} selectedCoin={selectedCoin} handleSelect={handleSelect} />
 
           {/* Overlay info */}
           <div style={{ position: 'absolute', bottom: 10, left: 10, color: 'rgba(255,255,255,0.5)', fontSize: '10px', fontFamily: 'monospace' }}>

@@ -7,6 +7,7 @@ For Crypto MCP Server – Produced by Corax CoLAB - The Future of Edge AI & Bloc
 
 import os
 import logging
+from urllib.parse import quote
 import requests
 from typing import Any, Dict, Optional
 from mcp.server.fastmcp import FastMCP
@@ -35,7 +36,10 @@ def _req(path: str, method: str = "get", json: Optional[dict] = None) -> Dict[st
         headers["Authorization"] = f"Bearer {SUPERALGOS_API_KEY}"
     try:
         r = requests.request(method, url, json=json, headers=headers, timeout=15)
-        return {"status_code": r.status_code, "json": r.json()}
+        try:
+            return {"status_code": r.status_code, "json": r.json()}
+        except ValueError:
+            return {"status_code": r.status_code, "text": r.text}
     except Exception as e:
         return {"status_code": 500, "error": str(e)}
 
@@ -63,7 +67,7 @@ def stop_task(task_name: str) -> Dict[str, Any]:
 
 @mcp.tool()
 def get_task_status(task_name: str) -> Dict[str, Any]:
-    return _req(f"TaskStatus?task={task_name}")
+    return _req(f"TaskStatus?task={quote(task_name, safe='')}")
 
 
 if __name__ == "__main__":

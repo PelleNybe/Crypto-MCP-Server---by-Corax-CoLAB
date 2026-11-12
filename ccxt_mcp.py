@@ -7,6 +7,7 @@ Run via systemd or: python3 ccxt_mcp.py
 """
 
 import os
+import json
 import logging
 import time
 import hmac
@@ -40,21 +41,29 @@ if not ALLOWED_PAIRS:
 DASHBOARD_API_URL = os.getenv("DASHBOARD_API_URL", "http://backend:4000")
 
 
-def ttl_cache(seconds: int):
-    """Simple TTL cache decorator."""
+def ttl_cache(seconds: int, maxsize: int = 256):
+    """Bounded TTL cache decorator that safely handles unhashable arguments."""
 
     def decorator(func):
         cache = {}
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            key = (args, tuple(sorted(kwargs.items())))
+            key = json.dumps({"args": args, "kwargs": kwargs}, sort_keys=True, default=str)
             now = time.time()
             if key in cache:
                 result, expiry = cache[key]
                 if now < expiry:
                     return result
+                del cache[key]
             result = func(*args, **kwargs)
+            if len(cache) >= maxsize:
+                expired = [k for k, (_, exp) in cache.items() if now >= exp]
+                for k in expired:
+                    del cache[k]
+                if len(cache) >= maxsize:
+                    oldest_key = min(cache, key=lambda k: cache[k][1])
+                    del cache[oldest_key]
             cache[key] = (result, now + seconds)
             return result
 
@@ -88,9 +97,12 @@ def ping() -> str:
 @mcp.tool()
 @ttl_cache(seconds=30)
 def get_ticker(exchange: str, symbol: str) -> dict:
-    ex = _make_exchange(exchange)
-    ticker = ex.fetch_ticker(symbol)
-    return ticker
+    try:
+        ex = _make_exchange(exchange)
+        return ex.fetch_ticker(symbol)
+    except Exception as e:
+        logger.error(f"Error in get_ticker: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -99,15 +111,17 @@ def fetch_ohlcv(
     exchange: str, symbol: str, timeframe: str = "1h", limit: int = 200
 ) -> List[List[Any]]:
     ex = _make_exchange(exchange)
-    ohlcv = ex.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
-    return ohlcv
+    return ex.fetch_ohlcv(symbol, timeframe=timeframe, limit=limit)
 
 
 @mcp.tool()
 def fetch_balance(exchange: str) -> dict:
-    ex = _make_exchange(exchange)
-    balance = ex.fetch_balance()
-    return balance
+    try:
+        ex = _make_exchange(exchange)
+        return ex.fetch_balance()
+    except Exception as e:
+        logger.error(f"Error in fetch_balance: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -186,36 +200,60 @@ def execute_approved_order(
     params: Optional[dict] = None,
 ) -> dict:
     """Internal tool called by the backend to actually execute the order after human approval."""
-    params = params or {}
+    params = dict(params) if params else {}
     db_pass = os.getenv("DASHBOARD_PASSWORD")
-    token = params.pop("approval_token", "") if params else ""
-    if db_pass and not hmac.compare_digest(
+    token = params.pop("approval_token", "")
+    if not db_pass or not hmac.compare_digest(
         str(token or "").encode("utf-8"), str(db_pass).encode("utf-8")
     ):
         return {
             "error": "Unauthorized: Dashboard approval required. Use create_order instead."
         }
-    ex = _make_exchange(exchange)
-    if type == "market":
-        order = ex.create_order(symbol, type, side, amount, None, params)
-    else:
-        order = ex.create_order(symbol, type, side, amount, price, params)
-    return order
+    if symbol not in ALLOWED_PAIRS:
+        return {
+            "error": f"Symbol {symbol} is not in ALLOWED_PAIRS list: {ALLOWED_PAIRS}"
+        }
+    try:
+        ex = _make_exchange(exchange)
+        ref_price = price
+        if ref_price is None:
+            ticker = ex.fetch_ticker(symbol)
+            ref_price = ticker.get("last", 0) or 0
+        estimated_usd = amount * ref_price
+        if estimated_usd > MAX_TRADE_USD:
+            return {
+                "error": f"Estimated trade size ${estimated_usd:.2f} exceeds MAX_TRADE_USD ${MAX_TRADE_USD:.2f}"
+            }
+        if type == "market":
+            order = ex.create_order(symbol, type, side, amount, None, params)
+        else:
+            order = ex.create_order(symbol, type, side, amount, price, params)
+        return order
+    except Exception as e:
+        logger.error(f"Error in execute_approved_order: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def cancel_order(exchange: str, order_id: str, symbol: Optional[str] = None) -> dict:
-    ex = _make_exchange(exchange)
-    res = ex.cancel_order(order_id, symbol) if symbol else ex.cancel_order(order_id)
-    return res
+    try:
+        ex = _make_exchange(exchange)
+        return ex.cancel_order(order_id, symbol) if symbol else ex.cancel_order(order_id)
+    except Exception as e:
+        logger.error(f"Error in cancel_order: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def fetch_open_orders(exchange: str, symbol: Optional[str] = None) -> list:
-    ex = _make_exchange(exchange)
-    if symbol:
-        return ex.fetch_open_orders(symbol)
-    return ex.fetch_open_orders()
+    try:
+        ex = _make_exchange(exchange)
+        if symbol:
+            return ex.fetch_open_orders(symbol)
+        return ex.fetch_open_orders()
+    except Exception as e:
+        logger.error(f"Error in fetch_open_orders: {e}")
+        return [{"error": str(e)}]
 
 
 @mcp.tool()
@@ -242,13 +280,6 @@ def log_reasoning(trade_id: str, explanation: str) -> dict:
         return {"error": str(e)}
 
 
-if __name__ == "__main__":
-    print(
-        "Starting ccxt_mcp on http://0.0.0.0:7001/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
-    )
-    mcp.run("streamable-http")
-
-
 @mcp.tool()
 @ttl_cache(seconds=15)
 def fetch_order_book(exchange: str, symbol: str, limit: int = 20) -> dict:
@@ -273,3 +304,10 @@ def fetch_trades(exchange: str, symbol: str, limit: int = 50) -> list:
         return ex.fetch_trades(symbol, limit=limit)
     except Exception as e:
         return [{"error": str(e)}]
+
+
+if __name__ == "__main__":
+    print(
+        "Starting ccxt_mcp on http://0.0.0.0:7001/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
+    )
+    mcp.run("streamable-http")

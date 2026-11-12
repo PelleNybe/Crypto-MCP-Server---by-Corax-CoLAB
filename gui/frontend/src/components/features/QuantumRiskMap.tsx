@@ -137,8 +137,7 @@ export default function QuantumRiskMap() {
       }
     };
 
-    fetchRiskParams();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchRiskParamsWithPolling = async () => {
       try {

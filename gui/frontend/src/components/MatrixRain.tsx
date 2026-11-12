@@ -48,7 +48,7 @@ const MatrixRain = () => {
         };
         animationFrameId = requestAnimationFrame(loop);
 
-        let resizeTimeout: NodeJS.Timeout;
+        let resizeTimeout: ReturnType<typeof setTimeout>;
         const handleResize = () => {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(() => {

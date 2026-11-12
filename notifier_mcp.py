@@ -37,9 +37,16 @@ def send_telegram(message: str) -> dict:
     """Send a message to a Telegram bot"""
     if not TELEGRAM_TOKEN or not TELEGRAM_CHAT:
         raise RuntimeError("TELEGRAM_BOT_TOKEN or TELEGRAM_CHAT_ID is missing in .env")
-    url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
-    r = requests.post(url, json={"chat_id": TELEGRAM_CHAT, "text": message})
-    return {"status": r.status_code, "result": r.json()}
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
+        r = requests.post(url, json={"chat_id": TELEGRAM_CHAT, "text": message}, timeout=10)
+        try:
+            return {"status": r.status_code, "result": r.json()}
+        except ValueError:
+            return {"status": r.status_code, "result_text": r.text}
+    except Exception as e:
+        logger.error(f"Error sending Telegram message: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -47,8 +54,12 @@ def send_discord(message: str) -> dict:
     """Send a message to a Discord webhook"""
     if not DISCORD_WEBHOOK:
         raise RuntimeError("DISCORD_WEBHOOK_URL is missing in .env")
-    r = requests.post(DISCORD_WEBHOOK, json={"content": message})
-    return {"status": r.status_code, "result_text": r.text}
+    try:
+        r = requests.post(DISCORD_WEBHOOK, json={"content": message}, timeout=10)
+        return {"status": r.status_code, "result_text": r.text}
+    except Exception as e:
+        logger.error(f"Error sending Discord message: {e}")
+        return {"error": str(e)}
 
 
 if __name__ == "__main__":

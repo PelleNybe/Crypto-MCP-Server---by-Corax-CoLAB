@@ -4,14 +4,28 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - MCP_CCXT=http://mcp_ccxt:7001/mcp
-      - MCP_PORTFOLIO=http://mcp_portfolio:7004/mcp
       - PORT=4000
-    volumess:
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:5173,http://localhost:4000,http://localhost}
+      - MCP_CCXT=http://mcp_ccxt:7001/mcp
+      - MCP_ONCHAIN=http://mcp_onchain:7002/mcp
+      - MCP_TA=http://mcp_ta:7003/mcp
+      - MCP_PORTFOLIO=http://mcp_portfolio:7004/mcp
+      - MCP_NOTIFIER=http://mcp_notifier:7005/mcp
+      - MCP_COINGECKO=http://mcp_coingecko:7010/mcp
+      - MCP_FREQTRADE=http://mcp_freqtrade:7011/mcp
+      - MCP_OCTOBOT=http://mcp_octobot:7012/mcp
+      - MCP_HUMMINGBOT=http://mcp_hummingbot:7013/mcp
+      - MCP_SUPERALGOS=http://mcp_superalgos:7014/mcp
+      - MCP_LLM=http://mcp_llm:7015/mcp
+      - MCP_NEWS=http://mcp_news:7017/mcp
+      - MCP_HEADLINEARENA=http://mcp_headlinearena:7018/mcp
+    volumes:
       - db_data:/app
     depends_on:
       - mcp_ccxt
       - mcp_portfolio
+    restart: unless-stopped
 
   frontend:
     build: ./gui/frontend
@@ -19,86 +33,146 @@ services:
       - "80:80"
     depends_on:
       - backend
+    restart: unless-stopped
 
   redis:
     image: redis:alpine
     ports:
       - "6379:6379"
+    restart: unless-stopped
 
   mcp_ccxt:
     build:
       context: .
       dockerfile: Dockerfile.mcp
-    command: python ccxt_mcp.py
+    command: ["python", "ccxt_mcp.py"]
     ports:
       - "7001:7001"
     environment:
       - BINANCE_API_KEY=${BINANCE_API_KEY}
       - BINANCE_API_SECRET=${BINANCE_API_SECRET}
+      - ALLOWED_PAIRS=${ALLOWED_PAIRS:-}
+      - MAX_TRADE_USD=${MAX_TRADE_USD:-100.0}
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
+      - DASHBOARD_API_URL=http://backend:4000
+    restart: unless-stopped
 
-  mcp_coingecko:
+  mcp_onchain:
     build:
       context: .
       dockerfile: Dockerfile.mcp
-    command: python coingecko_mcp.py
+    command: ["python", "onchain_mcp.py"]
     ports:
-      - "7010:7010"
+      - "7002:7002"
+    environment:
+      - ETH_RPC_URL=${ETH_RPC_URL:-https://eth.llamarpc.com}
+      - DASHBOARD_PASSWORD=${DASHBOARD_PASSWORD}
+    restart: unless-stopped
+
+  mcp_ta:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: ["python", "ta_mcp.py"]
+    ports:
+      - "7003:7003"
+    restart: unless-stopped
 
   mcp_portfolio:
     build:
       context: .
       dockerfile: Dockerfile.mcp
-    command: python portfolio_mcp.py
+    command: ["python", "portfolio_mcp.py"]
     ports:
       - "7004:7004"
+    environment:
+      - BINANCE_API_KEY=${BINANCE_API_KEY}
+      - BINANCE_API_SECRET=${BINANCE_API_SECRET}
+      - KRAKEN_API_KEY=${KRAKEN_API_KEY}
+      - KRAKEN_API_SECRET=${KRAKEN_API_SECRET}
+    restart: unless-stopped
 
-  octobot-mcp:
+  mcp_notifier:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+    command: ["python", "notifier_mcp.py"]
+    ports:
+      - "7005:7005"
     environment:
-      - MCP_MODULE=octobot_mcp
-      - OCTOBOT_REST_URL=http://octobot:5001
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+    restart: unless-stopped
+
+  mcp_coingecko:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: ["python", "coingecko_mcp.py"]
+    ports:
+      - "7010:7010"
+    restart: unless-stopped
+
+  mcp_freqtrade:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: ["python", "freqtrade_mcp.py"]
+    ports:
+      - "7011:7011"
+    environment:
+      - FREQTRADE_REST_URL=${FREQTRADE_REST_URL:-http://freqtrade:8080}
+      - FREQTRADE_API_KEY=${FREQTRADE_API_KEY}
+    restart: unless-stopped
+
+  mcp_octobot:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: ["python", "octobot_mcp.py"]
+    environment:
+      - OCTOBOT_REST_URL=${OCTOBOT_REST_URL:-http://octobot:5001}
     ports:
       - "7012:7012"
     restart: unless-stopped
     depends_on:
       - redis
 
-  hummingbot-mcp:
+  mcp_hummingbot:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+    command: ["python", "hummingbot_mcp.py"]
     environment:
-      - MCP_MODULE=hummingbot_mcp
-      - HUMMINGBOT_REST_URL=https://hummingbot:15888
+      - HUMMINGBOT_REST_URL=${HUMMINGBOT_REST_URL:-https://hummingbot:15888}
     ports:
       - "7013:7013"
     restart: unless-stopped
     depends_on:
       - redis
 
-  superalgos-mcp:
+  mcp_superalgos:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+    command: ["python", "superalgos_mcp.py"]
     environment:
-      - MCP_MODULE=superalgos_mcp
-      - SUPERALGOS_REST_URL=http://superalgos:34248
+      - SUPERALGOS_REST_URL=${SUPERALGOS_REST_URL:-http://superalgos:34248}
     ports:
       - "7014:7014"
     restart: unless-stopped
     depends_on:
       - redis
 
-  llm-mcp:
+  mcp_llm:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+    command: ["python", "llm_mcp.py"]
     environment:
-      - MCP_MODULE=llm_mcp
-      - LLM_MODEL=ollama/mistral
-      - LLM_API_BASE=http://host.docker.internal:11434
+      - LLM_MODEL=${LLM_MODEL:-ollama/mistral}
+      - LLM_API_BASE=${LLM_API_BASE:-http://host.docker.internal:11434}
     ports:
       - "7015:7015"
     restart: unless-stopped
@@ -109,17 +183,43 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.mcp
+    command: ["python", "news_mcp.py"]
+    ports:
+      - "7017:7017"
     environment:
-      - DASHBOARD_API_URL=http://backend:4000
-    command: ["python3", "news_mcp.py"]
-
-volumess:
-  db_data:
+      - CRYPTOPANIC_API_KEY=${CRYPTOPANIC_API_KEY:-public}
+    restart: unless-stopped
 
   mcp_headlinearena:
     build:
       context: .
       dockerfile: Dockerfile.mcp
-    command: python ha_mcp.py
+    command: ["python", "ha_mcp.py"]
     ports:
       - "7018:7018"
+    restart: unless-stopped
+
+  bot_bridge:
+    build:
+      context: .
+      dockerfile: Dockerfile.mcp
+    command: ["python", "bot_bridge.py", "--watch", "--interval", "60", "--sync-freqtrade-whitelist"]
+    environment:
+      - MCP_TA=${MCP_TA:-http://mcp_ta:7003/mcp}
+      - MCP_ONCHAIN=${MCP_ONCHAIN:-http://mcp_onchain:7005/mcp}
+      - MCP_NOTIFIER=${MCP_NOTIFIER:-http://mcp_notifier:7007/mcp}
+      - MCP_FREQTRADE=${MCP_FREQTRADE:-http://mcp_freqtrade:7011/mcp}
+      - MCP_OCTOBOT=${MCP_OCTOBOT:-http://mcp_octobot:7012/mcp}
+      - MCP_NEWS=${MCP_NEWS:-http://mcp_news:7017/mcp}
+      - MCP_SIGNAL_FILE=/app/data/mcp_signals.json
+      - MCP_HISTORY_DB=/app/data/mcp_signal_history.db
+    volumes:
+      - ./data:/app/data
+    restart: unless-stopped
+    depends_on:
+      - mcp_ta
+      - mcp_news
+      - mcp_onchain
+
+volumes:
+  db_data:

@@ -1,0 +1,15 @@
+[Unit]
+Description=Crypto MCP Server Universal Bot Bridge (Corax CoLAB)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Crypto-MCP-Server---by-Corax-CoLAB
+Environment=PYTHONUNBUFFERED=1
+EnvironmentFile=%h/Crypto-MCP-Server---by-Corax-CoLAB/.env
+ExecStart=%h/Crypto-MCP-Server---by-Corax-CoLAB/.venv/bin/python %h/Crypto-MCP-Server---by-Corax-CoLAB/bot_bridge.py --watch --interval 60 --sync-freqtrade-whitelist
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

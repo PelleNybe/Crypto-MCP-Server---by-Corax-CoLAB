@@ -108,7 +108,7 @@ export default function GlobalWeatherSystem({ sentiment = 'neutral' }: { sentime
   useEffect(() => {
     if (sentiment === 'bear') {
       let tick = 0;
-      let timeoutId: NodeJS.Timeout;
+      let timeoutId: ReturnType<typeof setTimeout>;
 
       const tickLightning = () => {
         tick++;

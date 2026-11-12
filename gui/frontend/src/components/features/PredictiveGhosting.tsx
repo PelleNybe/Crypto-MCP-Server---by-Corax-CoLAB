@@ -82,8 +82,7 @@ export default function PredictiveGhosting() {
         }
     };
 
-    fetchAndCalculate();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchAndCalculateWithPolling = async () => {
       try {

@@ -1,6 +1,5 @@
 import { authenticatedFetch } from "../auth"
 import React, { useEffect, useState, useCallback, useMemo } from 'react';
-import OrbitalPortfolio from './features/OrbitalPortfolio'
 import Tooltip from './Tooltip'
 import socket from '../socket'
 import AssetUniverse from './features/AssetUniverse'

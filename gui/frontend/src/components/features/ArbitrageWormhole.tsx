@@ -134,7 +134,7 @@ const ArbitrageParticle = React.memo(({ start, end, speed }: { start: THREE.Vect
 
 
 // Optimization: Canvas component wrapper. (Removed redundant React.memo nesting)
-const CanvasScene = ({ selectedExchanges, prices, arbitragePairs }: { selectedExchanges: string[], prices: any, arbitragePairs: any[] }) => {
+const CanvasScene = ({ opportunities, sourcePos, targetPos }: { opportunities: any[], sourcePos: THREE.Vector3, targetPos: THREE.Vector3 }) => {
   return (
 <Canvas camera={{ position: [0, 5, 10], fov: 60 }}>
         <color attach="background" args={['#020205']} />
@@ -169,7 +169,7 @@ export default function ArbitrageWormhole() {
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchArbitrage = async () => {
       try {
@@ -232,7 +232,7 @@ export default function ArbitrageWormhole() {
         </div>
       )}
 
-      <CanvasScene selectedExchanges={selectedExchanges} prices={prices} arbitragePairs={arbitragePairs} />
+      <CanvasScene opportunities={opportunities} sourcePos={sourcePos} targetPos={targetPos} />
       <style>{`
         @keyframes pulseBg {
           0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }

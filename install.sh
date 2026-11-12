@@ -43,8 +43,9 @@ if [ ! -f ".env" ]; then
     echo "MCP_CCXT=http://127.0.0.1:7001/mcp" > .env
     echo "MCP_PORTFOLIO=http://127.0.0.1:7004/mcp" >> .env
     echo "PORT=4000" >> .env
-    echo "DASHBOARD_PASSWORD=admin" >> .env
-    echo "==> Generated default .env"
+    GEN_PASS=$(openssl rand -hex 16 2>/dev/null || head -c 16 /dev/urandom | od -An -tx1 | tr -d ' \n')
+    echo "DASHBOARD_PASSWORD=$GEN_PASS" >> .env
+    echo "==> Generated default .env with random DASHBOARD_PASSWORD"
   fi
 fi
 

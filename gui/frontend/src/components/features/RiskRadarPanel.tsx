@@ -36,7 +36,7 @@ export default function RiskRadarPanel() {
   const { targetSymbol: activeSymbol } = useActivePortfolioSymbol();
 
   useEffect(() => {
-    let resizeTimeout: NodeJS.Timeout;
+    let resizeTimeout: ReturnType<typeof setTimeout>;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
       resizeTimeout = setTimeout(() => {
@@ -134,7 +134,7 @@ export default function RiskRadarPanel() {
       }
     };
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchDataWithPolling = async () => {
       try {
@@ -146,7 +146,7 @@ export default function RiskRadarPanel() {
 
     fetchDataWithPolling();
     return () => { active = false; clearTimeout(timeoutId); };
-  }, [defcon, activeSymbol, addLog]);
+  }, [activeSymbol, addLog]);
 
 
   return (

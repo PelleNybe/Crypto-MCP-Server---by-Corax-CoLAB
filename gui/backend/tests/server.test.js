@@ -1,18 +1,19 @@
 const request = require('supertest');
 const { app, server, db, callMCP } = require('../server');
 
+beforeAll((done) => {
+  // Wait for sqlite tables to be created before tests run
+  setTimeout(done, 1000);
+});
+
+afterAll((done) => {
+  // Clean up after all describe blocks finish
+  server.close();
+  db.close();
+  done();
+});
+
 describe('Backend API Tests', () => {
-
-  beforeAll((done) => {
-    // Wait for sqlite tables to be created before tests run
-    setTimeout(done, 1000);
-  });
-
-  afterAll((done) => {
-    // Clean up
-    server.close();
-    db.close(); done();
-  });
 
   test('POST /api/mcp should validate input', async () => {
     const res = await request(app).post('/api/mcp').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`).send({
@@ -25,11 +26,12 @@ describe('Backend API Tests', () => {
   });
 
   test('POST /api/mcp with valid mcp should call upstream', async () => {
-    // Because fastmcp ccxt server is not running on 7001 during test, we expect a 500 or 400 from proxy depending on how catch block maps it
+    // Because fastmcp ccxt server is not running on 7001 during test, we expect a 500 from proxy
     const res = await request(app).post('/api/mcp').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`).send({
-      mcp: 'ccxt',
+      mcp: 'MCP_CCXT',
       method: 'ping'
     });
+    expect(res.statusCode).toBe(500);
     expect(res.body.ok).toBe(false);
   });
 
@@ -67,7 +69,7 @@ describe('Backend API Tests', () => {
 
   test('DELETE /api/strategies/:id should fail gracefully if missing', async () => {
     const res = await request(app).delete('/api/strategies/9999').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`);
-    expect([200, 404]).toContain(res.statusCode);
+    expect(res.statusCode).toBe(404);
   });
 
   test('GET /api/portfolio should handle exchanges array', async () => {
@@ -120,8 +122,8 @@ describe('Backend API Tests', () => {
 
   test('GET /api/system/logs', async () => {
     const res = await request(app).get('/api/system/logs').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`);
-    // Looks like 404 means this endpoint is not registered exactly like this
-    expect([200, 404]).toContain(res.statusCode);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
   });
 
   test('POST /api/strategies/dry_run', async () => {
@@ -131,23 +133,24 @@ describe('Backend API Tests', () => {
       connections: [],
       active: false
     });
-    // the system tries to spawn a shell script and usually fails returning 500
-    // Actually our previous error showed a 404
-    expect([200, 404, 500]).toContain(res.statusCode);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
   });
 });
 
 describe('App Settings Endpoints', () => {
-  test('GET /api/system/logs - if not 404', async () => {
+  test('GET /api/logs returns logs', async () => {
     const res = await request(app).get('/api/logs').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`);
-    expect([200, 404]).toContain(res.statusCode);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
   });
 
   test('POST /api/settings/dashboard_password', async () => {
     const res = await request(app).post('/api/settings/dashboard_password').set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`).send({
       password: 'new_pass'
     });
-    expect([200, 404]).toContain(res.statusCode);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
   });
 });
 
@@ -162,5 +165,14 @@ describe('Remaining Features Coverage', () => {
   test('GET /api/strategies with missing auth', async () => {
     const res = await request(app).get('/api/strategies');
     expect(res.statusCode).toBe(401);
+  });
+
+  test('GET /api/bot-bridge/signal returns ok when signal file absent', async () => {
+    const res = await request(app)
+      .get('/api/bot-bridge/signal')
+      .set('Authorization', `Bearer ${process.env.DASHBOARD_PASSWORD}`);
+    expect(res.statusCode).toBe(200);
+    expect(res.body.ok).toBe(true);
+    expect(typeof res.body.available).toBe('boolean');
   });
 });

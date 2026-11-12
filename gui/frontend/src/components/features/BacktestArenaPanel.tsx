@@ -8,7 +8,7 @@ export default function BacktestArenaPanel() {
   const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const [speed, setSpeed] = useState(1);
-  const [strategy, setStrategy] = useState('Corax-AI-V1');
+  const [strategy, setStrategy] = useState('SMA-Crossover');
   const [historicalData, setHistoricalData] = useState<any[]>([]);
 
   useEffect(() => {
@@ -59,19 +59,56 @@ export default function BacktestArenaPanel() {
           let tradeType = null;
           let profit = 0;
 
-          // Simple Crossover Logic
-          if (index >= longPeriod) {
-              // Golden Cross (Buy)
+          if (strategy === 'Mean-Reversion-Alpha') {
+            // 14-period RSI Mean Reversion: buy oversold (<35), sell overbought (>65)
+            if (index >= 14) {
+              let gains = 0;
+              let losses = 0;
+              for (let k = index - 13; k <= index; k++) {
+                const delta = arr[k][4] - arr[k - 1][4];
+                if (delta > 0) gains += delta;
+                else losses -= delta;
+              }
+              const avgGain = gains / 14;
+              const avgLoss = losses / 14;
+              const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
+              const rsi = 100 - 100 / (1 + rs);
+              if (rsi < 35 && position === 0) {
+                tradeType = 'BUY';
+                position = 1;
+                entryPrice = close;
+              } else if (rsi > 65 && position === 1) {
+                tradeType = 'SELL';
+                position = 0;
+                profit = close - entryPrice;
+              }
+            }
+          } else if (strategy === 'Momentum-Burst') {
+            // 5-period Rate-of-Change breakout: buy > +2%, sell < -2%
+            if (index >= 5) {
+              const prevClose = arr[index - 5][4];
+              const roc = prevClose > 0 ? ((close - prevClose) / prevClose) * 100 : 0;
+              if (roc > 2 && position === 0) {
+                tradeType = 'BUY';
+                position = 1;
+                entryPrice = close;
+              } else if (roc < -2 && position === 1) {
+                tradeType = 'SELL';
+                position = 0;
+                profit = close - entryPrice;
+              }
+            }
+          } else if (index >= longPeriod) {
+              // Default: SMA-Crossover (Golden Cross / Death Cross)
               if (prevShort <= prevLong && shortSMA > longSMA && position === 0) {
                   tradeType = 'BUY';
                   position = 1;
                   entryPrice = close;
               }
-              // Death Cross (Sell)
               else if (prevShort >= prevLong && shortSMA < longSMA && position === 1) {
                   tradeType = 'SELL';
                   position = 0;
-                  profit = close - entryPrice; // Simplified profit calculation (absolute)
+                  profit = close - entryPrice;
               }
           }
 
@@ -138,7 +175,7 @@ export default function BacktestArenaPanel() {
 
   // Handle Playback
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
     if (isPlaying) {
       const stepPlayback = () => {
         setProgress(p => {

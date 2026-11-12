@@ -32,7 +32,7 @@ export default function OrderPanel(){
 
   const previewOrderDebounced = useCallback(async () => {
     setRoutingActive(true)
-    const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange: debouncedExchange,symbol: debouncedSymbol,side: debouncedSide,type: debouncedType,amount: debouncedAmount,price: debouncedPrice})})
+    const resp = await authenticatedFetch('/api/order/dry_run', {method:'POST',headers:{'Content-Type':'application/json'}, body: JSON.stringify({exchange: debouncedExchange,symbol: debouncedSymbol,side: debouncedSide,type: debouncedType,amount: debouncedAmount,price: debouncedPrice,persist: false})})
     const j = await resp.json()
     if (j.ok && isMounted.current) setPreview(j.data); // Suppress errors for auto-preview
     setTimeout(() => { if (isMounted.current) setRoutingActive(false) }, 500)

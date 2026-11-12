@@ -76,7 +76,7 @@ const CanvasScene = ({ nodes, links }: { nodes: any[], links: any[] }) => {
           <meshBasicMaterial color="#000" />
         </mesh>
 
-        {data.nodes.length > 0 && <Constellation nodes={data.nodes} links={data.links} />}
+        {nodes.length > 0 && <Constellation nodes={nodes} links={links} />}
 
         <OrbitControls autoRotate autoRotateSpeed={0.5} minDistance={5} maxDistance={30} />
       </Canvas>
@@ -165,8 +165,7 @@ export default function WhaleConstellations() {
       }
     };
 
-    fetchConstellations();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchConstellationsWithPolling = async () => {
       try {
@@ -196,7 +195,7 @@ export default function WhaleConstellations() {
         <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: 4 }}><div style={{width:8, height:8, background:'#c084fc', borderRadius:'50%'}}></div> TRENDING NODES</div>
       </div>
 
-      <CanvasScene nodes={nodes} links={links} />
+      <CanvasScene nodes={data.nodes} links={data.links} />
     </div>
   );
 }

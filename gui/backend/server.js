@@ -22,6 +22,7 @@ const sqlite3 = require('sqlite3').verbose();
 const bodyParser = require('body-parser');
 
 const crypto = require('crypto');
+const fs = require('fs');
 const rateLimit = require('express-rate-limit');
 
 let DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD;
@@ -116,17 +117,18 @@ const path = require('path');
 
 
 const MCP_CCXT = process.env.MCP_CCXT || 'http://127.0.0.1:7001/mcp';
+const MCP_ONCHAIN = process.env.MCP_ONCHAIN || 'http://127.0.0.1:7002/mcp';
+const MCP_TA = process.env.MCP_TA || 'http://127.0.0.1:7003/mcp';
 const MCP_PORTFOLIO = process.env.MCP_PORTFOLIO || 'http://127.0.0.1:7004/mcp';
-const MCP_LLM = process.env.MCP_LLM || 'http://127.0.0.1:7015/mcp';
+const MCP_NOTIFIER = process.env.MCP_NOTIFIER || 'http://127.0.0.1:7005/mcp';
 const MCP_COINGECKO = process.env.MCP_COINGECKO || 'http://127.0.0.1:7010/mcp';
-const MCP_FREQTRADE = process.env.MCP_FREQTRADE || 'http://127.0.0.1:7002/mcp';
-const MCP_OCTOBOT = process.env.MCP_OCTOBOT || 'http://127.0.0.1:7003/mcp';
-const MCP_ONCHAIN = process.env.MCP_ONCHAIN || 'http://127.0.0.1:7007/mcp';
-const MCP_TA = process.env.MCP_TA || 'http://127.0.0.1:7005/mcp';
-const MCP_SUPERALGOS = process.env.MCP_SUPERALGOS || 'http://127.0.0.1:7006/mcp';
-const MCP_HUMMINGBOT = process.env.MCP_HUMMINGBOT || 'http://127.0.0.1:7014/mcp';
-const MCP_NOTIFIER = process.env.MCP_NOTIFIER || 'http://127.0.0.1:7016/mcp';
+const MCP_FREQTRADE = process.env.MCP_FREQTRADE || 'http://127.0.0.1:7011/mcp';
+const MCP_OCTOBOT = process.env.MCP_OCTOBOT || 'http://127.0.0.1:7012/mcp';
+const MCP_HUMMINGBOT = process.env.MCP_HUMMINGBOT || 'http://127.0.0.1:7013/mcp';
+const MCP_SUPERALGOS = process.env.MCP_SUPERALGOS || 'http://127.0.0.1:7014/mcp';
+const MCP_LLM = process.env.MCP_LLM || 'http://127.0.0.1:7015/mcp';
 const MCP_NEWS = process.env.MCP_NEWS || 'http://127.0.0.1:7017/mcp';
+const MCP_HEADLINEARENA = process.env.MCP_HEADLINEARENA || 'http://127.0.0.1:7018/mcp';
 
 const mcpUrls = {
   MCP_CCXT,
@@ -140,7 +142,8 @@ const mcpUrls = {
   MCP_SUPERALGOS,
   MCP_HUMMINGBOT,
   MCP_NOTIFIER,
-  MCP_NEWS
+  MCP_NEWS,
+  MCP_HEADLINEARENA
 };
 const PORT = parseInt(process.env.PORT || '4000', 10);
 
@@ -162,33 +165,26 @@ function backupDatabase() {
   const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
   const backupFile = path.join(backupDir, `orders_backup_${timestamp}.db`);
 
-  db.serialize(() => {
-  db.run('PRAGMA foreign_keys = ON;');
-      db.run('BEGIN EXCLUSIVE', [], (err) => { if (err) { console.error('Error on BEGIN EXCLUSIVE', err); return; }
-        if (!err) {
-            try {
-              fsModule.copyFileSync(DB_PATH, backupFile);
-              console.log(`[Backup] Successfully created database backup: ${backupFile}`);
+  db.run('VACUUM INTO ?', [backupFile], (err) => {
+    if (err) {
+      console.error('[Backup] Failed to create database backup via VACUUM INTO:', err);
+      return;
+    }
+    console.log(`[Backup] Successfully created database backup: ${backupFile}`);
+    try {
+      const files = fsModule.readdirSync(backupDir)
+        .filter(f => f.startsWith('orders_backup_') && f.endsWith('.db'))
+        .sort()
+        .reverse();
 
-              const files = fsModule.readdirSync(backupDir)
-                  .filter(f => f.startsWith('orders_backup_') && f.endsWith('.db'))
-                  .sort()
-                  .reverse();
-
-              if (files.length > 5) {
-                  files.slice(5).forEach(file => {
-                      fsModule.unlinkSync(path.join(backupDir, file));
-                  });
-              }
-            } catch (copyErr) {
-              console.error('[Backup] Failed to copy database file:', copyErr);
-            } finally {
-              db.run('COMMIT', (err) => { if (err) console.error('COMMIT error:', err); });
-            }
-        } else {
-            console.error('[Backup] Failed to lock database for backup:', err);
-        }
-      });
+      if (files.length > 5) {
+        files.slice(5).forEach(file => {
+          fsModule.unlinkSync(path.join(backupDir, file));
+        });
+      }
+    } catch (cleanErr) {
+      console.error('[Backup] Failed to prune old backups:', cleanErr);
+    }
   });
 }
 
@@ -433,7 +429,7 @@ app.get('/api/portfolio', async (req, res) => {
   if (exchangesParam.length > 100) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
   const exchanges = exchangesParam.split(',').map(s => s.trim());
   try {
-    const result = await callMCP(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', exchanges);
+    const result = await callMCP(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', { exchanges });
     res.json({ ok: true, data: result });
   } catch (err) {
     console.error('portfolio error', err.message || err);
@@ -457,7 +453,6 @@ app.post('/api/mcp', sensitiveLimiter, async (req, res) => {
   if (typeof mcp !== 'string' || !Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) {
     return res.status(400).json({ ok: false, error: 'Unknown MCP endpoint' });
   }
-  if (!Object.prototype.hasOwnProperty.call(mcpUrls, mcp)) { return res.status(400).json({ ok: false, error: 'Unknown MCP service' }); }
   const mcpUrl = mcpUrls[mcp];
   if (typeof mcpUrl !== 'string') return res.status(400).json({ ok: false, error: 'Invalid MCP endpoint' });
 
@@ -505,6 +500,22 @@ app.get('/api/ticker', async (req, res) => {
   }
 });
 
+// GET /api/bot-bridge/signal
+app.get('/api/bot-bridge/signal', async (req, res) => {
+  const signalFile = process.env.MCP_SIGNAL_FILE || path.resolve(__dirname, '../../data/mcp_signals.json');
+  try {
+    const raw = await fs.promises.readFile(signalFile, 'utf-8');
+    const signal = JSON.parse(raw);
+    return res.json({ ok: true, available: true, signal });
+  } catch (err) {
+    if (err && err.code === 'ENOENT') {
+      return res.json({ ok: true, available: false, signal: null });
+    }
+    console.error('bot-bridge signal read error', err.message || err);
+    return res.status(500).json({ ok: false, error: 'Failed to read bot bridge signal' });
+  }
+});
+
 // POST /api/order/dry_run
 app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
   const { exchange, symbol, side, type, amount, price, params } = req.body || {};
@@ -549,12 +560,17 @@ app.post('/api/order/dry_run', sensitiveLimiter, async (req, res) => {
       params: params || {}
     };
 
+    if (req.body && req.body.persist === false) {
+      return res.json({ ok: true, data: preview });
+    }
+
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, usedPrice, 1, 'preview', JSON.stringify(preview), (err) => {
       if (err) {
         console.error('DB error:', err);
         return res.status(500).json({ ok: false, error: 'Database operation failed' });
       }
+      apiCache.delete('/api/orders');
       res.json({ ok: true, data: preview });
     });
     stmt.finalize();
@@ -604,7 +620,9 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
     // Build exchange-specific params safely, merging provided routing parameters
     const exchangeKey = (exchange || '').toLowerCase();
     // Ensure params is an object to prevent Array injection DoS
-    let exchangeParams = Object.assign({}, (params && typeof params === 'object' && !Array.isArray(params)) ? params : {});
+    let exchangeParams = Object.assign({}, (params && typeof params === 'object' && !Array.isArray(params)) ? params : {}, {
+      approval_token: DASHBOARD_PASSWORD
+    });
 
     const orderArgs = {
       exchange,
@@ -616,7 +634,10 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
       params: exchangeParams
     };
 
-    const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'create_order', orderArgs);
+    const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'execute_approved_order', orderArgs);
+    if (orderResp && orderResp.error) {
+      return res.status(400).json({ ok: false, error: orderResp.error });
+    }
 
     const stmt = db.prepare('INSERT INTO orders (exchange,symbol,side,type,amount,price,dry_run,status,response) VALUES (?,?,?,?,?,?,?,?,?)');
     stmt.run(exchange, symbol, side, type, amount, price || null, 0, 'placed', JSON.stringify(orderResp), function (err) {
@@ -624,6 +645,7 @@ app.post('/api/order/execute', sensitiveLimiter, async (req, res) => {
         console.error('DB error:', err);
         return res.status(500).json({ ok: false, error: 'Database operation failed' });
       }
+      apiCache.delete('/api/orders');
       io.emit('order_placed', { id: this.lastID, exchange, symbol, side, type, amount, price, response: orderResp });
       res.json({ ok: true, data: orderResp });
     });
@@ -691,7 +713,7 @@ function startPolling(mcpUrl, toolName, args, eventName, intervalMs) {
 }
 
 // Polling intervals
-if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', ['binance'], 'portfolio', 60000); }
+if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_PORTFOLIO, 'portfolio_value', { exchanges: ['binance'] }, 'portfolio', 60000); }
 if (process.env.NODE_ENV !== 'test') { startPolling(mcpUrls.MCP_CCXT, 'get_ticker', { exchange: 'binance', symbol: 'BTC/USDT' }, 'ticker', 5000); }
 
 // GET /api/strategies
@@ -732,10 +754,105 @@ app.post("/api/strategies", sensitiveLimiter, (req, res) => {
       console.error('Database insert failed:', err);
       return res.status(500).json({ ok: false, error: 'Database insert failed' });
     }
+    apiCache.delete('/api/strategies');
     res.json({ ok: true, id: this.lastID });
   });
   stmt.finalize();
 });
+
+// DELETE /api/strategies/:id
+app.delete("/api/strategies/:id", sensitiveLimiter, (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (isNaN(id) || id <= 0) {
+    return res.status(400).json({ ok: false, error: "Invalid strategy id" });
+  }
+  db.run("DELETE FROM strategies WHERE id = ?", [id], function (err) {
+    if (err) {
+      console.error("Database delete failed:", err);
+      return res.status(500).json({ ok: false, error: "Database delete failed" });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ ok: false, error: "Strategy not found" });
+    }
+    apiCache.delete("/api/strategies");
+    res.json({ ok: true, deleted: this.changes });
+  });
+});
+
+// POST /api/strategies/update_status
+app.post("/api/strategies/update_status", sensitiveLimiter, (req, res) => {
+  const { id, active } = req.body || {};
+  const numericId = parseInt(id, 10);
+  if (isNaN(numericId) || numericId <= 0 || typeof active !== "boolean") {
+    return res.status(400).json({ ok: false, error: "Invalid id or active flag" });
+  }
+  db.run("UPDATE strategies SET active = ? WHERE id = ?", [active ? 1 : 0, numericId], function (err) {
+    if (err) {
+      console.error("Database update failed:", err);
+      return res.status(500).json({ ok: false, error: "Database update failed" });
+    }
+    if (this.changes === 0) {
+      return res.status(404).json({ ok: false, error: "Strategy not found" });
+    }
+    apiCache.delete("/api/strategies");
+    res.json({ ok: true, id: numericId, active });
+  });
+});
+
+// POST /api/strategies/dry_run
+app.post("/api/strategies/dry_run", sensitiveLimiter, (req, res) => {
+  const { name, nodes, connections } = req.body || {};
+  if (!name || typeof name !== "string" || name.length > 100) {
+    return res.status(400).json({ ok: false, error: "Missing or invalid strategy name" });
+  }
+  if (!Array.isArray(nodes) || nodes.length > 5000 || !Array.isArray(connections) || connections.length > 5000) {
+    return res.status(400).json({ ok: false, error: "Invalid nodes or connections array" });
+  }
+  res.json({
+    ok: true,
+    data: {
+      name,
+      nodeCount: nodes.length,
+      connectionCount: connections.length,
+      valid: nodes.length > 0,
+      simulatedAt: new Date().toISOString(),
+    },
+  });
+});
+
+// GET /api/system/logs & /api/logs
+function handleGetLogs(req, res) {
+  db.all(
+    `SELECT o.id, o.created_at, o.exchange, o.symbol, o.side, o.status, r.explanation as reasoning
+     FROM orders o
+     LEFT JOIN reasoning r ON o.id = r.trade_id
+     ORDER BY o.created_at DESC
+     LIMIT 50`,
+    [],
+    (err, rows) => {
+      if (err) {
+        console.error("Failed to fetch logs:", err);
+        return res.status(500).json({ ok: false, error: "Failed to fetch logs" });
+      }
+      res.json({ ok: true, data: rows || [] });
+    }
+  );
+}
+app.get("/api/system/logs", handleGetLogs);
+app.get("/api/logs", handleGetLogs);
+
+// POST /api/settings/dashboard_password
+app.post("/api/settings/dashboard_password", sensitiveLimiter, (req, res) => {
+  const { password } = req.body || {};
+  if (typeof password !== "string" || password.length < 4 || password.length > 128) {
+    return res.status(400).json({ ok: false, error: "Password must be 4-128 characters" });
+  }
+  res.json({
+    ok: true,
+    message: "Password validated. Update DASHBOARD_PASSWORD in .env and restart to persist.",
+  });
+});
+
 // Start server and handle errors (EADDRINUSE will be surfaced)
 if (process.env.NODE_ENV !== 'test') { server.listen(PORT); }
 
@@ -803,6 +920,7 @@ app.post('/api/order/pending', sensitiveLimiter, (req, res) => {
         return res.status(500).json({ ok: false, error: 'Database insert failed' });
       }
       const orderId = this.lastID;
+      apiCache.delete('/api/orders');
       io.emit('order_pending', { id: orderId, exchange: preview.exchange, symbol: preview.symbol, side: preview.side, type: preview.type, amount: preview.amount, price: preview.price, estimatedCost: preview.estimatedCost, note: preview.note });
       res.json({ ok: true, id: orderId, data: preview });
     });
@@ -830,6 +948,14 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
     if (order.status !== 'pending') return res.status(400).json({ ok: false, error: 'Order is not pending' });
 
     try {
+      let savedParams = {};
+      try {
+        const parsedResp = order.response ? JSON.parse(order.response) : {};
+        if (parsedResp && typeof parsedResp.params === 'object' && !Array.isArray(parsedResp.params)) {
+          savedParams = parsedResp.params;
+        }
+      } catch (_) {}
+
       const orderArgs = {
         exchange: order.exchange,
         symbol: order.symbol,
@@ -837,16 +963,20 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
         type: order.type,
         amount: Number(order.amount),
         price: order.price !== null ? Number(order.price) : null,
-        params: { approval_token: DASHBOARD_PASSWORD }
+        params: Object.assign({}, savedParams, { approval_token: DASHBOARD_PASSWORD })
       };
 
       const orderResp = await callMCP(mcpUrls.MCP_CCXT, 'execute_approved_order', orderArgs);
+      if (orderResp && orderResp.error) {
+        return res.status(400).json({ ok: false, error: orderResp.error });
+      }
 
       db.run('UPDATE orders SET status = ?, response = ?, dry_run = 0 WHERE id = ?', ['placed', JSON.stringify(orderResp), orderId], (err) => {
         if (err) {
           console.error('DB UPDATE error (placed):', err);
           return res.status(500).json({ ok: false, error: 'Database operation failed' });
         }
+        apiCache.delete('/api/orders');
         // Extract fields to prevent leaking orderArgs.params (which contains DASHBOARD_PASSWORD)
         io.emit('order_placed', { id: orderId, exchange: orderArgs.exchange, symbol: orderArgs.symbol, side: orderArgs.side, type: orderArgs.type, amount: orderArgs.amount, price: orderArgs.price, response: orderResp });
         res.json({ ok: true, data: orderResp });
@@ -868,15 +998,17 @@ app.post('/api/order/approve', sensitiveLimiter, async (req, res) => {
 // Security Fix: Added sensitiveLimiter to prevent DoS attacks on the endpoint
 app.post('/api/order/reasoning', sensitiveLimiter, (req, res) => {
   const { trade_id, explanation } = req.body || {};
-  if (typeof trade_id !== 'string' || typeof explanation !== 'string') return res.status(400).json({ ok: false, error: 'Invalid types for trade_id or explanation' });
-  if (trade_id.length > 50 || explanation.length > 10000) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
-  if (!trade_id || !explanation) return res.status(400).json({ ok: false, error: 'Missing trade_id or explanation' });
+  if ((typeof trade_id !== 'string' && typeof trade_id !== 'number') || typeof explanation !== 'string') return res.status(400).json({ ok: false, error: 'Invalid types for trade_id or explanation' });
+  const tradeIdStr = String(trade_id);
+  if (!tradeIdStr || !explanation) return res.status(400).json({ ok: false, error: 'Missing trade_id or explanation' });
+  if (tradeIdStr.length > 50 || explanation.length > 10000) return res.status(400).json({ ok: false, error: 'Input length limit exceeded' });
 
-  db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [trade_id, explanation], function(err) {
+  db.run('INSERT INTO reasoning (trade_id, explanation) VALUES (?, ?)', [tradeIdStr, explanation], function(err) {
     if (err) {
       console.error('Database insert failed:', err);
       return res.status(500).json({ ok: false, error: 'Database operation failed' });
     }
+    apiCache.delete('/api/orders');
     res.json({ ok: true });
   });
 });

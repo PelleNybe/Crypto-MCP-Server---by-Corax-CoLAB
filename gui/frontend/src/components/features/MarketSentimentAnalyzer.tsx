@@ -81,8 +81,7 @@ export default function MarketSentimentAnalyzer() {
       }
     };
 
-    fetchSentiment();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchSentimentWithPolling = async () => {
       try {

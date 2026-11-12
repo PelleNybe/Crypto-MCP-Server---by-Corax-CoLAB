@@ -28,12 +28,24 @@ mcp = FastMCP(
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "vendor", "headlinearena"))
 import ha
 
+import threading
+from types import SimpleNamespace
+
+_stdout_lock = threading.Lock()
+
+
+class _DefaultNamespace(SimpleNamespace):
+    """Namespace returning None for unset CLI flags expected by ha.py."""
+
+    def __getattr__(self, name: str):
+        return None
+
+
 def _run(cmd_func, _augment=None, **field_values):
-    from types import SimpleNamespace
-    ns = SimpleNamespace(**field_values)
+    ns = _DefaultNamespace(**field_values)
     buf = io.StringIO()
     try:
-        with contextlib.redirect_stdout(buf):
+        with _stdout_lock, contextlib.redirect_stdout(buf):
             cmd_func(ns)
     except ha.HAFailure as e:
         logger.error(f"HA Error: {str(e)}")
@@ -83,7 +95,9 @@ def ha_challenges(track: Optional[str] = None, include_post_close: bool = False,
 
 @mcp.tool()
 def ha_predict(challenge_id: str, direction: str, confidence: float, reasoning: str, amount: Optional[float] = None, agent_id: Optional[str] = None) -> dict:
-    """Submit a ternary prediction (bullish/bearish/flat) for a financial market challenge."""
+    """Submit a ternary prediction (bullish/bearish/neutral) for a financial market challenge."""
+    if direction == "flat":
+        direction = "neutral"
     return _run(ha.cmd_predict, challenge_id=challenge_id, direction=direction, confidence=confidence, reasoning=reasoning, amount=amount, _agent_id=agent_id)
 
 @mcp.tool()

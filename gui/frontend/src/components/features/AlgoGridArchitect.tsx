@@ -4,6 +4,7 @@ import { authenticatedFetch } from '../../auth';
 import { callMcpEndpoint } from '../../api_mcp';
 import { useActivePortfolioSymbol } from '../../hooks/useActivePortfolioSymbol';
 import { useToast } from '../../hooks/useToast';
+import socket from '../../socket';
 
 const Node = React.memo(({ type, title, position, active }: { type: 'source' | 'logic' | 'action', title: string, position: {x: number, y: number}, active: boolean }) => {
   const colors = {
@@ -118,9 +119,6 @@ export default function AlgoGridArchitect() {
 
   // Trigger the animation on real order execution events via socket
   useEffect(() => {
-    if (!(window as any).socket) return;
-    const socket = (window as any).socket;
-
     const handleOrder = () => {
       setActivePath(true);
       setTimeout(() => setActivePath(false), 1500);

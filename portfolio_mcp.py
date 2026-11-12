@@ -24,6 +24,9 @@ mcp = FastMCP(
 )
 cg = CoinGeckoAPI()
 
+import threading
+
+_CACHE_LOCK = threading.Lock()
 _CACHE = {"prices": {}, "timestamp": 0, "mapping": None, "mapping_timestamp": 0}
 CACHE_TTL = int(os.getenv("PORTFOLIO_CACHE_TTL", "30"))
 MAPPING_TTL = int(os.getenv("PORTFOLIO_MAPPING_TTL", "3600"))
@@ -46,44 +49,44 @@ def _update_mapping_if_needed(now: float) -> bool:
 
 
 def _get_prices_coingecko(symbols: List[str]) -> Dict[str, float]:
-    now = time.time()
-    if now - _CACHE["timestamp"] > CACHE_TTL:
-        _CACHE["prices"] = {}
-        _CACHE["timestamp"] = now
+    with _CACHE_LOCK:
+        now = time.time()
+        if now - _CACHE["timestamp"] > CACHE_TTL:
+            _CACHE["prices"] = {}
+            _CACHE["timestamp"] = now
 
-    if not _update_mapping_if_needed(now):
-        return {}
+        if not _update_mapping_if_needed(now):
+            return {}
 
-    missing_keys = []
-    missing_ids = []
+        missing_keys = []
+        missing_ids = []
 
-    # If this is called from fetch_exchange_balance, symbols are already upper-cased
-    # But just in case it is called directly from elsewhere, we map them here once.
-    # To optimize this when called from fetch_exchange_balance we just check if it's uppercase
-    upper_symbols = [s if s.isupper() else s.upper() for s in symbols]
-    prices_cache = _CACHE["prices"]
-    mapping_cache = _CACHE.get("mapping", {})
-    for key in upper_symbols:
-        if key not in prices_cache:
-            if coin_id := mapping_cache.get(key):
-                missing_keys.append(key)
-                missing_ids.append(coin_id)
+        upper_symbols = [s if s.isupper() else s.upper() for s in symbols]
+        prices_cache = _CACHE["prices"]
+        mapping_cache = _CACHE.get("mapping", {})
+        for key in upper_symbols:
+            if key not in prices_cache:
+                if coin_id := mapping_cache.get(key):
+                    missing_keys.append(key)
+                    missing_ids.append(coin_id)
 
-    if missing_ids:
-        try:
-            ids_str = ",".join(missing_ids)
-            rp = cg.get_price(ids=ids_str, vs_currencies="usd")
-            for key, coin_id in zip(missing_keys, missing_ids):
-                if price := rp.get(coin_id, {}).get("usd"):
-                    _CACHE["prices"][key] = price
-        except Exception as e:
-            logger.debug("CoinGecko batch price lookup failed: %s", e)
+        if missing_ids:
+            try:
+                ids_str = ",".join(missing_ids)
+                rp = cg.get_price(ids=ids_str, vs_currencies="usd")
+                for key, coin_id in zip(missing_keys, missing_ids):
+                    if price := rp.get(coin_id, {}).get("usd"):
+                        _CACHE["prices"][key] = price
+            except Exception as e:
+                logger.debug("CoinGecko batch price lookup failed: %s", e)
 
-    prices = _CACHE["prices"]
-    return {k: prices[k] for k in upper_symbols if k in prices}
+        prices = _CACHE["prices"]
+        return {k: prices[k] for k in upper_symbols if k in prices}
 
 
 async def _get_price_ccxt(exchange, symbol):
+    if symbol.upper() in ("USD", "USDT", "USDC", "DAI", "BUSD"):
+        return 1.0
     pair = f"{symbol}/USDT"
     try:
         t = await exchange.fetch_ticker(pair)

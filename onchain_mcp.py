@@ -6,8 +6,11 @@ Exposes: eth_balance, erc20_balance, tx_info, gas_price
 """
 
 import os
+import ipaddress
 import logging
-from typing import Optional
+import socket
+from typing import Any, Optional
+from urllib.parse import quote, urlparse
 import httpx
 from mcp.server.fastmcp import FastMCP
 
@@ -38,8 +41,54 @@ mcp = FastMCP(
 _w3_instances = {}
 
 
+def _validate_rpc_url(rpc_url: str) -> str:
+    """Validate RPC URL to prevent SSRF against internal/metadata endpoints."""
+    parsed = urlparse(rpc_url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        raise ValueError(f"Invalid RPC URL scheme or host: {rpc_url}")
+
+    if os.getenv("ALLOW_PRIVATE_RPC", "false").lower() == "true":
+        return rpc_url
+
+    host = parsed.hostname.lower()
+    if host in ("localhost", "ip6-localhost"):
+        raise ValueError(f"Blocked private/local RPC host: {host}")
+
+    try:
+        addr_infos = socket.getaddrinfo(host, None)
+        for info in addr_infos:
+            ip = ipaddress.ip_address(info[4][0])
+            if (
+                ip.is_private
+                or ip.is_loopback
+                or ip.is_link_local
+                or ip.is_multicast
+                or ip.is_reserved
+                or ip.is_unspecified
+            ):
+                raise ValueError(f"Blocked non-public RPC IP address: {ip}")
+    except socket.gaierror:
+        # Allow DNS failure to be handled by Web3 provider / tests with mocked providers
+        pass
+    return rpc_url
+
+
+def _to_json_safe(obj: Any) -> Any:
+    """Recursively convert Web3 AttributeDict/HexBytes/bytes into JSON-serializable types."""
+    if isinstance(obj, (bytes, bytearray)):
+        return "0x" + obj.hex()
+    if hasattr(obj, "hex") and callable(obj.hex) and not isinstance(obj, (str, int, float)):
+        return obj.hex()
+    if isinstance(obj, dict):
+        return {str(k): _to_json_safe(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_to_json_safe(v) for v in obj]
+    return obj
+
+
 def _get_web3(rpc_url: Optional[str] = None) -> Web3:
     rpc_url = rpc_url or os.getenv("ETH_RPC_URL", "https://eth.llamarpc.com")
+    _validate_rpc_url(rpc_url)
 
     if rpc_url in _w3_instances:
         return _w3_instances[rpc_url]
@@ -51,7 +100,7 @@ def _get_web3(rpc_url: Optional[str] = None) -> Web3:
         logger.warning(f"Failed to inject ExtraDataToPOAMiddleware: {e}")
 
     if not w3.is_connected():
-        raise RuntimeError(f"Kan inte koppla till RPC: {rpc_url}")
+        raise RuntimeError(f"Cannot connect to RPC: {rpc_url}")
 
     _w3_instances[rpc_url] = w3
     return w3
@@ -59,18 +108,26 @@ def _get_web3(rpc_url: Optional[str] = None) -> Web3:
 
 @mcp.tool()
 def gas_price(rpc_url: Optional[str] = None) -> dict:
-    w3 = _get_web3(rpc_url)
-    wei = w3.eth.gas_price
-    gwei = w3.from_wei(wei, "gwei")
-    return {"gas_price_wei": str(wei), "gas_price_gwei": str(gwei)}
+    try:
+        w3 = _get_web3(rpc_url)
+        wei = w3.eth.gas_price
+        gwei = w3.from_wei(wei, "gwei")
+        return {"gas_price_wei": str(wei), "gas_price_gwei": str(gwei)}
+    except Exception as e:
+        logger.error(f"Error in gas_price: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def eth_balance(address: str, rpc_url: Optional[str] = None) -> dict:
-    w3 = _get_web3(rpc_url)
-    wei = w3.eth.get_balance(address)
-    eth = w3.from_wei(wei, "ether")
-    return {"address": address, "balance_wei": str(wei), "balance_eth": str(eth)}
+    try:
+        w3 = _get_web3(rpc_url)
+        wei = w3.eth.get_balance(address)
+        eth = w3.from_wei(wei, "ether")
+        return {"address": address, "balance_wei": str(wei), "balance_eth": str(eth)}
+    except Exception as e:
+        logger.error(f"Error in eth_balance: {e}")
+        return {"error": str(e)}
 
 
 ERC20_ABI = [
@@ -102,23 +159,27 @@ ERC20_ABI = [
 def erc20_balance(
     address: str, contract_address: str, rpc_url: Optional[str] = None
 ) -> dict:
-    w3 = _get_web3(rpc_url)
-    contract = w3.eth.contract(
-        address=w3.to_checksum_address(contract_address), abi=ERC20_ABI
-    )
-    balance = contract.functions.balanceOf(w3.to_checksum_address(address)).call()
     try:
-        decimals = contract.functions.decimals().call()
-    except Exception:
-        decimals = 18
-    human = balance / (10**decimals)
-    return {
-        "address": address,
-        "contract": contract_address,
-        "balance_raw": str(balance),
-        "balance": human,
-        "decimals": decimals,
-    }
+        w3 = _get_web3(rpc_url)
+        contract = w3.eth.contract(
+            address=w3.to_checksum_address(contract_address), abi=ERC20_ABI
+        )
+        balance = contract.functions.balanceOf(w3.to_checksum_address(address)).call()
+        try:
+            decimals = contract.functions.decimals().call()
+        except Exception:
+            decimals = 18
+        human = balance / (10**decimals)
+        return {
+            "address": address,
+            "contract": contract_address,
+            "balance_raw": str(balance),
+            "balance": human,
+            "decimals": decimals,
+        }
+    except Exception as e:
+        logger.error(f"Error in erc20_balance: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -126,15 +187,7 @@ def tx_info(txhash: str, rpc_url: Optional[str] = None) -> dict:
     w3 = _get_web3(rpc_url)
     tx = w3.eth.get_transaction(txhash)
     receipt = w3.eth.get_transaction_receipt(txhash)
-    return {"tx": dict(tx), "receipt": dict(receipt)}
-
-
-if __name__ == "__main__":
-    print(
-        "Starting onchain_mcp on http://127.0.0.1:7002/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
-    )
-    # transport, bind (address:port), mount_path
-    mcp.run("streamable-http")
+    return {"tx": _to_json_safe(dict(tx)), "receipt": _to_json_safe(dict(receipt))}
 
 
 @mcp.tool()
@@ -162,7 +215,7 @@ async def search_dexscreener_token(query: str) -> dict:
     Searches for a specific token or contract address on DexScreener.
     """
     try:
-        url = f"https://api.dexscreener.com/latest/dex/search?q={query}"
+        url = f"https://api.dexscreener.com/latest/dex/search?q={quote(query)}"
         client = _get_http_client()
         response = await client.get(url, timeout=10)
         if response.status_code == 200:
@@ -292,12 +345,26 @@ def execute_dex_swap(
     amount_in: float,
     slippage_tolerance: float = 0.5,
     rpc_url: Optional[str] = None,
+    approval_token: str = "",
 ) -> dict:
     """
     Executes a real on-chain swap using Uniswap V2 Router on Ethereum Mainnet.
-    Requires ETH_PRIVATE_KEY and ETH_PUBLIC_ADDRESS in .env.
+    Requires DASHBOARD_PASSWORD approval_token, ETH_PRIVATE_KEY, and ETH_PUBLIC_ADDRESS.
     """
+    import hmac
+
     try:
+        db_pass = os.getenv("DASHBOARD_PASSWORD")
+        if not db_pass or not hmac.compare_digest(
+            str(approval_token or "").encode("utf-8"), str(db_pass).encode("utf-8")
+        ):
+            return {"error": "Unauthorized: Valid approval_token is required for live DEX swaps."}
+
+        if amount_in <= 0:
+            return {"error": "amount_in must be greater than 0."}
+        if not (0 < slippage_tolerance <= 10.0):
+            return {"error": "slippage_tolerance must be between 0 and 10.0%."}
+
         private_key = os.getenv("ETH_PRIVATE_KEY")
         public_address = os.getenv("ETH_PUBLIC_ADDRESS")
 
@@ -399,9 +466,10 @@ def execute_dex_swap(
                 signed_approve = w3.eth.account.sign_transaction(
                     approve_tx, private_key=private_key
                 )
-                approve_hash = w3.eth.send_raw_transaction(
-                    signed_approve.rawTransaction
+                raw_approve = getattr(signed_approve, "raw_transaction", None) or getattr(
+                    signed_approve, "rawTransaction"
                 )
+                approve_hash = w3.eth.send_raw_transaction(raw_approve)
                 w3.eth.wait_for_transaction_receipt(
                     approve_hash
                 )  # wait for approval to mine
@@ -452,7 +520,10 @@ def execute_dex_swap(
         signed_tx = w3.eth.account.sign_transaction(tx, private_key=private_key)
 
         # Send transaction
-        tx_hash = w3.eth.send_raw_transaction(signed_tx.rawTransaction)
+        raw_tx = getattr(signed_tx, "raw_transaction", None) or getattr(
+            signed_tx, "rawTransaction"
+        )
+        tx_hash = w3.eth.send_raw_transaction(raw_tx)
 
         return {
             "status": "success",
@@ -464,3 +535,10 @@ def execute_dex_swap(
     except Exception as e:
         logger.error(f"Error executing DEX swap: {e}")
         return {"error": str(e)}
+
+
+if __name__ == "__main__":
+    print(
+        "Starting onchain_mcp on http://0.0.0.0:7002/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
+    )
+    mcp.run("streamable-http")

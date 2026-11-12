@@ -72,6 +72,48 @@ async def history() -> Dict[str, Any]:
     return await _req("api/trading/history")
 
 
+@mcp.tool()
+async def open_orders() -> Dict[str, Any]:
+    """Return currently open orders in OctoBot."""
+    return await _req("api/trading/orders")
+
+
+@mcp.tool()
+async def trades() -> Dict[str, Any]:
+    """Return executed trades in OctoBot."""
+    return await _req("api/trading/trades")
+
+
+@mcp.tool()
+async def profits() -> Dict[str, Any]:
+    """Return OctoBot profitability summary."""
+    return await _req("api/trading/profits")
+
+
+@mcp.tool()
+async def tentacles() -> Dict[str, Any]:
+    """List installed OctoBot tentacles (evaluators, strategies, trading modes)."""
+    return await _req("api/tentacles")
+
+
+@mcp.tool()
+async def reload_tentacles() -> Dict[str, Any]:
+    """Reload OctoBot tentacles configuration."""
+    return await _req("api/tentacles/reload", method="post")
+
+
+@mcp.tool()
+async def restart_bot() -> Dict[str, Any]:
+    """Restart the running OctoBot instance."""
+    return await _req("api/bot/restart", method="post")
+
+
+@mcp.tool()
+async def cancel_order(order_id: str) -> Dict[str, Any]:
+    """Cancel an open order in OctoBot by order ID."""
+    return await _req("api/trading/cancel_order", method="post", json={"order_id": order_id})
+
+
 if __name__ == "__main__":
     print(
         "Starting octobot_mcp on http://127.0.0.1:7012/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"

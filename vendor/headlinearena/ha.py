@@ -1578,12 +1578,7 @@ def _parse_samples(raw):
     containing a JSON array or newline/comma-separated numbers."""
     text = raw.strip()
     if text.startswith("@"):
-        path = text[1:]
-        try:
-            with open(path, "r", encoding="utf-8") as fh:
-                text = fh.read().strip()
-        except OSError as exc:
-            fail(f"--samples file {path!r} could not be read: {exc}")
+        fail("--samples @file loading is disabled for security; pass inline numbers or JSON array instead.")
     if text.startswith("["):
         try:
             values = json.loads(text)

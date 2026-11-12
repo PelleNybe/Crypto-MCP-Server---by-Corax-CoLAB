@@ -31,36 +31,41 @@ def ping() -> str:
 
 @mcp.tool()
 def price(coin_id: str, vs_currency: str = "usd") -> Dict[str, Any]:
-    res = cg.get_price(ids=coin_id, vs_currencies=vs_currency)
-    return {"query": {"coin_id": coin_id, "vs_currency": vs_currency}, "result": res}
+    try:
+        res = cg.get_price(ids=coin_id, vs_currencies=vs_currency)
+        return {"query": {"coin_id": coin_id, "vs_currency": vs_currency}, "result": res}
+    except Exception as e:
+        logger.error(f"Error in price: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def coin_info(coin_id: str) -> Dict[str, Any]:
-    res = cg.get_coin_by_id(coin_id)
-    return res
+    try:
+        return cg.get_coin_by_id(coin_id)
+    except Exception as e:
+        logger.error(f"Error in coin_info: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def market_chart(
     coin_id: str, vs_currency: str = "usd", days: int = 7
 ) -> Dict[str, Any]:
-    res = cg.get_coin_market_chart_by_id(id=coin_id, vs_currency=vs_currency, days=days)
-    return res
+    try:
+        return cg.get_coin_market_chart_by_id(id=coin_id, vs_currency=vs_currency, days=days)
+    except Exception as e:
+        logger.error(f"Error in market_chart: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
 def trending() -> Dict[str, Any]:
-    res = cg.get_search_trending()
-    return res
-
-
-if __name__ == "__main__":
-    print(
-        "Starting coingecko_mcp on http://127.0.0.1:7010/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
-    )
-    # transport + bind (address:port/path)
-    mcp.run("streamable-http")
+    try:
+        return cg.get_search_trending()
+    except Exception as e:
+        logger.error(f"Error in trending: {e}")
+        return {"error": str(e)}
 
 
 @mcp.tool()
@@ -73,3 +78,10 @@ def get_coins_markets(vs_currency: str = "usd", limit: int = 50) -> list:
         return res
     except Exception as e:
         return [{"error": str(e)}]
+
+
+if __name__ == "__main__":
+    print(
+        "Starting coingecko_mcp on http://0.0.0.0:7010/mcp — Crypto MCP Server (Corax CoLAB - The Future of Edge AI & Blockchain)"
+    )
+    mcp.run("streamable-http")

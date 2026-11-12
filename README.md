@@ -77,15 +77,17 @@ This repository comes bundled with over a dozen powerful **MCPs (Model Context P
 | ⛓️ **`onchain_mcp`** | ETH balances, ERC20 balances, transaction info, and live Gas Prices. | `7002` |
 | 📊 **`ta_mcp`** | Compute Technical Indicators (RSI, MACD, SMA50, BB) and Monte Carlo Simulations. | `7003` |
 | 💼 **`portfolio_mcp`** | Aggregated portfolio balances and performance tracking. | `7004` |
-| 🦎 **`coingecko_mcp`** | Deep market stats, top coins, and historical trends. | `7005` |
-| 🧠 **`llm_mcp`** | Local/Remote LLM operations and Copilot interactions. | `7006` |
-| 🔔 **`notifier_mcp`** | System notifications, alerts, and Telegram broadcasting. | `7007` |
-| 📈 **`freqtrade_mcp`** | Interfaces with local Freqtrade instances via REST APIs. | `7011` |
-| 🏟️ **`ha_mcp`** | Prediction markets for agents via HeadlineArena (financial and Civic Index). | `7018` |
-| 🐙 **`octobot_mcp`** | Interfaces with local OctoBot instances via REST APIs. | `7012` |
-| 🐦 **`hummingbot_mcp`** | Controls local Hummingbot Gateway APIs. | `7013` |
+| 🔔 **`notifier_mcp`** | System notifications, alerts, and Telegram broadcasting. | `7005` |
+| 🦎 **`coingecko_mcp`** | Deep market stats, top coins, and historical trends. | `7010` |
+| 📈 **`freqtrade_mcp`** | Full Freqtrade REST API v1 control, pairlocks, performance & analytics. | `7011` |
+| 🐙 **`octobot_mcp`** | Controls OctoBot status, orders, trades, profits, and tentacles. | `7012` |
+| 🐦 **`hummingbot_mcp`** | Controls Hummingbot Gateway (DEX/CLOB) & Backend API (CEX bots). | `7013` |
 | 🤖 **`superalgos_mcp`** | Interacts with the Superalgos platform API. | `7014` |
+| 🧠 **`llm_mcp`** | Local/Remote LLM operations and Copilot interactions. | `7015` |
 | 📰 **`news_mcp`** | Fetches the latest crypto news from CryptoPanic. | `7017` |
+| 🏟️ **`ha_mcp`** | Prediction markets for agents via HeadlineArena (financial and Civic Index). | `7018` |
+
+> 🤖 **Using Freqtrade, Hummingbot, or OctoBot?** See [`integrations/README.md`](./integrations/README.md) for [`bot_bridge.py`](./bot_bridge.py) (live risk/regime overlay + automated halt guardrails + SQLite backtest history), [`strategy_doctor.py`](./strategy_doctor.py), drop-in strategy templates, and the **BOT FLEET** dashboard tab.
 
 </details>
 

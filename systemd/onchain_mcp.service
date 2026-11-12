@@ -5,10 +5,10 @@ After=network.target
 [Service]
 Type=simple
 # User=pelle (Run as current user or specific user)
-WorkingDirectory=%h/cryptomcpserver
+WorkingDirectory=%h/Crypto-MCP-Server---by-Corax-CoLAB
 Environment=PYTHONUNBUFFERED=1
-EnvironmentFile=%h/cryptomcpserver/.env
-ExecStart=.env/bin/python %h/cryptomcpserver/onchain_mcp.py
+EnvironmentFile=%h/Crypto-MCP-Server---by-Corax-CoLAB/.env
+ExecStart=%h/Crypto-MCP-Server---by-Corax-CoLAB/.venv/bin/python %h/Crypto-MCP-Server---by-Corax-CoLAB/onchain_mcp.py
 Restart=on-failure
 RestartSec=5
 

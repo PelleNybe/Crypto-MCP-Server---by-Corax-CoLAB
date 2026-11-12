@@ -133,30 +133,30 @@ def generate_backtest_report(backtest_data: dict):
     ticker = backtest_data["ticker"]
     filename = f"trading_diary/{timestamp_str}_{ticker}_BACKTEST.md"
 
-    md_content = "# Agentic Backtesting Report\\n\\n"
-    md_content += f"**Ticker:** {ticker}\\n"
-    md_content += f"**Timeframe:** {backtest_data['timeframe']}\\n"
-    md_content += f"**Simulation Period:** {backtest_data['start_time']} to {backtest_data['end_time']}\\n"
-    md_content += f"**Total Steps simulated:** {backtest_data['total_steps']}\\n\\n"
+    md_content = "# Agentic Backtesting Report\n\n"
+    md_content += f"**Ticker:** {ticker}\n"
+    md_content += f"**Timeframe:** {backtest_data['timeframe']}\n"
+    md_content += f"**Simulation Period:** {backtest_data['start_time']} to {backtest_data['end_time']}\n"
+    md_content += f"**Total Steps simulated:** {backtest_data['total_steps']}\n\n"
 
-    md_content += "## 1. Summary of Actions\\n\\n"
+    md_content += "## 1. Summary of Actions\n\n"
     md_content += (
-        f"```json\\n{json.dumps(backtest_data['summary'], indent=2)}\\n```\\n\\n"
+        f"```json\n{json.dumps(backtest_data['summary'], indent=2)}\n```\n\n"
     )
 
-    md_content += "## 2. Detailed Event Log\\n\\n"
+    md_content += "## 2. Detailed Event Log\n\n"
     for event in backtest_data["details"]:
-        md_content += f"### {event['timestamp']} | Price: ${event['price']:.2f}\\n"
-        md_content += f"**Consensus Decision:** {event['decision']}\\n"
-        md_content += f"**Vote Distribution:** {json.dumps(event['analysis'].get('vote_counts', {}))}\\n"
+        md_content += f"### {event['timestamp']} | Price: ${event['price']:.2f}\n"
+        md_content += f"**Consensus Decision:** {event['decision']}\n"
+        md_content += f"**Vote Distribution:** {json.dumps(event['analysis'].get('vote_counts', {}))}\n"
 
-        md_content += "<details>\\n<summary><b>Director Reasoning (Click to expand)</b></summary>\\n\\n"
+        md_content += "<details>\n<summary><b>Director Reasoning (Click to expand)</b></summary>\n\n"
         for vote in event["analysis"].get("director_votes", []):
             provider = vote.get("provider", "Unknown")
             v_decision = vote.get("decision", "HOLD")
             reasoning = vote.get("reasoning", "No reasoning provided.")
-            md_content += f"- **{provider} ({v_decision}):** {reasoning}\\n"
-        md_content += "</details>\\n\\n---\\n\\n"
+            md_content += f"- **{provider} ({v_decision}):** {reasoning}\n"
+        md_content += "</details>\n\n---\n\n"
 
     try:
         with open(filename, "w") as f:

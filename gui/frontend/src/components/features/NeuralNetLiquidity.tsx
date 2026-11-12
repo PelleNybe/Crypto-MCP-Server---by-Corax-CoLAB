@@ -10,7 +10,7 @@ import { callMcpEndpoint } from '../../api_mcp';
 
 // Feature 1: The "Neural-Net" Liquidity Flow & Arbitrage Map
 export default function NeuralNetLiquidity() {
-    const fgRef = useRef<any>();
+    const fgRef = useRef<any>(null);
   const [graphData, setGraphData] = useState<any>({ nodes: [], links: [] });
 
   useEffect(() => {
@@ -95,8 +95,7 @@ export default function NeuralNetLiquidity() {
       }
     };
 
-    fetchLiquidity();
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchLiquidityWithPolling = async () => {
       try {

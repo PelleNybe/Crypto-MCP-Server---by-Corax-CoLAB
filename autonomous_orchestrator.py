@@ -166,6 +166,22 @@ async def gather_market_data(target_ticker: str, config: dict):
                         )
         except Exception as e:
             logger.error(f"Failed to gather data from lunarcrush: {e}")
+    # Fetch live price from corax-crypto (ccxt_mcp) if configured
+    if "corax-crypto" in config.get("mcpServers", {}):
+        try:
+            async with await connect_mcp(config["mcpServers"]["corax-crypto"]) as (read, write):
+                async with ClientSession(read, write) as session:
+                    await session.initialize()
+                    res = await session.call_tool(
+                        "get_ticker",
+                        arguments={"exchange": "binance", "symbol": f"{target_ticker}/USDT"},
+                    )
+                    if res.content:
+                        ticker_data = json.loads(res.content[0].text)
+                        market_data["price"] = ticker_data.get("last")
+        except Exception as e:
+            logger.error(f"Failed to gather price from corax-crypto: {e}")
+
     logger.info(f"Data gathered: {market_data}")
     return market_data
 
@@ -494,7 +510,9 @@ async def trigger_analyze():
 
 
 def load_config():
-    config_path = "multi_mcp_config.example.json"
+    env_path = os.getenv("MCP_CONFIG_PATH")
+    candidates = [p for p in (env_path, "multi_mcp_config.json", "multi_mcp_config.example.json") if p]
+    config_path = next((p for p in candidates if os.path.exists(p)), candidates[0])
     try:
         with open(config_path, "r") as f:
             config = json.load(f)

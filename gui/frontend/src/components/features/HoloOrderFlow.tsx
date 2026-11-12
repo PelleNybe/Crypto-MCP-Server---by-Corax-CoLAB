@@ -93,7 +93,7 @@ export default function HoloOrderFlow({ price, symbol }: { price: number, symbol
 
   useEffect(() => {
     let active = true;
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchOrderBook = async () => {
       try {
@@ -139,7 +139,7 @@ export default function HoloOrderFlow({ price, symbol }: { price: number, symbol
 
   return (
     <div style={{ width: '100%', height: '300px', background: '#050505', borderRadius: '8px', overflow: 'hidden', position: 'relative' }}>
-      <CanvasScene bids={bids} asks={asks} maxVol={maxVol} />
+      <CanvasScene bids={bids} asks={asks} maxVol={maxVolume} price={price} />
       <div style={{ position: 'absolute', bottom: 10, left: 10, color: '#10b981', fontSize: '12px', fontFamily: 'monospace', textShadow: '0 0 5px #10b981' }}>
         HOLOGRAPHIC DEPTH: BIDS
       </div>

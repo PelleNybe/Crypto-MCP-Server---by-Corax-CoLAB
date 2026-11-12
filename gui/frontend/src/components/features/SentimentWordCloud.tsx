@@ -126,7 +126,7 @@ export default function SentimentWordCloud() {
         }
     };
 
-    let timeoutId: NodeJS.Timeout;
+    let timeoutId: ReturnType<typeof setTimeout>;
 
     const fetchNewsWithPolling = async () => {
       try {

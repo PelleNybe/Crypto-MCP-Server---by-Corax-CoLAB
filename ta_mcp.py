@@ -44,38 +44,60 @@ def _fetch_ohlcv(exchange_id: str, symbol: str, timeframe: str, limit: int = 200
 def compute_indicators(
     exchange: str, symbol: str, timeframe: str = "1h", limit: int = 200
 ) -> Dict[str, Any]:
-    df = _fetch_ohlcv(exchange, symbol, timeframe, limit)
-    df["rsi"] = ta.rsi(df["close"], length=14)
-    macd = ta.macd(df["close"])
-    df["macd"] = macd["MACD_12_26_9"]
-    df["macd_signal"] = macd["MACDs_12_26_9"]
-    df["sma50"] = ta.sma(df["close"], length=50)
-    bb = ta.bbands(df["close"], length=20)
-    df["bb_lower"] = bb["BBL_20_2.0_2.0"]
-    df["bb_upper"] = bb["BBU_20_2.0_2.0"]
+    try:
+        df = _fetch_ohlcv(exchange, symbol, timeframe, limit)
+        if df.empty:
+            return {"error": f"No OHLCV data returned for {symbol} on {exchange}"}
 
-    last = df.iloc[-1].to_dict()
-    rsi = last.get("rsi")
-    macd_hist = (
-        last.get("macd") - last.get("macd_signal")
-        if (last.get("macd") is not None and last.get("macd_signal") is not None)
-        else None
-    )
-    signal = "hold"
-    if rsi and rsi < 30 and macd_hist and macd_hist > 0:
-        signal = "buy"
-    elif rsi and rsi > 70 and macd_hist and macd_hist < 0:
-        signal = "sell"
-    return {
-        "symbol": symbol,
-        "timeframe": timeframe,
-        "rsi": rsi,
-        "macd_hist": macd_hist,
-        "sma50": last.get("sma50"),
-        "bb_lower": last.get("bb_lower"),
-        "bb_upper": last.get("bb_upper"),
-        "signal": signal,
-    }
+        df["rsi"] = ta.rsi(df["close"], length=14)
+        macd = ta.macd(df["close"])
+        if macd is not None and "MACD_12_26_9" in macd and "MACDs_12_26_9" in macd:
+            df["macd"] = macd["MACD_12_26_9"]
+            df["macd_signal"] = macd["MACDs_12_26_9"]
+        else:
+            df["macd"] = None
+            df["macd_signal"] = None
+
+        df["sma50"] = ta.sma(df["close"], length=50)
+        bb = ta.bbands(df["close"], length=20)
+        if bb is not None and "BBL_20_2.0_2.0" in bb and "BBU_20_2.0_2.0" in bb:
+            df["bb_lower"] = bb["BBL_20_2.0_2.0"]
+            df["bb_upper"] = bb["BBU_20_2.0_2.0"]
+        else:
+            df["bb_lower"] = None
+            df["bb_upper"] = None
+
+        last = df.iloc[-1].to_dict()
+
+        def _clean(val):
+            return None if val is None or pd.isna(val) else float(val)
+
+        rsi = _clean(last.get("rsi"))
+        macd_val = _clean(last.get("macd"))
+        macd_sig = _clean(last.get("macd_signal"))
+        macd_hist = (
+            macd_val - macd_sig
+            if (macd_val is not None and macd_sig is not None)
+            else None
+        )
+        signal = "hold"
+        if rsi is not None and rsi < 30 and macd_hist is not None and macd_hist > 0:
+            signal = "buy"
+        elif rsi is not None and rsi > 70 and macd_hist is not None and macd_hist < 0:
+            signal = "sell"
+        return {
+            "symbol": symbol,
+            "timeframe": timeframe,
+            "rsi": rsi,
+            "macd_hist": macd_hist,
+            "sma50": _clean(last.get("sma50")),
+            "bb_lower": _clean(last.get("bb_lower")),
+            "bb_upper": _clean(last.get("bb_upper")),
+            "signal": signal,
+        }
+    except Exception as e:
+        logger.error(f"Error in compute_indicators: {e}")
+        return {"error": str(e)}
 
 
 import numpy as np
@@ -111,30 +133,20 @@ def monte_carlo_simulation(
 
         current_price = df["close"].iloc[-1]
 
-        # Generate random paths
-        # Z is standard normal distributed random variables
-        # Using a secure random seed from os.urandom
-        import os
-
-        np.random.seed(int.from_bytes(os.urandom(4), byteorder="little"))
-        Z = norm.ppf(np.random.rand(future_steps, simulations))
+        rng = np.random.default_rng()
+        Z = norm.ppf(rng.uniform(1e-9, 1 - 1e-9, size=(future_steps, simulations)))
         daily_returns = np.exp(drift + stdev * Z)
 
-        price_paths = np.zeros_like(daily_returns)
+        price_paths = np.zeros((future_steps + 1, simulations))
         price_paths[0] = current_price
 
-        for t in range(1, future_steps):
-            price_paths[t] = price_paths[t - 1] * daily_returns[t]
+        for t in range(1, future_steps + 1):
+            price_paths[t] = price_paths[t - 1] * daily_returns[t - 1]
 
-        # Calculate percentiles
+        # Calculate percentiles (index 0 is current_price, indices 1..future_steps are simulated)
         median_path = np.percentile(price_paths, 50, axis=1).tolist()
         lower_bound = np.percentile(price_paths, 5, axis=1).tolist()  # 5th percentile
         upper_bound = np.percentile(price_paths, 95, axis=1).tolist()  # 95th percentile
-
-        # Adjust lengths to be future_steps + 1 including the current price at index 0
-        median_path.insert(0, float(current_price))
-        lower_bound.insert(0, float(current_price))
-        upper_bound.insert(0, float(current_price))
 
         return {
             "symbol": symbol,
